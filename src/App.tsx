@@ -1731,17 +1731,18 @@ function App() {
   }
   if (authStatus === "checking") {
     return (
-      <div className="flex min-h-dvh items-center justify-center bg-[#FFF4F6] px-4 text-center text-foreground">
+      <div className="flex min-h-dvh flex-col items-center justify-center gap-8 bg-[#FFF4F6] px-4 text-center text-foreground">
         <div className="space-y-3">
           <img
             src="/logo-plantoes-gabi.png"
             alt="Plantões da Gabi"
-            className="mx-auto h-28 w-auto object-contain"
+            className="mx-auto h-28 w-auto rounded-3xl bg-white object-contain p-2 shadow-elevated ring-1 ring-rose-100"
           />
           <p className="text-sm font-semibold text-muted-foreground">
             Sincronizando plantões...
           </p>
         </div>
+        <SiteFooter />
       </div>
     )
   }
