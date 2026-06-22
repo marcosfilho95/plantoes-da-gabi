@@ -1439,20 +1439,12 @@ function App() {
 
           {/* Form panel */}
           <div className="mx-auto w-full max-w-md">
-            <div className="mb-7 flex flex-col items-center text-center lg:hidden">
-              <div className="grid size-20 place-items-center rounded-3xl bg-white shadow-card ring-1 ring-rose-100">
-                <img
-                  src="/logo-plantoes-gabi.png"
-                  alt="Plantões da Gabi"
-                  className="h-16 w-auto object-contain"
-                />
-              </div>
-              <h1 className="mt-5 font-display text-3xl font-semibold leading-tight tracking-tight">
-                Plantões <span className="italic text-primary">da Gabi</span>
-              </h1>
-              <p className="mt-1.5 text-sm text-muted-foreground">
-                Sua agenda pessoal de plantões.
-              </p>
+            <div className="mb-6 flex flex-col items-center text-center lg:hidden">
+              <img
+                src="/logo-plantoes-gabi.png"
+                alt="Plantões da Gabi"
+                className="h-44 w-auto object-contain drop-shadow-sm sm:h-52"
+              />
             </div>
 
             <Card className="overflow-hidden rounded-[1.75rem] border-rose-100/80 bg-white/95 shadow-elevated backdrop-blur-xl">
