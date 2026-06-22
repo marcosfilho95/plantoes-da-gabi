@@ -1444,7 +1444,7 @@ function App() {
               <img
                 src="/logo-plantoes-gabi.png"
                 alt="Plantões da Gabi"
-                className="h-44 w-auto object-contain drop-shadow-sm sm:h-52"
+                className="h-44 w-auto rounded-3xl bg-white object-contain p-2 shadow-elevated ring-1 ring-rose-100 sm:h-52"
               />
             </div>
 
