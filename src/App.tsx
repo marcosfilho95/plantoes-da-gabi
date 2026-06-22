@@ -1630,7 +1630,7 @@ function App() {
                     </p>
                   ) : null}
                   <Button
-                    className="h-12 w-full rounded-xl bg-gradient-brand text-[15px] font-semibold tracking-wide text-white shadow-brand transition-all duration-200 hover:brightness-105 active:scale-[0.99]"
+                    className="h-12 w-full rounded-xl bg-gradient-to-r from-rose-500 via-rose-600 to-rose-700 text-[15px] font-semibold tracking-wide text-white shadow-brand transition-all duration-200 hover:from-rose-400 hover:via-rose-500 hover:to-rose-600 hover:brightness-105 active:scale-[0.99]"
                     disabled={isAuthSubmitting || !isSupabaseConfigured}
                     type="submit"
                   >
@@ -1642,6 +1642,31 @@ function App() {
                     {authMode === "login" ? <LogIn className="size-4" /> : null}
                     {isAuthSubmitting ? "Aguarde..." : authSubmitLabelByMode[authMode]}
                   </Button>
+                  {authMode === "login" || authMode === "signup" ? (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!supabase) return
+                        setAuthError("")
+                        try {
+                          await supabase.auth.signInWithOAuth({
+                            provider: "google",
+                            options: { redirectTo: getAuthRedirectUrl() },
+                          })
+                        } catch (err) {
+                          setAuthError(
+                            err instanceof Error ? err.message : "Falha ao entrar com Google",
+                          )
+                        }
+                      }}
+                      className="flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-rose-100 bg-white text-[15px] font-semibold text-foreground shadow-sm transition-all duration-200 hover:border-rose-200 hover:bg-rose-50/60 active:scale-[0.99]"
+                    >
+                      <svg className="size-5" viewBox="0 0 24 24" aria-hidden>
+                        <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.24 1.4-1.66 4.1-5.5 4.1-3.31 0-6-2.74-6-6.1s2.69-6.1 6-6.1c1.88 0 3.14.8 3.86 1.48l2.63-2.54C16.86 3.4 14.66 2.4 12 2.4 6.84 2.4 2.7 6.55 2.7 11.7s4.14 9.3 9.3 9.3c5.37 0 8.92-3.77 8.92-9.08 0-.61-.07-1.08-.15-1.55H12z"/>
+                      </svg>
+                      Entrar com Google
+                    </button>
+                  ) : null}
                 </form>
 
                 {authMode !== "update-password" ? (
