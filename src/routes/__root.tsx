@@ -76,20 +76,34 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      {
+        name: "viewport",
+        content: "width=device-width, initial-scale=1.0, viewport-fit=cover",
+      },
+      { title: "Plantões da Gabi" },
+      {
+        name: "description",
+        content: "Agenda PWA para organizar os plantões da Gabriella.",
+      },
+      { name: "theme-color", content: "#fff1f2" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-title", content: "Plantões da Gabi" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "default" },
+      { property: "og:title", content: "Plantões da Gabi" },
+      {
+        property: "og:description",
+        content: "Agenda PWA para organizar os plantões da Gabriella.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "icon", type: "image/png", href: "/pwa-192.png" },
       {
-        rel: "stylesheet",
-        href: appCss,
+        rel: "apple-touch-icon",
+        sizes: "180x180",
+        href: "/apple-touch-icon.png",
       },
     ],
   }),
