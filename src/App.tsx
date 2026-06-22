@@ -1372,225 +1372,346 @@ function App() {
       authMode === "signup" || authMode === "update-password"
 
     return (
-      <div className="flex min-h-dvh items-center justify-center bg-[#FFF4F6] px-4 py-8 text-foreground">
-        <Card className="w-full max-w-sm overflow-hidden border-[#F3D5DC] bg-white shadow-[0_22px_70px_rgba(190,24,93,0.13)] transition-all duration-300">
-          <CardHeader className="items-center border-b border-rose-100 bg-gradient-to-b from-white to-rose-50/70 px-6 pb-8 pt-7 text-center">
-            <div className="rounded-2xl bg-white px-5 py-3 shadow-sm ring-1 ring-rose-100">
-              <img
-                src="/logo-plantoes-gabi.png"
-                alt="Plantões da Gabi"
-                className="h-28 w-auto object-contain"
-              />
+      <div className="relative min-h-dvh overflow-hidden bg-gradient-canvas text-foreground">
+        <div className="pointer-events-none absolute -left-32 -top-32 size-[420px] rounded-full bg-gradient-brand opacity-20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-40 -right-24 size-[480px] rounded-full bg-rose-200/40 blur-3xl" />
+
+        <div className="relative mx-auto grid min-h-dvh w-full max-w-[1200px] grid-cols-1 items-center gap-10 px-5 py-10 lg:grid-cols-[1.05fr_1fr] lg:px-10 lg:py-16">
+          {/* Brand panel — desktop only */}
+          <aside className="hidden lg:flex">
+            <div className="relative isolate w-full overflow-hidden rounded-[2.25rem] bg-gradient-brand p-10 text-white shadow-elevated">
+              <div className="brand-grain absolute inset-0 opacity-50 mix-blend-overlay" />
+              <div className="absolute -right-24 -top-24 size-72 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-20 -left-10 size-72 rounded-full bg-rose-300/30 blur-3xl" />
+
+              <div className="relative flex h-full min-h-[560px] flex-col justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="grid size-12 place-items-center rounded-2xl bg-white/95 shadow-brand">
+                    <img
+                      src="/logo-plantoes-gabi.png"
+                      alt=""
+                      className="size-10 object-contain"
+                    />
+                  </div>
+                  <div className="leading-tight">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-rose-100/80">
+                      Studio pessoal
+                    </p>
+                    <p className="font-display text-lg font-semibold text-white">
+                      Plantões da Gabi
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <h2 className="font-display text-5xl font-semibold leading-[1.05] tracking-tight text-white">
+                    Sua agenda de plantões,
+                    <br />
+                    <span className="italic text-rose-100">refinada.</span>
+                  </h2>
+                  <p className="max-w-md text-base leading-relaxed text-rose-50/90">
+                    Acompanhe horas, valores e pagamentos com a elegância de um caderno
+                    artesanal — agora com a precisão de um app.
+                  </p>
+
+                  <ul className="grid gap-3 pt-2 text-sm text-rose-50/90">
+                    {[
+                      "Resumo mensal de horas e valores",
+                      "Filtros por PF, PJ e local",
+                      "Exportação em CSV pronta para a contabilidade",
+                    ].map((item) => (
+                      <li key={item} className="flex items-start gap-3">
+                        <span className="mt-1 grid size-5 shrink-0 place-items-center rounded-full bg-white/15 ring-1 ring-white/30">
+                          <span className="size-1.5 rounded-full bg-white" />
+                        </span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <p className="font-display text-xs italic text-rose-100/70">
+                  &ldquo;Cada plantão merece um registro bonito.&rdquo;
+                </p>
+              </div>
             </div>
-          </CardHeader>
-          <CardContent
-            key={authMode}
-            className="auth-panel px-6 pb-6 pt-5 transition-all duration-300"
-          >
-            <form className="space-y-4" onSubmit={handleAuthSubmit}>
-              {isEmailVisible ? (
-                <div className="grid gap-2">
-                  <Label htmlFor="auth-email" className="text-sm font-semibold">
-                    {authMode === "login" ? "E-mail ou usuário" : "E-mail"}
-                  </Label>
-                  <Input
-                    id="auth-email"
-                    ref={emailInputRef}
-                    type={authMode === "login" ? "text" : "email"}
-                    autoComplete={authMode === "login" ? "username" : "email"}
-                    autoCapitalize="none"
-                    inputMode={authMode === "login" ? "text" : "email"}
-                    spellCheck={false}
-                    className="h-12 rounded-xl border-rose-200 bg-rose-50/30 px-4 shadow-sm transition-all duration-200 focus-visible:ring-rose-300"
-                    value={authForm.email}
-                    onPointerDown={() => emailInputRef.current?.focus()}
-                    onTouchStart={() => emailInputRef.current?.focus()}
-                    onChange={(event) =>
-                      setAuthForm((current) => ({
-                        ...current,
-                        email: event.target.value,
-                      }))
-                    }
-                  />
-                </div>
-              ) : null}
-              {isUsernameVisible ? (
-                <div className="grid gap-2">
-                  <Label htmlFor="auth-username" className="text-sm font-semibold">
-                    Usuário
-                  </Label>
-                  <Input
-                    id="auth-username"
-                    type="text"
-                    autoComplete="username"
-                    autoCapitalize="none"
-                    inputMode="text"
-                    spellCheck={false}
-                    className="h-12 rounded-xl border-rose-200 bg-rose-50/30 px-4 shadow-sm transition-all duration-200 focus-visible:ring-rose-300"
-                    placeholder="gabi"
-                    value={authForm.username}
-                    onChange={(event) =>
-                      setAuthForm((current) => ({
-                        ...current,
-                        username: normalizeUsername(event.target.value),
-                      }))
-                    }
-                  />
-                </div>
-              ) : null}
-              {isPasswordVisible ? (
-                <div className="grid gap-2">
-                  <Label htmlFor="auth-password" className="text-sm font-semibold">
-                    Senha
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      id="auth-password"
-                      ref={passwordInputRef}
-                      type={showPassword ? "text" : "password"}
-                      autoComplete={
-                        authMode === "login" ? "current-password" : "new-password"
-                      }
-                      autoCapitalize="none"
-                      spellCheck={false}
-                      className="h-12 rounded-xl border-rose-200 bg-rose-50/30 px-4 pr-12 shadow-sm transition-all duration-200 focus-visible:ring-rose-300"
-                      value={authForm.password}
-                      onPointerDown={() => passwordInputRef.current?.focus()}
-                      onTouchStart={() => passwordInputRef.current?.focus()}
-                      onChange={(event) =>
-                        setAuthForm((current) => ({
-                          ...current,
-                          password: event.target.value,
-                        }))
-                      }
-                    />
-                    <button
-                      type="button"
-                      className="absolute right-2 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-rose-100 hover:text-rose-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300"
-                      onClick={() => setShowPassword((current) => !current)}
-                      aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="size-4" />
-                      ) : (
-                        <Eye className="size-4" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-              ) : null}
-              {isConfirmVisible ? (
-                <div className="grid gap-2">
-                  <Label
-                    htmlFor="auth-confirm-password"
-                    className="text-sm font-semibold"
-                  >
-                    Confirmar senha
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      id="auth-confirm-password"
-                      type={showConfirmPassword ? "text" : "password"}
-                      autoComplete="new-password"
-                      autoCapitalize="none"
-                      spellCheck={false}
-                      className="h-12 rounded-xl border-rose-200 bg-rose-50/30 px-4 pr-12 shadow-sm transition-all duration-200 focus-visible:ring-rose-300"
-                      value={authForm.confirmPassword}
-                      onChange={(event) =>
-                        setAuthForm((current) => ({
-                          ...current,
-                          confirmPassword: event.target.value,
-                        }))
-                      }
-                    />
-                    <button
-                      type="button"
-                      className="absolute right-2 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-rose-100 hover:text-rose-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300"
-                      onClick={() => setShowConfirmPassword((current) => !current)}
-                      aria-label={
-                        showConfirmPassword
-                          ? "Ocultar confirmação de senha"
-                          : "Mostrar confirmação de senha"
-                      }
-                    >
-                      {showConfirmPassword ? (
-                        <EyeOff className="size-4" />
-                      ) : (
-                        <Eye className="size-4" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-              ) : null}
-              {authError ? (
-                <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
-                  {authError}
-                </p>
-              ) : null}
-              {authMessage ? (
-                <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700">
-                  {authMessage}
-                </p>
-              ) : null}
-              <Button
-                className="h-12 w-full rounded-xl text-base font-bold shadow-[0_14px_30px_rgba(225,29,72,0.22)] transition-all duration-200 active:scale-[0.98]"
-                disabled={isAuthSubmitting || !isSupabaseConfigured}
-                type="submit"
+          </aside>
+
+          {/* Form panel */}
+          <div className="mx-auto w-full max-w-md">
+            <div className="mb-7 flex flex-col items-center text-center lg:hidden">
+              <div className="grid size-20 place-items-center rounded-3xl bg-white shadow-card ring-1 ring-rose-100">
+                <img
+                  src="/logo-plantoes-gabi.png"
+                  alt="Plantões da Gabi"
+                  className="h-16 w-auto object-contain"
+                />
+              </div>
+              <h1 className="mt-5 font-display text-3xl font-semibold leading-tight tracking-tight">
+                Plantões <span className="italic text-primary">da Gabi</span>
+              </h1>
+              <p className="mt-1.5 text-sm text-muted-foreground">
+                Sua agenda pessoal de plantões.
+              </p>
+            </div>
+
+            <Card className="overflow-hidden rounded-[1.75rem] border-rose-100/80 bg-white/95 shadow-elevated backdrop-blur-xl">
+              <CardContent
+                key={authMode}
+                className="auth-panel px-7 pb-7 pt-8 sm:px-9"
               >
-                {authMode === "signup" ? <UserPlus className="size-4" /> : null}
-                {authMode === "recover" ? <Mail className="size-4" /> : null}
-                {authMode === "update-password" ? (
-                  <KeyRound className="size-4" />
-                ) : null}
-                {authMode === "login" ? <LogIn className="size-4" /> : null}
-                {isAuthSubmitting ? "Aguarde..." : authSubmitLabelByMode[authMode]}
-              </Button>
-            </form>
-            {authMode !== "update-password" ? (
-              <div className="mt-5 grid gap-2 text-center text-sm font-semibold">
-                {authMode !== "login" ? (
-                  <button
-                    type="button"
-                    className="rounded-md px-2 py-1 text-rose-700 transition-all duration-200 hover:bg-rose-50 hover:text-rose-800 active:scale-[0.98]"
-                    onClick={() => {
-                      setAuthMode("login")
-                      setAuthError("")
-                      setAuthMessage("")
-                    }}
+                <div className="mb-6 space-y-1">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary/70">
+                    {authMode === "signup"
+                      ? "Nova conta"
+                      : authMode === "recover"
+                        ? "Recuperar acesso"
+                        : authMode === "update-password"
+                          ? "Nova senha"
+                          : "Bem-vinda de volta"}
+                  </p>
+                  <h2 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-[1.7rem]">
+                    {authMode === "signup"
+                      ? "Crie sua conta"
+                      : authMode === "recover"
+                        ? "Vamos recuperar"
+                        : authMode === "update-password"
+                          ? "Defina uma nova senha"
+                          : "Entre na sua agenda"}
+                  </h2>
+                </div>
+
+                <form className="space-y-4" onSubmit={handleAuthSubmit}>
+                  {isEmailVisible ? (
+                    <div className="grid gap-1.5">
+                      <Label
+                        htmlFor="auth-email"
+                        className="text-[0.78rem] font-semibold uppercase tracking-wide text-muted-foreground"
+                      >
+                        {authMode === "login" ? "E-mail ou usuário" : "E-mail"}
+                      </Label>
+                      <Input
+                        id="auth-email"
+                        ref={emailInputRef}
+                        type={authMode === "login" ? "text" : "email"}
+                        autoComplete={authMode === "login" ? "username" : "email"}
+                        autoCapitalize="none"
+                        inputMode={authMode === "login" ? "text" : "email"}
+                        spellCheck={false}
+                        className="h-12 rounded-xl border-rose-100 bg-rose-50/40 px-4 text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/40 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-primary/15"
+                        value={authForm.email}
+                        onPointerDown={() => emailInputRef.current?.focus()}
+                        onTouchStart={() => emailInputRef.current?.focus()}
+                        onChange={(event) =>
+                          setAuthForm((current) => ({
+                            ...current,
+                            email: event.target.value,
+                          }))
+                        }
+                      />
+                    </div>
+                  ) : null}
+                  {isUsernameVisible ? (
+                    <div className="grid gap-1.5">
+                      <Label
+                        htmlFor="auth-username"
+                        className="text-[0.78rem] font-semibold uppercase tracking-wide text-muted-foreground"
+                      >
+                        Usuário
+                      </Label>
+                      <Input
+                        id="auth-username"
+                        type="text"
+                        autoComplete="username"
+                        autoCapitalize="none"
+                        inputMode="text"
+                        spellCheck={false}
+                        className="h-12 rounded-xl border-rose-100 bg-rose-50/40 px-4 text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/40 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-primary/15"
+                        placeholder="gabi"
+                        value={authForm.username}
+                        onChange={(event) =>
+                          setAuthForm((current) => ({
+                            ...current,
+                            username: normalizeUsername(event.target.value),
+                          }))
+                        }
+                      />
+                    </div>
+                  ) : null}
+                  {isPasswordVisible ? (
+                    <div className="grid gap-1.5">
+                      <Label
+                        htmlFor="auth-password"
+                        className="text-[0.78rem] font-semibold uppercase tracking-wide text-muted-foreground"
+                      >
+                        Senha
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          id="auth-password"
+                          ref={passwordInputRef}
+                          type={showPassword ? "text" : "password"}
+                          autoComplete={
+                            authMode === "login"
+                              ? "current-password"
+                              : "new-password"
+                          }
+                          autoCapitalize="none"
+                          spellCheck={false}
+                          className="h-12 rounded-xl border-rose-100 bg-rose-50/40 px-4 pr-12 text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/40 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-primary/15"
+                          value={authForm.password}
+                          onPointerDown={() => passwordInputRef.current?.focus()}
+                          onTouchStart={() => passwordInputRef.current?.focus()}
+                          onChange={(event) =>
+                            setAuthForm((current) => ({
+                              ...current,
+                              password: event.target.value,
+                            }))
+                          }
+                        />
+                        <button
+                          type="button"
+                          className="absolute right-1.5 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-rose-50 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                          onClick={() => setShowPassword((current) => !current)}
+                          aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="size-4" />
+                          ) : (
+                            <Eye className="size-4" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
+                  {isConfirmVisible ? (
+                    <div className="grid gap-1.5">
+                      <Label
+                        htmlFor="auth-confirm-password"
+                        className="text-[0.78rem] font-semibold uppercase tracking-wide text-muted-foreground"
+                      >
+                        Confirmar senha
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          id="auth-confirm-password"
+                          type={showConfirmPassword ? "text" : "password"}
+                          autoComplete="new-password"
+                          autoCapitalize="none"
+                          spellCheck={false}
+                          className="h-12 rounded-xl border-rose-100 bg-rose-50/40 px-4 pr-12 text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/40 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-primary/15"
+                          value={authForm.confirmPassword}
+                          onChange={(event) =>
+                            setAuthForm((current) => ({
+                              ...current,
+                              confirmPassword: event.target.value,
+                            }))
+                          }
+                        />
+                        <button
+                          type="button"
+                          className="absolute right-1.5 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-rose-50 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                          onClick={() => setShowConfirmPassword((current) => !current)}
+                          aria-label={
+                            showConfirmPassword
+                              ? "Ocultar confirmação de senha"
+                              : "Mostrar confirmação de senha"
+                          }
+                        >
+                          {showConfirmPassword ? (
+                            <EyeOff className="size-4" />
+                          ) : (
+                            <Eye className="size-4" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
+                  {authError ? (
+                    <p className="rounded-xl border border-red-200 bg-red-50/80 px-3.5 py-2.5 text-sm font-medium text-red-700">
+                      {authError}
+                    </p>
+                  ) : null}
+                  {authMessage ? (
+                    <p className="rounded-xl border border-emerald-200 bg-emerald-50/80 px-3.5 py-2.5 text-sm font-medium text-emerald-700">
+                      {authMessage}
+                    </p>
+                  ) : null}
+                  <Button
+                    className="h-12 w-full rounded-xl bg-gradient-brand text-[15px] font-semibold tracking-wide text-white shadow-brand transition-all duration-200 hover:brightness-105 active:scale-[0.99]"
+                    disabled={isAuthSubmitting || !isSupabaseConfigured}
+                    type="submit"
                   >
-                    Voltar para entrada
-                  </button>
-                ) : null}
-                {authMode === "login" ? (
+                    {authMode === "signup" ? <UserPlus className="size-4" /> : null}
+                    {authMode === "recover" ? <Mail className="size-4" /> : null}
+                    {authMode === "update-password" ? (
+                      <KeyRound className="size-4" />
+                    ) : null}
+                    {authMode === "login" ? <LogIn className="size-4" /> : null}
+                    {isAuthSubmitting ? "Aguarde..." : authSubmitLabelByMode[authMode]}
+                  </Button>
+                </form>
+
+                {authMode !== "update-password" ? (
                   <>
-                    <button
-                      type="button"
-                      className="rounded-md px-2 py-1 text-rose-700 transition-all duration-200 hover:bg-rose-50 hover:text-rose-800 active:scale-[0.98]"
-                      onClick={() => {
-                        setAuthMode("signup")
-                        setAuthError("")
-                        setAuthMessage("")
-                      }}
-                    >
-                      Criar conta
-                    </button>
-                    <button
-                      type="button"
-                      className="rounded-md px-2 py-1 text-muted-foreground transition-all duration-200 hover:bg-rose-50 hover:text-rose-700 active:scale-[0.98]"
-                      onClick={() => {
-                        setAuthMode("recover")
-                        setAuthError("")
-                        setAuthMessage("")
-                      }}
-                    >
-                      Esqueci minha senha
-                    </button>
+                    <div className="my-6 flex items-center gap-3">
+                      <span className="h-px flex-1 bg-rose-100" />
+                      <span className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                        {authMode === "login" ? "ou" : ""}
+                      </span>
+                      <span className="h-px flex-1 bg-rose-100" />
+                    </div>
+                    <div className="grid gap-2 text-center text-sm">
+                      {authMode !== "login" ? (
+                        <button
+                          type="button"
+                          className="rounded-lg px-3 py-2 font-semibold text-primary transition-colors hover:bg-rose-50"
+                          onClick={() => {
+                            setAuthMode("login")
+                            setAuthError("")
+                            setAuthMessage("")
+                          }}
+                        >
+                          ← Voltar para entrada
+                        </button>
+                      ) : null}
+                      {authMode === "login" ? (
+                        <>
+                          <button
+                            type="button"
+                            className="rounded-lg px-3 py-2 font-semibold text-foreground transition-colors hover:bg-rose-50 hover:text-primary"
+                            onClick={() => {
+                              setAuthMode("signup")
+                              setAuthError("")
+                              setAuthMessage("")
+                            }}
+                          >
+                            Criar uma nova conta
+                          </button>
+                          <button
+                            type="button"
+                            className="rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-rose-50 hover:text-primary"
+                            onClick={() => {
+                              setAuthMode("recover")
+                              setAuthError("")
+                              setAuthMessage("")
+                            }}
+                          >
+                            Esqueci minha senha
+                          </button>
+                        </>
+                      ) : null}
+                    </div>
                   </>
                 ) : null}
-              </div>
-            ) : null}
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+
+            <p className="mt-6 text-center text-xs text-muted-foreground">
+              Feito com <span className="text-primary">♥</span> para a Gabi.
+            </p>
+          </div>
+        </div>
       </div>
     )
   }
