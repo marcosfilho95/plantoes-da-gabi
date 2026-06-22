@@ -5,10 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Plantões da Gabi — palette (HSL).
- * Tailwind v4 reads --color-* tokens from the @theme inline block. The actual
- * color values are wrapped in hsl() inside :root so utilities like bg-primary
- * resolve correctly.
+ * Plantões da Gabi — premium palette.
+ * Warm ivory/blush canvas, deep rose primary, antique gold accent,
+ * Fraunces display serif paired with Inter Tight.
  */
 
 @theme inline {
@@ -39,29 +38,65 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-ring-offset-background: var(--background);
+  --color-gold: var(--gold);
+  --color-ivory: var(--ivory);
+  --font-display: "Fraunces", "Cormorant Garamond", ui-serif, Georgia, serif;
+  --font-sans: "Inter Tight", "Inter", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", sans-serif;
 }
 
 :root {
-  --radius: 0.5rem;
-  --background: hsl(0 0% 100%);
-  --foreground: hsl(342 25% 14%);
+  --radius: 0.875rem;
+  --ivory: hsl(28 60% 98%);
+  --background: hsl(28 60% 98%);
+  --foreground: hsl(346 35% 12%);
   --card: hsl(0 0% 100%);
-  --card-foreground: hsl(342 25% 14%);
+  --card-foreground: hsl(346 35% 12%);
   --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(342 25% 14%);
-  --primary: hsl(347 77% 50%);
-  --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(348 100% 95%);
-  --secondary-foreground: hsl(344 54% 28%);
-  --muted: hsl(345 48% 97%);
-  --muted-foreground: hsl(341 15% 42%);
-  --accent: hsl(158 32% 92%);
-  --accent-foreground: hsl(166 43% 22%);
+  --popover-foreground: hsl(346 35% 12%);
+  --primary: hsl(347 70% 44%);
+  --primary-foreground: hsl(28 60% 98%);
+  --secondary: hsl(348 100% 96%);
+  --secondary-foreground: hsl(344 54% 24%);
+  --muted: hsl(20 30% 95%);
+  --muted-foreground: hsl(341 12% 38%);
+  --accent: hsl(158 24% 90%);
+  --accent-foreground: hsl(166 43% 18%);
   --destructive: hsl(0 72% 50%);
   --destructive-foreground: hsl(0 0% 100%);
-  --border: hsl(345 49% 89%);
-  --input: hsl(345 49% 89%);
-  --ring: hsl(347 77% 50%);
+  --border: hsl(345 35% 90%);
+  --input: hsl(345 35% 90%);
+  --ring: hsl(347 70% 44%);
+  --gold: hsl(38 55% 55%);
+
+  /* Premium effects */
+  --shadow-card: 0 1px 0 hsl(345 30% 90% / 0.6),
+    0 12px 30px -12px hsl(347 50% 40% / 0.18);
+  --shadow-elevated: 0 1px 0 hsl(345 30% 90% / 0.6),
+    0 30px 80px -30px hsl(347 60% 30% / 0.32);
+  --shadow-brand: 0 18px 40px -18px hsl(347 70% 44% / 0.45);
+  --gradient-canvas: radial-gradient(
+      ellipse 80% 60% at 20% 0%,
+      hsl(348 100% 96%) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 70% 60% at 100% 100%,
+      hsl(28 80% 95%) 0%,
+      transparent 55%
+    ),
+    linear-gradient(180deg, hsl(28 60% 98%), hsl(20 50% 97%));
+  --gradient-brand: linear-gradient(
+    135deg,
+    hsl(347 78% 52%) 0%,
+    hsl(338 70% 42%) 55%,
+    hsl(322 55% 32%) 100%
+  );
+  --gradient-soft: linear-gradient(
+    180deg,
+    hsl(0 0% 100%) 0%,
+    hsl(348 100% 98%) 100%
+  );
 }
 
 @layer base {
@@ -70,11 +105,11 @@
   }
 
   html {
-    background: #fff4f6;
+    background: var(--ivory);
     color-scheme: light;
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
-      sans-serif;
-    letter-spacing: 0;
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11", "calt";
+    letter-spacing: -0.005em;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -82,7 +117,8 @@
 
   body {
     margin: 0;
-    background-color: #fff4f6;
+    background: var(--gradient-canvas);
+    background-attachment: fixed;
     color: var(--color-foreground);
     min-width: 320px;
   }
@@ -92,11 +128,25 @@
   select,
   textarea {
     font: inherit;
-    letter-spacing: 0;
+    letter-spacing: inherit;
+  }
+
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: var(--font-display);
+    font-feature-settings: "ss01", "ss02";
+    letter-spacing: -0.02em;
   }
 
   #root {
     min-height: 100dvh;
+  }
+
+  ::selection {
+    background: hsl(347 78% 52% / 0.18);
+    color: hsl(346 35% 12%);
   }
 }
 
@@ -104,17 +154,26 @@
   @keyframes auth-panel-in {
     from {
       opacity: 0;
-      transform: translateY(8px);
+      transform: translateY(10px);
     }
-
     to {
       opacity: 1;
       transform: translateY(0);
     }
   }
 
+  @keyframes brand-shimmer {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0);
+    }
+    50% {
+      transform: translate3d(0, -10px, 0);
+    }
+  }
+
   .auth-panel {
-    animation: auth-panel-in 180ms ease-out;
+    animation: auth-panel-in 240ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .safe-top {
@@ -123,5 +182,46 @@
 
   .safe-bottom {
     padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+  .shadow-elevated {
+    box-shadow: var(--shadow-elevated);
+  }
+  .shadow-brand {
+    box-shadow: var(--shadow-brand);
+  }
+
+  .bg-gradient-brand {
+    background-image: var(--gradient-brand);
+  }
+  .bg-gradient-soft {
+    background-image: var(--gradient-soft);
+  }
+  .bg-gradient-canvas {
+    background-image: var(--gradient-canvas);
+  }
+
+  .text-gradient-brand {
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .brand-grain {
+    background-image: radial-gradient(
+        hsl(0 0% 100% / 0.08) 1px,
+        transparent 1px
+      ),
+      radial-gradient(hsl(0 0% 0% / 0.04) 1px, transparent 1px);
+    background-size: 3px 3px, 5px 5px;
+    background-position: 0 0, 1px 1px;
+  }
+
+  .ring-hairline {
+    box-shadow: inset 0 0 0 1px hsl(345 35% 90% / 0.8);
   }
 }
