@@ -1618,6 +1618,18 @@ function App() {
                           )}
                         </button>
                       </div>
+                      {authForm.confirmPassword.length > 0 ? (
+                        authForm.password === authForm.confirmPassword ? (
+                          <p className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
+                            <CheckCircle2 className="size-3.5" />
+                            As senhas coincidem
+                          </p>
+                        ) : (
+                          <p className="text-xs font-semibold text-red-600">
+                            As senhas não coincidem
+                          </p>
+                        )
+                      ) : null}
                     </div>
                   ) : null}
                   {authError ? (
@@ -1631,8 +1643,14 @@ function App() {
                     </p>
                   ) : null}
                   <Button
-                    className="h-12 w-full rounded-xl bg-gradient-to-r from-rose-500 via-rose-600 to-rose-700 text-[15px] font-semibold tracking-wide text-white shadow-brand transition-all duration-200 hover:from-rose-400 hover:via-rose-500 hover:to-rose-600 hover:brightness-105 active:scale-[0.99]"
-                    disabled={isAuthSubmitting || !isSupabaseConfigured}
+                    className="relative h-12 w-full overflow-hidden rounded-xl border border-rose-400/40 bg-[linear-gradient(135deg,#fb7185_0%,#e11d48_45%,#9f1239_100%)] text-[15px] font-semibold tracking-wide text-white shadow-[0_18px_40px_-12px_rgba(225,29,72,0.55),inset_0_1px_0_rgba(255,255,255,0.35)] transition-all duration-200 hover:brightness-[1.08] hover:shadow-[0_22px_50px_-12px_rgba(225,29,72,0.65),inset_0_1px_0_rgba(255,255,255,0.4)] active:scale-[0.99] disabled:opacity-70"
+                    disabled={
+                      isAuthSubmitting ||
+                      !isSupabaseConfigured ||
+                      ((authMode === "signup" || authMode === "update-password") &&
+                        authForm.confirmPassword.length > 0 &&
+                        authForm.password !== authForm.confirmPassword)
+                    }
                     type="submit"
                   >
                     {authMode === "signup" ? <UserPlus className="size-4" /> : null}
