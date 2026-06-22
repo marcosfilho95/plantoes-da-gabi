@@ -1,29 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
+import App from "@/App";
 
 export const Route = createFileRoute("/")({
+  ssr: false,
   head: () => ({
     meta: [
-      { title: "Your App" },
-      { name: "description", content: "Replace this with a one-sentence description of your app." },
-      { property: "og:title", content: "Your App" },
-      { property: "og:description", content: "Replace this with a one-sentence description of your app." },
+      { title: "Plantões da Gabi" },
+      {
+        name: "description",
+        content: "Agenda PWA para organizar os plantões da Gabriella.",
+      },
+      { property: "og:title", content: "Plantões da Gabi" },
+      {
+        property: "og:description",
+        content: "Agenda PWA para organizar os plantões da Gabriella.",
+      },
     ],
   }),
-  component: Index,
+  component: App,
 });
-
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
