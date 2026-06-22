@@ -1463,15 +1463,15 @@ function App() {
                           ? "Nova senha"
                           : "Bem-vinda de volta"}
                   </p>
-                  <h2 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-[1.7rem]">
-                    {authMode === "signup"
-                      ? "Crie sua conta"
-                      : authMode === "recover"
-                        ? "Vamos recuperar"
-                        : authMode === "update-password"
-                          ? "Defina uma nova senha"
-                          : "Entre na sua agenda"}
-                  </h2>
+                  {authMode !== "login" ? (
+                    <h2 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-[1.7rem]">
+                      {authMode === "signup"
+                        ? "Crie sua conta"
+                        : authMode === "recover"
+                          ? "Vamos recuperar"
+                          : "Defina uma nova senha"}
+                    </h2>
+                  ) : null}
                 </div>
 
                 <form className="space-y-4" onSubmit={handleAuthSubmit}>
