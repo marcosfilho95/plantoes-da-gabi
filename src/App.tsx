@@ -1958,7 +1958,7 @@ function App() {
 
           <TabsContent value="agenda" className="space-y-4">
 
-            <Card className="border-border bg-card shadow-sm">
+            <Card data-tour="calendar" className="border-border bg-card shadow-sm">
               <CardHeader className="pb-3">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -1968,6 +1968,7 @@ function App() {
                     </CardDescription>
                   </div>
                   <div
+                    data-tour="add-hint"
                     className="flex items-center gap-2 rounded-full border border-dashed border-primary/40 bg-secondary/80 px-3 py-1.5 text-left"
                     role="note"
                   >
