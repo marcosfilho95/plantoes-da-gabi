@@ -106,7 +106,15 @@ export function ThemeToggle({
             aria-checked={active}
             aria-label={`Tema ${o.label}`}
             title={o.label}
-            onClick={() => onChange(key)}
+            onClick={(e) => {
+              const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
+              changeThemeWithBlob(
+                theme,
+                key,
+                { x: r.left + r.width / 2, y: r.top + r.height / 2 },
+                onChange,
+              )
+            }}
             className={cn(
               "group relative inline-flex items-center justify-center rounded-full transition-all duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
               cell,
