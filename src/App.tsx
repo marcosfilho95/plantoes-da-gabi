@@ -897,6 +897,7 @@ function App() {
   const [shiftFilter, setShiftFilter] = useState<ShiftFilter>("todos")
   const [personFilter, setPersonFilter] = useState<PersonFilter>("todos")
   const [activeTab, setActiveTab] = useState<TabId>("agenda")
+  const [theme, setTheme] = useTheme()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<ShiftForm>(() => createEmptyForm())
