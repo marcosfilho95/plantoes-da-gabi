@@ -273,7 +273,7 @@ export function WelcomeTutorial({
   if (!mounted || !open) return null
   const Icon = current.icon
 
-  const spotlightPadding = 8
+  const spotlightPadding = 10
   const spotlightStyle: React.CSSProperties | undefined = rect
     ? {
         top: rect.top - spotlightPadding,
