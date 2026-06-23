@@ -581,7 +581,7 @@ function formatAuthError(error: unknown) {
 function createEmptyForm(date = todayISO()): ShiftForm {
   return {
     date,
-    location: DEFAULT_LOCATIONS[0],
+    location: "",
     kind: "MT",
     paid: false,
     amount: "",
