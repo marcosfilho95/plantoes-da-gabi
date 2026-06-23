@@ -2093,9 +2093,27 @@ function App() {
                   </div>
                 </div>
 
-                <p className="rounded-lg border border-rose-100 bg-rose-50/60 p-3 text-xs text-muted-foreground">
-                  Os rendimentos totais para declaração estão no perfil do usuário.
-                </p>
+                <button
+                  type="button"
+                  onClick={() => setProfileOpen(true)}
+                  className="flex w-full items-center gap-3 rounded-xl border border-primary/30 bg-gradient-to-r from-rose-50 to-white p-3 text-left text-sm text-foreground shadow-sm transition-colors hover:border-primary/50 hover:bg-rose-50"
+                >
+                  <span
+                    className="flex size-9 shrink-0 items-center justify-center rounded-full text-primary-foreground shadow-brand"
+                    style={{ background: "var(--gradient-brand)" }}
+                  >
+                    <User className="size-4" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-[10px] font-bold uppercase tracking-wide text-primary">
+                      Declaração anual
+                    </span>
+                    <span className="block text-xs font-medium text-muted-foreground">
+                      Veja os rendimentos totais do ano no <span className="font-semibold text-foreground">Perfil</span>.
+                    </span>
+                  </span>
+                  <ChevronRight className="size-4 shrink-0 text-primary" />
+                </button>
               </CardContent>
             </Card>
 
