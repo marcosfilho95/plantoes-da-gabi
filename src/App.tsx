@@ -2586,7 +2586,6 @@ function App() {
         <FeedbackCard fromName={session.fullName} fromEmail={session.email} />
       </main>
 
-      <SiteFooter className="mx-auto w-full max-w-[1180px] px-4 py-8 safe-bottom" />
 
       <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
         <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-[640px]">
