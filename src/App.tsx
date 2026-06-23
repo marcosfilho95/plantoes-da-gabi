@@ -2192,6 +2192,33 @@ function App() {
                 </div>
               </div>
 
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold uppercase text-muted-foreground">
+                  Tipo para ir
+                </Label>
+                <div
+                  className="flex gap-2 overflow-x-auto pb-1"
+                  role="group"
+                  aria-label="Filtrar por tipo de pessoa"
+                >
+                  {(
+                    [
+                      { value: "todos", label: "Todos" },
+                      { value: "PF", label: "PF" },
+                      { value: "PJ", label: "PJ" },
+                    ] as const
+                  ).map((option) => (
+                    <FilterChip
+                      key={option.value}
+                      active={personFilter === option.value}
+                      onClick={() => setPersonFilter(option.value)}
+                    >
+                      {option.label}
+                    </FilterChip>
+                  ))}
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
                 <div className="space-y-2">
                   <Label className="text-xs font-semibold uppercase text-muted-foreground">
