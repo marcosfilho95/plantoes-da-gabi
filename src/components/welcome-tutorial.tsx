@@ -83,12 +83,12 @@ const STEPS: Step[] = [
   },
   {
     tab: "plantoes",
-    selector: '[data-tour="plantoes-content"]',
+    selector: '[data-tour="plantoes-list"]',
     icon: Table2,
     eyebrow: "Plantões",
-    title: "Lista de todos os seus plantões",
-    body: "Nesta aba você encontra cada plantão cadastrado, podendo editar ou apagar com facilidade.",
-    placement: "bottom",
+    title: "Tudo que você registrou",
+    body: "Esta é a aba Plantões. No topo, o resumo do mês e os botões para exportar em CSV. Logo abaixo vem a lista completa, onde você pode editar ou apagar cada plantão.",
+    placement: "top",
   },
   {
     tab: "plantoes",
@@ -96,7 +96,7 @@ const STEPS: Step[] = [
     icon: Filter,
     eyebrow: "Filtros",
     title: "Encontre rápido o que precisa",
-    body: "Refine a lista por status de pagamento, local ou pessoa. Os filtros se combinam entre si.",
+    body: "Refine a lista por status de pagamento, local ou turno. Os filtros se combinam entre si.",
     placement: "bottom",
   },
   {
