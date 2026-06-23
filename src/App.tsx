@@ -71,7 +71,7 @@ import {
 const STORAGE_KEY = "plantoes-gabi:v1"
 const LOCATIONS_STORAGE_KEY = "plantoes-gabi:locations:v1"
 
-const DEFAULT_LOCATIONS = ["FROTINHA M", "EVENTO HAP", "ANA LIMA", "ANT PRUD"]
+const DEFAULT_LOCATIONS: string[] = []
 
 const SHIFT_TYPES = [
   {
