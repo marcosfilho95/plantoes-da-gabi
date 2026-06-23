@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
-import { createPortal } from "react-dom"
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   BarChart3,
   CalendarDays,
@@ -15,45 +15,48 @@ import {
   Table2,
   User,
   X,
-} from "lucide-react"
+} from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-const SEEN_KEY_PREFIX = "plantoes-gabi:tutorial-seen:"
+const SEEN_KEY_PREFIX = "plantoes-gabi:tutorial-seen:";
 
 export function hasSeenTutorial(userId: string | undefined | null) {
-  if (!userId || typeof window === "undefined") return true
+  if (!userId || typeof window === "undefined") return true;
   try {
-    return window.localStorage.getItem(`${SEEN_KEY_PREFIX}${userId}`) === "1"
+    return window.localStorage.getItem(`${SEEN_KEY_PREFIX}${userId}`) === "1";
   } catch {
-    return true
+    return true;
   }
 }
 
 export function markTutorialSeen(userId: string) {
   try {
-    window.localStorage.setItem(`${SEEN_KEY_PREFIX}${userId}`, "1")
-  } catch {}
+    window.localStorage.setItem(`${SEEN_KEY_PREFIX}${userId}`, "1");
+  } catch {
+    return;
+  }
 }
 
-type TabId = "agenda" | "plantoes" | "resumo"
+type TabId = "agenda" | "plantoes" | "resumo";
 
 type Step = {
-  selector?: string
-  tab?: TabId
-  icon: React.ComponentType<{ className?: string }>
-  eyebrow: string
-  title: string
-  body: string
-  placement?: "top" | "bottom" | "auto"
-}
+  selector?: string;
+  tab?: TabId;
+  icon: React.ComponentType<{ className?: string }>;
+  eyebrow: string;
+  title: string;
+  body: string;
+  placement?: "top" | "bottom" | "auto";
+  offsetY?: number;
+};
 
 const STEPS: Step[] = [
   {
     icon: Sparkles,
     eyebrow: "Boas-vindas",
-    title: "Vamos conhecer a aplicação juntos",
+    title: "Vamos conhecer a aplicação juntos?",
     body: "Em alguns passos eu vou destacar cada parte. Você pode pular quando quiser.",
   },
   {
@@ -72,6 +75,7 @@ const STEPS: Step[] = [
     title: "Calendário do mês",
     body: "Aqui você visualiza os dias com plantão. Use as setas do topo para trocar de mês.",
     placement: "top",
+    offsetY: 64,
   },
   {
     tab: "agenda",
@@ -148,13 +152,13 @@ const STEPS: Step[] = [
     title: "Bons plantões!",
     body: "Você já pode começar. Qualquer dúvida, é só voltar aqui pelo botão de ajuda.",
   },
-]
+];
 
-type Rect = { top: number; left: number; width: number; height: number }
+type Rect = { top: number; left: number; width: number; height: number };
 
 function getRect(el: Element): Rect {
-  const r = el.getBoundingClientRect()
-  return { top: r.top, left: r.left, width: r.width, height: r.height }
+  const r = el.getBoundingClientRect();
+  return { top: r.top, left: r.left, width: r.width, height: r.height };
 }
 
 export function WelcomeTutorial({
@@ -165,133 +169,129 @@ export function WelcomeTutorial({
   onOpenChange,
   setActiveTab,
 }: {
-  title?: "Dr." | "Dra." | null
-  userId: string
-  firstName?: string
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  setActiveTab: (tab: TabId) => void
+  title?: "Dr." | "Dra." | null;
+  userId: string;
+  firstName?: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  setActiveTab: (tab: TabId) => void;
 }) {
-  const closingTitle = title
-    ? `Bons plantões, ${title.replace(/\.$/, "")}!`
-    : "Bons plantões!"
+  const closingTitle = title ? `Bons plantões, ${title.replace(/\.$/, "")}!` : "Bons plantões!";
   const stepsLocal = STEPS.map((s, i) =>
     i === STEPS.length - 1 ? { ...s, title: closingTitle } : s,
-  )
-  const [step, setStep] = useState(0)
-  const [rect, setRect] = useState<Rect | null>(null)
-  const [mounted, setMounted] = useState(false)
-  const tooltipRef = useRef<HTMLDivElement>(null)
-  const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number } | null>(null)
+  );
+  const [step, setStep] = useState(0);
+  const [rect, setRect] = useState<Rect | null>(null);
+  const [mounted, setMounted] = useState(false);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number } | null>(null);
 
-  useEffect(() => setMounted(true), [])
+  useEffect(() => setMounted(true), []);
 
   // Reset to first step on open.
   useEffect(() => {
-    if (open) setStep(0)
-  }, [open])
+    if (open) setStep(0);
+  }, [open]);
 
-  const total = STEPS.length
-  const current = stepsLocal[step]!
-  const isLast = step === total - 1
+  const total = STEPS.length;
+  const current = stepsLocal[step]!;
+  const isLast = step === total - 1;
 
   // Switch tab if required.
   useEffect(() => {
-    if (!open) return
-    if (current.tab) setActiveTab(current.tab)
-  }, [open, current.tab, setActiveTab])
+    if (!open) return;
+    if (current.tab) setActiveTab(current.tab);
+  }, [open, current.tab, setActiveTab]);
 
   // Locate target & update rect.
   const updateRect = useCallback(() => {
     if (!current.selector) {
-      setRect(null)
-      return
+      setRect(null);
+      return;
     }
-    const el = document.querySelector(current.selector)
+    const el = document.querySelector(current.selector);
     if (!el) {
-      setRect(null)
-      return
+      setRect(null);
+      return;
     }
     // Scroll into view (centered) before measuring.
-    el.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" })
+    el.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
     // Wait a bit for scroll to settle.
     window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(() => setRect(getRect(el)))
-    })
-  }, [current.selector])
+      window.requestAnimationFrame(() => setRect(getRect(el)));
+    });
+  }, [current.selector]);
 
   useLayoutEffect(() => {
-    if (!open) return
-    setRect(null)
+    if (!open) return;
+    setRect(null);
     // Allow tab switch / DOM to settle.
-    const t = window.setTimeout(updateRect, 120)
-    return () => window.clearTimeout(t)
-  }, [open, step, updateRect])
+    const t = window.setTimeout(updateRect, 120);
+    return () => window.clearTimeout(t);
+  }, [open, step, updateRect]);
 
   useEffect(() => {
-    if (!open) return
-    const handler = () => updateRect()
-    window.addEventListener("resize", handler)
-    window.addEventListener("scroll", handler, true)
+    if (!open) return;
+    const handler = () => updateRect();
+    window.addEventListener("resize", handler);
+    window.addEventListener("scroll", handler, true);
     return () => {
-      window.removeEventListener("resize", handler)
-      window.removeEventListener("scroll", handler, true)
-    }
-  }, [open, updateRect])
+      window.removeEventListener("resize", handler);
+      window.removeEventListener("scroll", handler, true);
+    };
+  }, [open, updateRect]);
 
   // Compute tooltip position.
   useLayoutEffect(() => {
-    if (!open) return
-    const vw = window.innerWidth
-    const vh = window.innerHeight
-    const node = tooltipRef.current
-    const tw = node?.offsetWidth ?? Math.min(360, vw - 24)
-    const th = node?.offsetHeight ?? 220
-    const margin = 12
-    const gap = 14
+    if (!open) return;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const node = tooltipRef.current;
+    const tw = node?.offsetWidth ?? Math.min(360, vw - 24);
+    const th = node?.offsetHeight ?? 220;
+    const margin = 12;
+    const gap = 14;
 
     if (!rect) {
       setTooltipPos({
         top: Math.max(margin, (vh - th) / 2),
         left: Math.max(margin, (vw - tw) / 2),
-      })
-      return
+      });
+      return;
     }
 
-    const placement = current.placement ?? "auto"
-    const spaceBelow = vh - (rect.top + rect.height)
-    const spaceAbove = rect.top
+    const placement = current.placement ?? "auto";
+    const spaceBelow = vh - (rect.top + rect.height);
+    const spaceAbove = rect.top;
     const showBelow =
       placement === "bottom"
         ? true
         : placement === "top"
           ? false
-          : spaceBelow >= th + gap + margin || spaceBelow >= spaceAbove
+          : spaceBelow >= th + gap + margin || spaceBelow >= spaceAbove;
 
-    const top = showBelow
+    const baseTop = showBelow
       ? Math.min(vh - th - margin, rect.top + rect.height + gap)
-      : Math.max(margin, rect.top - th - gap)
+      : Math.max(margin, rect.top - th - gap);
+    const top = Math.min(Math.max(margin, baseTop + (current.offsetY ?? 0)), vh - th - margin);
 
-    const centerLeft = rect.left + rect.width / 2 - tw / 2
-    const left = Math.min(Math.max(margin, centerLeft), vw - tw - margin)
+    const centerLeft = rect.left + rect.width / 2 - tw / 2;
+    const left = Math.min(Math.max(margin, centerLeft), vw - tw - margin);
 
-    setTooltipPos({ top, left })
-  }, [open, rect, current.placement, step])
+    setTooltipPos({ top, left });
+  }, [open, rect, current.placement, current.offsetY, step]);
 
   function close() {
-    markTutorialSeen(userId)
-    onOpenChange(false)
+    markTutorialSeen(userId);
+    onOpenChange(false);
   }
 
-  const greeting = useMemo(
-    () => (firstName ? `Olá, ${firstName}!` : "Olá!"),
-    [firstName],
-  )
+  const greeting = useMemo(() => (firstName ? `Olá, ${firstName}!` : "Olá!"), [firstName]);
 
-  if (!mounted || !open) return null
-  const Icon = current.icon
+  if (!mounted || !open) return null;
+  const Icon = current.icon;
 
-  const spotlightPadding = 10
+  const spotlightPadding = 10;
   const spotlightStyle: React.CSSProperties | undefined = rect
     ? {
         top: rect.top - spotlightPadding,
@@ -299,7 +299,7 @@ export function WelcomeTutorial({
         width: rect.width + spotlightPadding * 2,
         height: rect.height + spotlightPadding * 2,
       }
-    : undefined
+    : undefined;
 
   const overlay = (
     <div className="fixed inset-0 z-[100]" aria-modal="true" role="dialog">
@@ -383,11 +383,7 @@ export function WelcomeTutorial({
                 key={i}
                 className={cn(
                   "h-1 flex-1 rounded-full transition-all",
-                  i < step
-                    ? "bg-primary/70"
-                    : i === step
-                      ? "bg-primary"
-                      : "bg-muted",
+                  i < step ? "bg-primary/70" : i === step ? "bg-primary" : "bg-muted",
                 )}
               />
             ))}
@@ -435,14 +431,13 @@ export function WelcomeTutorial({
 
       <style>{`
         @keyframes tour-pulse {
-        @keyframes tour-pulse {
           0% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.7); }
           70% { box-shadow: 0 0 0 22px hsl(var(--primary) / 0); }
           100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
         }
       `}</style>
     </div>
-  )
+  );
 
-  return createPortal(overlay, document.body)
+  return createPortal(overlay, document.body);
 }

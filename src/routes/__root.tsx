@@ -10,7 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
+import { reportClientError } from "../lib/error-reporting";
 
 function NotFoundComponent() {
   return (
@@ -38,7 +38,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
   useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    reportClientError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
 
   return (
@@ -91,19 +91,28 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
       { property: "og:title", content: "Plantões da Gabi" },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://plantoesdagabi.lovable.app/" },
+      { property: "og:url", content: "https://plantoes-da-gabi.vercel.app/" },
       { property: "og:site_name", content: "Plantões da Gabi" },
       { property: "og:locale", content: "pt_BR" },
-      { property: "og:image", content: "https://plantoesdagabi.lovable.app/__l5e/assets-v1/4adbc660-581f-4772-990c-73d147c0d468/og-share.jpg" },
+      { property: "og:image", content: "https://plantoes-da-gabi.vercel.app/pwa-512.png" },
       { property: "og:image:width", content: "1216" },
       { property: "og:image:height", content: "640" },
       { property: "og:image:alt", content: "Plantões da Gabi — Organize seus plantões e finanças" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Plantões da Gabi" },
-      { name: "description", content: "Aplicativo gratuito para médicos organizarem plantões e finanças em um só lugar." },
-      { property: "og:description", content: "Aplicativo gratuito para médicos organizarem plantões e finanças em um só lugar." },
-      { name: "twitter:description", content: "Aplicativo gratuito para médicos organizarem plantões e finanças em um só lugar." },
-      { name: "twitter:image", content: "https://plantoesdagabi.lovable.app/__l5e/assets-v1/4adbc660-581f-4772-990c-73d147c0d468/og-share.jpg" },
+      {
+        name: "description",
+        content: "Aplicativo gratuito para médicos organizarem plantões e finanças em um só lugar.",
+      },
+      {
+        property: "og:description",
+        content: "Aplicativo gratuito para médicos organizarem plantões e finanças em um só lugar.",
+      },
+      {
+        name: "twitter:description",
+        content: "Aplicativo gratuito para médicos organizarem plantões e finanças em um só lugar.",
+      },
+      { name: "twitter:image", content: "https://plantoes-da-gabi.vercel.app/pwa-512.png" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },

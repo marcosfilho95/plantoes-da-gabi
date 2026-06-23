@@ -1,4 +1,4 @@
-// Shim that re-exports the Lovable-managed Supabase client so the legacy
+// Shim that re-exports the shared Supabase client so the legacy
 // app code (`import { supabase, isSupabaseConfigured } from "@/lib/supabase"`)
 // keeps working without changes.
 import { supabase as supabaseClient } from "@/integrations/supabase/client";
