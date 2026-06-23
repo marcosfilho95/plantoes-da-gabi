@@ -1043,10 +1043,12 @@ function App() {
       const matchesLocation =
         locationFilter === "todos" || shift.location === locationFilter
       const matchesShift = shiftFilter === "todos" || shift.kind === shiftFilter
+      const matchesPerson =
+        personFilter === "todos" || (shift.personType ?? "PF") === personFilter
 
-      return matchesPayment && matchesLocation && matchesShift
+      return matchesPayment && matchesLocation && matchesShift && matchesPerson
     })
-  }, [locationFilter, monthShifts, paymentFilter, shiftFilter])
+  }, [locationFilter, monthShifts, paymentFilter, personFilter, shiftFilter])
 
   const groupedByDate = useMemo(() => {
     const groups = new Map<string, Shift[]>()
