@@ -2346,7 +2346,7 @@ function App() {
               </span>
               <ChevronRight className="size-4 shrink-0 text-primary" />
             </button>
-            <Card className="overflow-hidden border-border bg-card shadow-sm">
+            <Card data-tour="plantoes-list" className="overflow-hidden border-border bg-card shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4">
                 <div>
                   <h2 className="text-base font-semibold">
