@@ -861,11 +861,16 @@ function App() {
   const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>("todos")
   const [locationFilter, setLocationFilter] = useState("todos")
   const [shiftFilter, setShiftFilter] = useState<ShiftFilter>("todos")
+  const [personFilter, setPersonFilter] = useState<PersonFilter>("todos")
   const [activeTab, setActiveTab] = useState<TabId>("agenda")
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<ShiftForm>(() => createEmptyForm())
   const [newLocationName, setNewLocationName] = useState("")
+  const [yearExportInput, setYearExportInput] = useState(() =>
+    String(new Date().getFullYear()),
+  )
+  const [yearExportError, setYearExportError] = useState("")
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(shifts))
