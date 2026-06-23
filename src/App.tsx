@@ -1870,15 +1870,18 @@ function App() {
               <span>{session.firstName ? `Olá, ${session.firstName}` : "Perfil"}</span>
               <ChevronRight className="size-4 text-rose-400 transition-transform group-hover:translate-x-0.5" aria-hidden />
             </button>
-            <button
-              type="button"
-              onClick={handleLogout}
-              aria-label="Sair da conta"
-              className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-rose-100 bg-white/70 px-3 text-xs font-semibold text-muted-foreground transition-colors hover:bg-rose-50 hover:text-primary"
-            >
-              <LogOut className="size-3.5" />
-              Sair
-            </button>
+            <div className="flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={handleLogout}
+                aria-label="Sair da conta"
+                className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-lg border border-rose-100 bg-white/70 px-3 text-xs font-semibold text-muted-foreground transition-colors hover:bg-rose-50 hover:text-primary"
+              >
+                <LogOut className="size-3.5" />
+                Sair
+              </button>
+              <ThemeToggle theme={theme} onChange={setTheme} size="sm" />
+            </div>
           </div>
         </div>
       </header>
