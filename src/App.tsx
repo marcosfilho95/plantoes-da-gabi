@@ -63,6 +63,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { isSupabaseConfigured, supabase } from "@/lib/supabase"
 import { cn } from "@/lib/utils"
 import { SiteFooter, GoogleLogo } from "@/components/site-footer"
+import { ThemeToggle, useTheme } from "@/components/theme-toggle"
 import {
   downloadShiftsCsv,
   type PersonScope,
@@ -895,6 +896,7 @@ function App() {
   const [shiftFilter, setShiftFilter] = useState<ShiftFilter>("todos")
   const [personFilter, setPersonFilter] = useState<PersonFilter>("todos")
   const [activeTab, setActiveTab] = useState<TabId>("agenda")
+  const [theme, setTheme] = useTheme()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<ShiftForm>(() => createEmptyForm())
@@ -1475,6 +1477,9 @@ function App() {
         <div className="relative mx-auto flex min-h-dvh w-full max-w-md flex-col items-center justify-center gap-6 px-5 py-10">
           {/* Form panel */}
           <div className="mx-auto w-full max-w-md">
+            <div className="mb-3 flex justify-end">
+              <ThemeToggle theme={theme} onChange={setTheme} size="sm" />
+            </div>
             <div className="mb-6 flex flex-col items-center text-center">
               <img
                 src="/logo-plantoes-gabi.png"
@@ -1869,15 +1874,18 @@ function App() {
               <span>{session.firstName ? `Olá, ${session.firstName}` : "Perfil"}</span>
               <ChevronRight className="size-4 text-rose-400 transition-transform group-hover:translate-x-0.5" aria-hidden />
             </button>
-            <button
-              type="button"
-              onClick={handleLogout}
-              aria-label="Sair da conta"
-              className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-rose-100 bg-white/70 px-3 text-xs font-semibold text-muted-foreground transition-colors hover:bg-rose-50 hover:text-primary"
-            >
-              <LogOut className="size-3.5" />
-              Sair
-            </button>
+            <div className="flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={handleLogout}
+                aria-label="Sair da conta"
+                className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-lg border border-rose-100 bg-white/70 px-3 text-xs font-semibold text-muted-foreground transition-colors hover:bg-rose-50 hover:text-primary"
+              >
+                <LogOut className="size-3.5" />
+                Sair
+              </button>
+              <ThemeToggle theme={theme} onChange={setTheme} size="sm" />
+            </div>
           </div>
         </div>
       </header>

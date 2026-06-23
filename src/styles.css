@@ -99,6 +99,52 @@
   );
 }
 
+:root[data-theme="blue"] {
+  --background: hsl(210 60% 98%);
+  --ivory: hsl(210 60% 98%);
+  --foreground: hsl(220 40% 14%);
+  --primary: hsl(214 70% 50%);
+  --primary-foreground: hsl(210 60% 99%);
+  --secondary: hsl(210 100% 95%);
+  --secondary-foreground: hsl(218 50% 24%);
+  --muted: hsl(210 40% 95%);
+  --muted-foreground: hsl(218 18% 40%);
+  --accent: hsl(195 50% 90%);
+  --accent-foreground: hsl(210 50% 18%);
+  --border: hsl(210 55% 88%);
+  --input: hsl(210 55% 88%);
+  --ring: hsl(214 70% 50%);
+  --gold: hsl(38 55% 55%);
+
+  --shadow-card: 0 1px 0 hsl(210 50% 90% / 0.6),
+    0 12px 30px -12px hsl(214 60% 40% / 0.18);
+  --shadow-elevated: 0 1px 0 hsl(210 50% 90% / 0.6),
+    0 30px 80px -30px hsl(214 70% 30% / 0.32);
+  --shadow-brand: 0 18px 40px -18px hsl(214 80% 50% / 0.45);
+  --gradient-canvas: radial-gradient(
+      ellipse 80% 60% at 20% 0%,
+      hsl(210 100% 96%) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 70% 60% at 100% 100%,
+      hsl(195 80% 94%) 0%,
+      transparent 55%
+    ),
+    linear-gradient(180deg, hsl(210 60% 98%), hsl(200 50% 97%));
+  --gradient-brand: linear-gradient(
+    135deg,
+    hsl(205 90% 62%) 0%,
+    hsl(214 78% 52%) 50%,
+    hsl(222 70% 40%) 100%
+  );
+  --gradient-soft: linear-gradient(
+    180deg,
+    hsl(0 0% 100%) 0%,
+    hsl(210 100% 98%) 100%
+  );
+}
+
 @layer base {
   * {
     border-color: var(--color-border);
