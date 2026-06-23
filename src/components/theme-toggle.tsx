@@ -15,6 +15,35 @@ export function applyTheme(theme: ThemeName) {
   document.documentElement.dataset.theme = theme
 }
 
+type DocWithVT = Document & {
+  startViewTransition?: (cb: () => void) => { finished: Promise<void> }
+}
+
+export function changeThemeWithBlob(
+  current: ThemeName,
+  next: ThemeName,
+  origin: { x: number; y: number } | null,
+  commit: (t: ThemeName) => void,
+) {
+  if (current === next) return
+  const doc = document as DocWithVT
+  const root = document.documentElement
+  if (origin) {
+    root.style.setProperty("--theme-x", `${origin.x}px`)
+    root.style.setProperty("--theme-y", `${origin.y}px`)
+  } else {
+    root.style.setProperty("--theme-x", "50%")
+    root.style.setProperty("--theme-y", "50%")
+  }
+  if (typeof doc.startViewTransition !== "function" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    commit(next)
+    return
+  }
+  doc.startViewTransition(() => {
+    commit(next)
+  })
+}
+
 export function useTheme(): [ThemeName, (t: ThemeName) => void] {
   const [theme, setTheme] = useState<ThemeName>(() => getStoredTheme())
   useEffect(() => {
@@ -77,7 +106,15 @@ export function ThemeToggle({
             aria-checked={active}
             aria-label={`Tema ${o.label}`}
             title={o.label}
-            onClick={() => onChange(key)}
+            onClick={(e) => {
+              const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
+              changeThemeWithBlob(
+                theme,
+                key,
+                { x: r.left + r.width / 2, y: r.top + r.height / 2 },
+                onChange,
+              )
+            }}
             className={cn(
               "group relative inline-flex items-center justify-center rounded-full transition-all duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
               cell,
