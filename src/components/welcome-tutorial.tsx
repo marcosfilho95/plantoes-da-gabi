@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 const SEEN_KEY_PREFIX = "plantoes-gabi:tutorial-seen:";
@@ -241,6 +242,8 @@ export function WelcomeTutorial({
     };
   }, [open, updateRect]);
 
+  const isMobile = useIsMobile();
+
   // Compute tooltip position.
   useLayoutEffect(() => {
     if (!open) return;
@@ -251,6 +254,16 @@ export function WelcomeTutorial({
     const th = node?.offsetHeight ?? 220;
     const margin = 12;
     const gap = 14;
+
+    // On mobile, dock the tooltip to the bottom so it never shifts as the
+    // spotlight target moves — preventing the card from "walking" mid-tour.
+    if (isMobile) {
+      setTooltipPos({
+        top: vh - th - margin,
+        left: Math.max(margin, (vw - tw) / 2),
+      });
+      return;
+    }
 
     if (!rect) {
       setTooltipPos({
@@ -279,7 +292,7 @@ export function WelcomeTutorial({
     const left = Math.min(Math.max(margin, centerLeft), vw - tw - margin);
 
     setTooltipPos({ top, left });
-  }, [open, rect, current.placement, current.offsetY, step]);
+  }, [open, rect, current.placement, current.offsetY, step, isMobile]);
 
   function close() {
     markTutorialSeen(userId);
@@ -335,7 +348,10 @@ export function WelcomeTutorial({
       {/* Tooltip */}
       <div
         ref={tooltipRef}
-        className="pointer-events-auto fixed w-[min(360px,calc(100vw-1.5rem))] origin-top rounded-3xl border border-border/70 bg-card text-card-foreground shadow-elevated transition-[top,left] duration-300 ease-out"
+        className={cn(
+          "pointer-events-auto fixed w-[min(360px,calc(100vw-1.5rem))] origin-top rounded-3xl border border-border/70 bg-card text-card-foreground shadow-elevated",
+          !isMobile && "transition-[top,left] duration-300 ease-out",
+        )}
         style={{
           top: tooltipPos?.top ?? -9999,
           left: tooltipPos?.left ?? -9999,
