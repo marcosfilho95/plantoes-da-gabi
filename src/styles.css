@@ -99,50 +99,62 @@
   );
 }
 
-:root[data-theme="blue"] {
-  --background: hsl(208 70% 96%);
-  --ivory: hsl(208 70% 96%);
-  --foreground: hsl(220 40% 14%);
-  --primary: hsl(214 70% 50%);
-  --primary-foreground: hsl(210 60% 99%);
-  --secondary: hsl(208 90% 92%);
-  --secondary-foreground: hsl(218 50% 24%);
-  --muted: hsl(210 50% 93%);
-  --muted-foreground: hsl(218 18% 40%);
-  --accent: hsl(195 60% 88%);
-  --accent-foreground: hsl(210 50% 18%);
-  --border: hsl(210 60% 85%);
-  --input: hsl(210 60% 85%);
-  --ring: hsl(214 70% 50%);
-  --gold: hsl(38 55% 55%);
+:root[data-theme="dark"],
+.dark {
+  --background: hsl(340 18% 8%);
+  --ivory: hsl(340 18% 8%);
+  --foreground: hsl(28 30% 94%);
+  --card: hsl(340 16% 11%);
+  --card-foreground: hsl(28 30% 94%);
+  --popover: hsl(340 16% 11%);
+  --popover-foreground: hsl(28 30% 94%);
+  --primary: hsl(347 78% 62%);
+  --primary-foreground: hsl(340 30% 10%);
+  --secondary: hsl(344 22% 16%);
+  --secondary-foreground: hsl(28 30% 94%);
+  --muted: hsl(340 14% 14%);
+  --muted-foreground: hsl(28 15% 70%);
+  --accent: hsl(345 30% 22%);
+  --accent-foreground: hsl(28 30% 94%);
+  --destructive: hsl(0 72% 55%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(345 18% 22%);
+  --input: hsl(345 18% 22%);
+  --ring: hsl(347 78% 62%);
+  --gold: hsl(38 70% 62%);
 
-  --shadow-card: 0 1px 0 hsl(210 50% 88% / 0.6),
-    0 12px 30px -12px hsl(214 60% 40% / 0.18);
-  --shadow-elevated: 0 1px 0 hsl(210 50% 88% / 0.6),
-    0 30px 80px -30px hsl(214 70% 30% / 0.32);
-  --shadow-brand: 0 18px 40px -18px hsl(214 80% 50% / 0.45);
+  --shadow-card: 0 1px 0 hsl(0 0% 100% / 0.04),
+    0 12px 30px -12px hsl(0 0% 0% / 0.55);
+  --shadow-elevated: 0 1px 0 hsl(0 0% 100% / 0.05),
+    0 30px 80px -30px hsl(0 0% 0% / 0.7);
+  --shadow-brand: 0 18px 40px -18px hsl(347 80% 50% / 0.55);
   --gradient-canvas: radial-gradient(
       ellipse 80% 60% at 20% 0%,
-      hsl(205 95% 88%) 0%,
+      hsl(345 35% 18%) 0%,
       transparent 60%
     ),
     radial-gradient(
       ellipse 70% 60% at 100% 100%,
-      hsl(195 85% 86%) 0%,
+      hsl(330 30% 14%) 0%,
       transparent 55%
     ),
-    linear-gradient(180deg, hsl(208 70% 96%), hsl(200 65% 93%));
+    linear-gradient(180deg, hsl(340 18% 8%), hsl(340 22% 6%));
   --gradient-brand: linear-gradient(
     135deg,
-    hsl(205 90% 62%) 0%,
-    hsl(214 78% 52%) 50%,
-    hsl(222 70% 40%) 100%
+    hsl(350 90% 68%) 0%,
+    hsl(347 80% 58%) 50%,
+    hsl(345 75% 45%) 100%
   );
   --gradient-soft: linear-gradient(
     180deg,
-    hsl(0 0% 100%) 0%,
-    hsl(208 90% 96%) 100%
+    hsl(340 16% 12%) 0%,
+    hsl(340 18% 9%) 100%
   );
+}
+
+:root[data-theme="dark"] html,
+.dark html {
+  color-scheme: dark;
 }
 
 @layer base {
