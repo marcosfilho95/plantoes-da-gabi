@@ -2388,6 +2388,39 @@ function App() {
               </div>
             </div>
 
+            <div className="grid gap-2">
+              <Label>Tipo para ir</Label>
+              <div
+                className="grid grid-cols-2 gap-2"
+                role="radiogroup"
+                aria-label="Tipo para ir"
+              >
+                {(["PF", "PJ"] as const).map((type) => {
+                  const selected = form.personType === type
+                  return (
+                    <button
+                      key={type}
+                      type="button"
+                      role="radio"
+                      aria-checked={selected}
+                      className={cn(
+                        "rounded-lg border p-3 text-sm font-semibold transition-colors",
+                        selected
+                          ? "border-primary bg-rose-50 text-primary shadow-sm"
+                          : "border-border bg-white hover:border-rose-200 hover:bg-rose-50",
+                      )}
+                      onClick={() =>
+                        setForm((current) => ({ ...current, personType: type }))
+                      }
+                    >
+                      {type === "PF" ? "Pessoa Física" : "Pessoa Jurídica"}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+
             <div className="grid grid-cols-2 gap-3">
               <div className="grid gap-2">
                 <Label htmlFor="shift-amount">Valor</Label>
