@@ -908,6 +908,16 @@ function App() {
   const [profileYear, setProfileYear] = useState(() => new Date().getFullYear())
 
   useEffect(() => {
+    if (!session?.userId) return
+    if (!hasSeenTutorial(session.userId)) {
+      const t = window.setTimeout(() => setTutorialOpen(true), 600)
+      return () => window.clearTimeout(t)
+    }
+  }, [session?.userId])
+
+
+
+  useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(shifts))
   }, [shifts])
 
