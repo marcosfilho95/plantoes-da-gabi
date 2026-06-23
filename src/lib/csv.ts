@@ -193,7 +193,9 @@ export function buildShiftsSummary(shifts: CsvShift[]): ShiftsSummary {
     } else {
       pendenteTotal += bruto
       pendenteQtd += 1
+      if (mesComp) addTo(pendenteCompMap, mesComp, bruto)
     }
+
 
     const localKey = shift.location || "(sem local)"
     const localCur = localMap.get(localKey) ?? {
