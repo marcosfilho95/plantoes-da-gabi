@@ -1922,19 +1922,17 @@ function App() {
               </div>
             </div>
           </div>
-              <div className="flex items-center gap-1.5 rounded-full border border-border/60 bg-card/70 px-2 py-0.5 shadow-sm">
-                <span className="select-none text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
-                  Tema
-                </span>
-                <ThemeToggle theme={theme} onChange={setTheme} size="sm" />
-              </div>
-            </div>
-          </div>
         </div>
       </header>
 
       <main className="mx-auto w-full max-w-[520px] space-y-5 px-4 pb-8 pt-4 lg:max-w-[960px]">
-        <WelcomeTutorial userId={session.userId} firstName={session.firstName} />
+        <WelcomeTutorial
+          userId={session.userId}
+          firstName={session.firstName}
+          open={tutorialOpen}
+          onOpenChange={setTutorialOpen}
+          setActiveTab={setActiveTab}
+        />
 
 
         <Tabs
@@ -1942,7 +1940,8 @@ function App() {
           onValueChange={(value) => setActiveTab(value as TabId)}
           className="lg:col-start-1 lg:row-start-2"
         >
-          <TabsList className="grid w-full grid-cols-3 lg:max-w-md">
+          <TabsList data-tour="tabs" className="grid w-full grid-cols-3 lg:max-w-md">
+
             <TabsTrigger value="agenda">
               <CalendarDays className="size-4" />
               Agenda
