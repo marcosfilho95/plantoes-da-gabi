@@ -703,7 +703,7 @@ function sanitizeShiftTemplates(value: unknown): ShiftTemplate[] {
 
     const amount = Number(candidate.amount)
     const normalized: ShiftTemplate = {
-      id: candidate.id,
+      id: candidate.id as string,
       location,
       kind: candidate.kind as ShiftCode,
       period:
