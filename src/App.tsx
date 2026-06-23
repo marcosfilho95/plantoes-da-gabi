@@ -2198,7 +2198,7 @@ function App() {
 
 
           <TabsContent value="plantoes" data-tour="plantoes-content" className="space-y-4">
-            <section aria-label="Filtros">
+            <section aria-label="Filtros" data-tour="plantoes-filter">
               <div className="mb-3 flex h-10 items-center gap-2 px-1 text-base font-semibold text-foreground">
                 <Filter className="size-4 text-muted-foreground" />
                 Filtros
