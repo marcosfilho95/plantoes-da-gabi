@@ -1,4 +1,4 @@
-import { Github, Linkedin } from "lucide-react";
+import { Github, Instagram } from "lucide-react";
 
 export function SiteFooter({ className = "" }: { className?: string }) {
   return (
