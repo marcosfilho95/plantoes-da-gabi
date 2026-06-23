@@ -101,54 +101,54 @@
 
 :root[data-theme="dark"],
 .dark {
-  --background: hsl(340 18% 8%);
-  --ivory: hsl(340 18% 8%);
-  --foreground: hsl(28 30% 94%);
-  --card: hsl(340 16% 11%);
-  --card-foreground: hsl(28 30% 94%);
-  --popover: hsl(340 16% 11%);
-  --popover-foreground: hsl(28 30% 94%);
-  --primary: hsl(347 78% 62%);
+  --background: hsl(338 14% 12%);
+  --ivory: hsl(338 14% 12%);
+  --foreground: hsl(28 32% 96%);
+  --card: hsl(340 12% 18%);
+  --card-foreground: hsl(28 32% 96%);
+  --popover: hsl(340 12% 18%);
+  --popover-foreground: hsl(28 32% 96%);
+  --primary: hsl(350 88% 72%);
   --primary-foreground: hsl(340 30% 10%);
-  --secondary: hsl(344 22% 16%);
-  --secondary-foreground: hsl(28 30% 94%);
-  --muted: hsl(340 14% 14%);
-  --muted-foreground: hsl(28 15% 70%);
-  --accent: hsl(345 30% 22%);
-  --accent-foreground: hsl(28 30% 94%);
-  --destructive: hsl(0 72% 55%);
+  --secondary: hsl(342 18% 24%);
+  --secondary-foreground: hsl(28 32% 96%);
+  --muted: hsl(340 12% 22%);
+  --muted-foreground: hsl(28 18% 80%);
+  --accent: hsl(345 26% 30%);
+  --accent-foreground: hsl(28 32% 96%);
+  --destructive: hsl(0 78% 65%);
   --destructive-foreground: hsl(0 0% 100%);
-  --border: hsl(345 18% 22%);
-  --input: hsl(345 18% 22%);
-  --ring: hsl(347 78% 62%);
-  --gold: hsl(38 70% 62%);
+  --border: hsl(342 16% 32%);
+  --input: hsl(342 16% 32%);
+  --ring: hsl(350 88% 72%);
+  --gold: hsl(40 75% 70%);
 
-  --shadow-card: 0 1px 0 hsl(0 0% 100% / 0.04),
+  --shadow-card: 0 1px 0 hsl(0 0% 100% / 0.05),
     0 12px 30px -12px hsl(0 0% 0% / 0.55);
-  --shadow-elevated: 0 1px 0 hsl(0 0% 100% / 0.05),
+  --shadow-elevated: 0 1px 0 hsl(0 0% 100% / 0.06),
     0 30px 80px -30px hsl(0 0% 0% / 0.7);
-  --shadow-brand: 0 18px 40px -18px hsl(347 80% 50% / 0.55);
+  --shadow-brand: 0 18px 40px -18px hsl(350 80% 55% / 0.55);
   --gradient-canvas: radial-gradient(
       ellipse 80% 60% at 20% 0%,
-      hsl(345 35% 18%) 0%,
+      hsl(345 30% 22%) 0%,
       transparent 60%
     ),
     radial-gradient(
       ellipse 70% 60% at 100% 100%,
-      hsl(330 30% 14%) 0%,
+      hsl(330 24% 18%) 0%,
       transparent 55%
     ),
-    linear-gradient(180deg, hsl(340 18% 8%), hsl(340 22% 6%));
+    linear-gradient(180deg, hsl(338 14% 12%), hsl(338 18% 10%));
   --gradient-brand: linear-gradient(
     135deg,
-    hsl(350 90% 68%) 0%,
-    hsl(347 80% 58%) 50%,
-    hsl(345 75% 45%) 100%
+    hsl(350 92% 76%) 0%,
+    hsl(348 82% 66%) 50%,
+    hsl(345 75% 56%) 100%
   );
   --gradient-soft: linear-gradient(
     180deg,
-    hsl(340 16% 12%) 0%,
-    hsl(340 18% 9%) 100%
+    hsl(340 12% 20%) 0%,
+    hsl(340 14% 16%) 100%
   );
 }
 
@@ -284,7 +284,7 @@
   }
 }
 
-/* Theme transition — circular blob reveal via View Transitions API */
+/* Theme transition — slow dawn/dusk reveal via View Transitions API */
 @supports (view-transition-name: root) {
   ::view-transition-old(root),
   ::view-transition-new(root) {
@@ -293,17 +293,31 @@
   }
   ::view-transition-old(root) {
     z-index: 1;
+    animation: theme-old-fade 2200ms cubic-bezier(0.45, 0, 0.55, 1) forwards;
   }
   ::view-transition-new(root) {
     z-index: 2;
-    animation: theme-blob-reveal 720ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation: theme-blob-reveal 2200ms cubic-bezier(0.45, 0, 0.55, 1) forwards;
   }
   @keyframes theme-blob-reveal {
-    from {
+    0% {
       clip-path: circle(0% at var(--theme-x, 50%) var(--theme-y, 50%));
+      filter: blur(8px) saturate(1.15);
     }
-    to {
-      clip-path: circle(150% at var(--theme-x, 50%) var(--theme-y, 50%));
+    60% {
+      filter: blur(2px) saturate(1.05);
+    }
+    100% {
+      clip-path: circle(160% at var(--theme-x, 50%) var(--theme-y, 50%));
+      filter: blur(0) saturate(1);
+    }
+  }
+  @keyframes theme-old-fade {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0.85;
     }
   }
 }
