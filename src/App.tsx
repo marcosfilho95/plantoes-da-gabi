@@ -594,47 +594,42 @@ function buildCalendar(monthKey: string) {
   return days
 }
 
-function exportShiftsAsCsv(shifts: Shift[], monthKey: string) {
-  const header = [
-    "data",
-    "local",
-    "turno",
-    "horario",
-    "recebido",
-    "valor",
-    "observacoes",
-  ]
-  const rows = shifts.map((shift) => {
-    const meta = SHIFT_BY_CODE[shift.kind]
-
-    return [
-      shift.date,
-      shift.location,
-      shift.kind,
-      meta.period,
-      shift.paid ? "sim" : "nao",
-      shift.amount ? String(shift.amount).replace(".", ",") : "",
-      shift.notes ?? "",
-    ]
-  })
-  const csv = [header, ...rows]
-    .map((row) =>
-      row
-        .map((cell) => `"${String(cell).replaceAll('"', '""')}"`)
-        .join(";"),
-    )
-    .join("\n")
-  const blob = new Blob([`\ufeff${csv}`], {
-    type: "text/csv;charset=utf-8",
-  })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement("a")
-
-  link.href = url
-  link.download = `plantoes-gabi-${monthKey}.csv`
-  link.click()
-  URL.revokeObjectURL(url)
+function shiftsForCsv(shifts: Shift[]) {
+  return shifts.map((shift) => ({
+    date: shift.date,
+    location: shift.location,
+    kind: shift.kind,
+    period: SHIFT_BY_CODE[shift.kind]?.period,
+    paid: shift.paid,
+    amount: shift.amount,
+    notes: shift.notes,
+    personType: shift.personType,
+  }))
 }
+
+function exportMonthCsv(
+  shifts: Shift[],
+  monthKey: string,
+  personScope: PersonScope = "todos",
+) {
+  downloadShiftsCsv(shiftsForCsv(shifts), {
+    label: monthKey,
+    personScope,
+  })
+}
+
+function exportYearCsv(
+  shifts: Shift[],
+  year: number,
+  personScope: PersonScope = "todos",
+) {
+  const yearShifts = shifts.filter((shift) => shift.date.startsWith(`${year}-`))
+  downloadShiftsCsv(shiftsForCsv(yearShifts), {
+    label: String(year),
+    personScope,
+  })
+}
+
 
 function MetricCard({
   accentClassName,
