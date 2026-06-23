@@ -666,21 +666,21 @@ function MetricCard({
 }) {
   return (
     <Card className="h-full border-[#F3D5DC] bg-white shadow-sm">
-      <CardContent className="grid min-h-24 grid-cols-[auto_1fr] items-center gap-3 p-4">
+      <CardContent className="grid min-h-24 grid-cols-[auto_minmax(0,1fr)] items-center gap-2 p-3 sm:gap-3 sm:p-4">
         <div
           className={cn(
-            "flex size-10 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-primary",
+            "flex size-9 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-primary sm:size-10",
             accentClassName,
           )}
         >
           {icon}
         </div>
         <div className="min-w-0 space-y-1">
-          <p className="text-sm font-semibold text-muted-foreground">
+          <p className="truncate text-xs font-semibold text-muted-foreground sm:text-sm">
             {label}
           </p>
-          <p className="text-2xl font-bold leading-none text-foreground">{value}</p>
-          <p className="truncate text-sm text-muted-foreground">{detail}</p>
+          <p className="truncate text-lg font-bold leading-tight text-foreground sm:text-2xl">{value}</p>
+          <p className="truncate text-xs text-muted-foreground sm:text-sm">{detail}</p>
         </div>
       </CardContent>
     </Card>
