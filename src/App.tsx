@@ -468,10 +468,27 @@ function toAuthSession(session: Session | null): AuthSession | null {
     return null
   }
 
+  const meta = (session.user.user_metadata ?? {}) as Record<string, unknown>
+  const rawName =
+    (typeof meta.full_name === "string" && meta.full_name) ||
+    (typeof meta.name === "string" && meta.name) ||
+    (typeof meta.given_name === "string" && meta.given_name) ||
+    ""
+  const email = session.user.email ?? ""
+  const fallback = email.split("@")[0]?.replace(/[._\-+\d]+/g, " ").trim() ?? ""
+  const fullName = (rawName || fallback).trim()
+  const firstNameRaw = fullName.split(/\s+/)[0] ?? ""
+  const firstName = firstNameRaw
+    ? firstNameRaw.charAt(0).toLocaleUpperCase("pt-BR") +
+      firstNameRaw.slice(1).toLocaleLowerCase("pt-BR")
+    : ""
+
   return {
-    email: session.user.email ?? "",
+    email,
     token: session.access_token,
     userId: session.user.id,
+    fullName: fullName || email,
+    firstName: firstName || (email ? email[0]!.toUpperCase() : "Usuário"),
   }
 }
 
