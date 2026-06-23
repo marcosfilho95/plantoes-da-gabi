@@ -37,7 +37,7 @@ export default defineConfig({
         navigateFallback: null,
         cleanupOutdatedCaches: true,
         clientsClaim: true,
-        skipWaiting: false,
+        skipWaiting: true,
         globPatterns: ["**/*.{js,css,woff2,png,svg,jpg,webp,ico}"],
         navigationPreload: true,
         runtimeCaching: [
