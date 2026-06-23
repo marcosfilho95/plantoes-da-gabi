@@ -63,7 +63,8 @@ export function FeedbackCard({
           <strong className="text-foreground">100% gratuita</strong> e o
           objetivo é tornar a vida dos médicos mais fácil, administrando os
           plantões e as contas. Se tiver alguma ideia de melhoria ou crítica,
-          manda a ver — vai cair direto no meu e-mail.
+          manda a ver — sua contribuição ajuda a evoluir o app para toda a
+          comunidade médica.
         </p>
       </CardHeader>
 
