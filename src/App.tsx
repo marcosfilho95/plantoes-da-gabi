@@ -1909,8 +1909,11 @@ function App() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <CardTitle>Calendário</CardTitle>
-                    <CardDescription>
-                      {formatShiftCount(stats.total)} no mês · toque em um dia para adicionar plantão
+                    <CardDescription className="flex items-center gap-1">
+                      <Plus className="size-3 text-primary" aria-hidden />
+                      <span>
+                        {formatShiftCount(stats.total)} no mês · toque em um dia para adicionar
+                      </span>
                     </CardDescription>
                   </div>
                   <Button
