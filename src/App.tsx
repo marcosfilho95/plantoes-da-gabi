@@ -2173,7 +2173,75 @@ function App() {
                 )}
               </CardContent>
             </Card>
+
+            <Card className="border-[#F3D5DC] bg-white shadow-sm lg:col-span-2">
+              <CardHeader>
+                <CardTitle>Exportar ano completo</CardTitle>
+                <CardDescription>
+                  Gera um CSV com todos os plantões do ano informado.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex flex-wrap items-end gap-3">
+                  <div className="grid gap-1.5">
+                    <Label
+                      htmlFor="year-export-input"
+                      className="text-xs font-semibold uppercase text-muted-foreground"
+                    >
+                      Ano
+                    </Label>
+                    <Input
+                      id="year-export-input"
+                      inputMode="numeric"
+                      maxLength={4}
+                      className="w-28"
+                      value={yearExportInput}
+                      onChange={(event) => {
+                        setYearExportInput(event.target.value.replace(/\D/g, ""))
+                        setYearExportError("")
+                      }}
+                    />
+                  </div>
+                  {(["todos", "PF", "PJ"] as const).map((scope) => (
+                    <Button
+                      key={scope}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      aria-label={`Exportar ano ${scope === "todos" ? "completo" : scope}`}
+                      onClick={() => {
+                        const result = validateExportYear(yearExportInput)
+                        if (!result.ok) {
+                          setYearExportError(result.message)
+                          return
+                        }
+                        setYearExportError("")
+                        const yearShifts =
+                          scope === "todos"
+                            ? shifts
+                            : shifts.filter(
+                                (shift) => (shift.personType ?? "PF") === scope,
+                              )
+                        exportYearCsv(yearShifts, result.year, scope)
+                      }}
+                    >
+                      <Download className="size-4" />
+                      {scope === "todos" ? "Todos" : scope}
+                    </Button>
+                  ))}
+                </div>
+                {yearExportError ? (
+                  <p
+                    role="alert"
+                    className="text-sm font-medium text-red-700"
+                  >
+                    {yearExportError}
+                  </p>
+                ) : null}
+              </CardContent>
+            </Card>
           </TabsContent>
+
         </Tabs>
 
         <section className="lg:col-start-2 lg:row-start-2" aria-label="Filtros">
