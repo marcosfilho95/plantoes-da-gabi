@@ -144,6 +144,7 @@ export type ShiftsSummary = {
   brutoPorCompetencia: Array<{ mes: string; total: number; quantidade: number }>
   liquidoPorRecebimento: Array<{ mes: string; total: number; quantidade: number }>
   pendente: { total: number; quantidade: number }
+  pendentePorCompetencia: Array<{ mes: string; total: number; quantidade: number }>
   porLocal: Array<{ local: string; bruto: number; liquido: number; quantidade: number }>
   porTipoRecebimento: Array<{
     tipo: string
