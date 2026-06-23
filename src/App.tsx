@@ -885,6 +885,8 @@ function App() {
     String(new Date().getFullYear()),
   )
   const [yearExportError, setYearExportError] = useState("")
+  const [profileOpen, setProfileOpen] = useState(false)
+  const [profileYear, setProfileYear] = useState(() => new Date().getFullYear())
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(shifts))
