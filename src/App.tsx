@@ -1474,6 +1474,32 @@ function App() {
     }
   }, [sync.status, sync.error])
 
+  // Safety net: never leave the user stuck on the "Sincronizando..." splash.
+  // If we have a session but the remote load failed / is offline, fall back
+  // to local data so the app becomes usable. F5 should not be required.
+  useEffect(() => {
+    if (!session || authMode === "update-password") return
+    if (authStatus !== "checking") return
+    if (
+      sync.status === "error" ||
+      sync.status === "offline" ||
+      sync.status === "synced"
+    ) {
+      setHasLoadedRemote(true)
+      setAuthStatus("authenticated")
+    }
+  }, [session, authMode, authStatus, sync.status])
+
+  // Hard timeout: if loading takes more than 8s, release the UI anyway.
+  useEffect(() => {
+    if (authStatus !== "checking" || !session) return
+    const t = window.setTimeout(() => {
+      setHasLoadedRemote(true)
+      setAuthStatus("authenticated")
+    }, 8000)
+    return () => window.clearTimeout(t)
+  }, [authStatus, session])
+
 
   const monthShifts = useMemo(() => {
     return shifts.filter((shift) => shift.date.startsWith(selectedMonth)).sort(sortShifts)
