@@ -7,26 +7,31 @@
  *  - Every cell wrapped in double quotes, internal quotes doubled
  *  - Dates rendered as dd/mm/aaaa
  *  - Decimal values use comma (",") and no thousand separators
- *  - A final TOTAL row sums the "valor" column
  *
  * Manual verification (steps):
  *  1. Open the app, navigate to month with shifts.
  *  2. Apply filters (status, local, turno, PF/PJ) on the Plantões tab.
  *  3. Click "Todos" / "PF" / "PJ" export buttons — confirm filename and rows.
- *  4. Open CSV in Excel/LibreOffice; confirm header, dates, comma decimals
- *     and TOTAL row matching displayed total.
+ *  4. Open CSV in Excel/LibreOffice; confirm header, dates and comma decimals.
  *  5. In the yearly export, try a future year and a non-4-digit value —
  *     expect a friendly error and no download.
  *  6. Try a notes field containing  " ; \n  — expect escaped output.
  */
 
 export type CsvShift = {
+  id: string
   date: string
   location: string
   kind: string
   period?: string
   paid: boolean
   amount?: number
+  expectedPaymentDate?: string
+  paymentDate?: string
+  netAmount?: number
+  deductions?: number
+  invoiceNumber?: string
+  paymentNotes?: string
   notes?: string
   personType?: "PF" | "PJ"
 }
@@ -34,13 +39,19 @@ export type CsvShift = {
 export type PersonScope = "todos" | "PF" | "PJ"
 
 export const CSV_HEADER = [
-  "data",
+  "id",
+  "data_plantao",
   "local",
   "turno",
   "horario",
-  "tipo",
-  "recebido",
-  "valor",
+  "tipo_recebimento",
+  "status",
+  "valor_bruto",
+  "data_prevista_recebimento",
+  "data_recebimento",
+  "valor_liquido",
+  "descontos",
+  "numero_nota_fiscal",
   "observacoes",
 ] as const
 
@@ -66,50 +77,40 @@ export function formatCsvAmount(value: number | undefined): string {
 
 function shiftRow(shift: CsvShift): string[] {
   return [
+    shift.id,
     formatCsvDate(shift.date),
     shift.location,
     shift.kind,
     shift.period ?? "",
     shift.personType ?? "",
-    shift.paid ? "sim" : "nao",
+    shift.paid ? "recebido" : "pendente",
     formatCsvAmount(shift.amount),
-    shift.notes ?? "",
+    shift.expectedPaymentDate ? formatCsvDate(shift.expectedPaymentDate) : "",
+    shift.paymentDate ? formatCsvDate(shift.paymentDate) : "",
+    formatCsvAmount(shift.netAmount),
+    formatCsvAmount(shift.deductions),
+    shift.invoiceNumber ?? "",
+    [shift.notes, shift.paymentNotes].filter(Boolean).join(" | "),
   ]
 }
 
 export type BuildCsvOptions = {
   /** Optional list of header columns. Defaults to CSV_HEADER. */
   header?: readonly string[]
-  /** When false, omit the trailing TOTAL row. Defaults to true. */
-  includeTotal?: boolean
-  /** Label printed in the "data" column of the TOTAL row. */
-  totalLabel?: string
 }
 
-/** Builds the CSV body (without BOM). Returns at least header + total row. */
+/** Builds the CSV body (without BOM). Returns header + rows only. */
 export function buildShiftsCsv(
   shifts: CsvShift[],
   options: BuildCsvOptions = {},
 ): string {
   const header = options.header ?? CSV_HEADER
-  const includeTotal = options.includeTotal !== false
   const lines: string[] = []
 
   lines.push(header.map(escapeCsvCell).join(SEPARATOR))
 
   for (const shift of shifts) {
     lines.push(shiftRow(shift).map(escapeCsvCell).join(SEPARATOR))
-  }
-
-  if (includeTotal) {
-    const total = shifts.reduce((sum, shift) => sum + (shift.amount ?? 0), 0)
-    const totalRow = new Array(header.length).fill("")
-    totalRow[0] = options.totalLabel ?? "TOTAL"
-    // Place sum in the "valor" column when present
-    const valorIndex = header.indexOf("valor")
-    const target = valorIndex >= 0 ? valorIndex : header.length - 2
-    totalRow[target] = formatCsvAmount(total)
-    lines.push(totalRow.map(escapeCsvCell).join(SEPARATOR))
   }
 
   return lines.join(LINE_BREAK)

@@ -150,8 +150,15 @@ type Shift = {
   date: string
   location: string
   kind: ShiftCode
+  period?: string
   paid: boolean
   amount?: number
+  expectedPaymentDate?: string
+  paymentDate?: string
+  netAmount?: number
+  deductions?: number
+  invoiceNumber?: string
+  paymentNotes?: string
   notes?: string
   personType: "PF" | "PJ"
   createdAt: string
@@ -162,17 +169,29 @@ type ShiftForm = {
   date: string
   location: string
   kind: ShiftCode
+  period: string
   paid: boolean
   amount: string
+  expectedPaymentDate: string
   notes: string
   personType: "PF" | "PJ"
+}
+
+type ReceiptForm = {
+  paymentDate: string
+  netAmount: string
+  deductions: string
+  invoiceNumber: string
+  paymentNotes: string
 }
 
 type ShiftTemplate = {
   id: string
   location: string
   kind: ShiftCode
+  period?: string
   amount?: number
+  expectedPaymentDate?: string
   notes?: string
   personType: "PF" | "PJ"
   createdAt: string
@@ -312,6 +331,26 @@ function getPaymentStatus(shift: Shift): PaymentStatus {
   return shift.paid ? "received" : "pending"
 }
 
+function getShiftPeriod(shift: Pick<Shift, "kind" | "period">) {
+  return shift.period?.trim() || SHIFT_BY_CODE[shift.kind].period
+}
+
+function getShiftGrossAmount(shift: Pick<Shift, "amount">) {
+  return shift.amount ?? 0
+}
+
+function getShiftNetAmount(shift: Pick<Shift, "amount" | "netAmount">) {
+  return shift.netAmount ?? shift.amount ?? 0
+}
+
+function getShiftDeductions(shift: Pick<Shift, "deductions">) {
+  return shift.deductions ?? 0
+}
+
+function getFinancialDate(shift: Shift) {
+  return shift.paymentDate || shift.date
+}
+
 function parseAmount(value: string) {
   const trimmed = value.trim()
 
@@ -325,6 +364,20 @@ function parseAmount(value: string) {
   const amount = Number(normalized)
 
   return Number.isFinite(amount) && amount > 0 ? amount : undefined
+}
+
+function amountToInput(value: number | undefined) {
+  return value ? String(value).replace(".", ",") : ""
+}
+
+function createReceiptForm(shift: Shift): ReceiptForm {
+  return {
+    paymentDate: shift.paymentDate || todayISO(),
+    netAmount: amountToInput(shift.netAmount ?? shift.amount),
+    deductions: amountToInput(shift.deductions),
+    invoiceNumber: shift.invoiceNumber ?? "",
+    paymentNotes: shift.paymentNotes ?? "",
+  }
 }
 
 function createId() {
@@ -363,7 +416,7 @@ function formatTemplateAmount(amount: number | undefined) {
 
 function formatShiftTemplateLabel(template: ShiftTemplate) {
   const meta = SHIFT_BY_CODE[template.kind]
-  return `${template.location} · ${template.kind} ${meta.period} · ${template.personType}${formatTemplateAmount(template.amount)}`
+  return `${template.location} · ${template.kind} ${template.period ?? meta.period} · ${template.personType}${formatTemplateAmount(template.amount)}`
 }
 
 function shiftTemplateFromForm(
@@ -375,7 +428,9 @@ function shiftTemplateFromForm(
     id: createId(),
     location: payload.location,
     kind: payload.kind,
+    period: payload.period,
     amount: payload.amount,
+    expectedPaymentDate: payload.expectedPaymentDate,
     notes: payload.notes.trim(),
     personType: payload.personType,
     createdAt: now,
@@ -388,14 +443,16 @@ function shiftTemplateFromForm(
 function shiftTemplateKey(
   template: Pick<
     ShiftTemplate,
-    "location" | "kind" | "amount" | "notes" | "personType"
+    "location" | "kind" | "period" | "amount" | "expectedPaymentDate" | "notes" | "personType"
   >,
 ) {
   return [
     normalizeLocationName(template.location),
     template.kind,
+    template.period ?? "",
     template.personType,
     template.amount ?? "",
+    template.expectedPaymentDate ?? "",
     (template.notes ?? "").trim(),
   ].join("|")
 }
@@ -436,8 +493,10 @@ function buildShiftTemplatesFromShifts(shifts: Shift[]) {
     return upsertShiftTemplate(templates, {
       location: shift.location,
       kind: shift.kind,
+      period: getShiftPeriod(shift),
       paid: false,
       amount: shift.amount,
+      expectedPaymentDate: shift.expectedPaymentDate ?? "",
       notes: shift.notes ?? "",
       personType: shift.personType ?? "PF",
     })
@@ -449,7 +508,9 @@ function formFromShiftTemplate(current: ShiftForm, template: ShiftTemplate): Shi
     ...current,
     location: template.location,
     kind: template.kind,
-    amount: template.amount ? String(template.amount).replace(".", ",") : "",
+    period: template.period ?? SHIFT_BY_CODE[template.kind].period,
+    amount: amountToInput(template.amount),
+    expectedPaymentDate: template.expectedPaymentDate ?? "",
     notes: template.notes ?? "",
     personType: template.personType,
   }
@@ -548,9 +609,18 @@ function sanitizeShifts(value: unknown): Shift[] {
     const kind = candidate.kind as ShiftCode
     const paid = Boolean(candidate.paid)
     const amount = Number(candidate.amount)
+    const netAmount = Number(candidate.netAmount)
+    const deductions = Number(candidate.deductions)
     const notes = typeof candidate.notes === "string" ? candidate.notes : ""
     const personType: "PF" | "PJ" =
       candidate.personType === "PJ" ? "PJ" : "PF"
+    const safeAmount = Number.isFinite(amount) && amount > 0 ? amount : undefined
+    const safeNetAmount =
+      Number.isFinite(netAmount) && netAmount > 0
+        ? netAmount
+        : paid
+          ? safeAmount
+          : undefined
 
     return [
       {
@@ -559,8 +629,29 @@ function sanitizeShifts(value: unknown): Shift[] {
         date,
         location,
         kind,
+        period:
+          typeof candidate.period === "string" && candidate.period.trim()
+            ? candidate.period.trim()
+            : SHIFT_BY_CODE[kind].period,
         paid,
-        amount: Number.isFinite(amount) && amount > 0 ? amount : undefined,
+        amount: safeAmount,
+        expectedPaymentDate:
+          typeof candidate.expectedPaymentDate === "string"
+            ? candidate.expectedPaymentDate
+            : "",
+        paymentDate:
+          typeof candidate.paymentDate === "string"
+            ? candidate.paymentDate
+            : paid
+              ? date
+              : "",
+        netAmount: safeNetAmount,
+        deductions:
+          Number.isFinite(deductions) && deductions > 0 ? deductions : undefined,
+        invoiceNumber:
+          typeof candidate.invoiceNumber === "string" ? candidate.invoiceNumber : "",
+        paymentNotes:
+          typeof candidate.paymentNotes === "string" ? candidate.paymentNotes : "",
         notes,
         personType,
         createdAt:
@@ -603,7 +694,15 @@ function sanitizeShiftTemplates(value: unknown): ShiftTemplate[] {
       id: candidate.id,
       location,
       kind: candidate.kind as ShiftCode,
+      period:
+        typeof candidate.period === "string" && candidate.period.trim()
+          ? candidate.period.trim()
+          : SHIFT_BY_CODE[candidate.kind as ShiftCode].period,
       amount: Number.isFinite(amount) && amount > 0 ? amount : undefined,
+      expectedPaymentDate:
+        typeof candidate.expectedPaymentDate === "string"
+          ? candidate.expectedPaymentDate
+          : "",
       notes: typeof candidate.notes === "string" ? candidate.notes.trim() : "",
       personType: candidate.personType === "PJ" ? "PJ" : "PF",
       createdAt:
@@ -811,8 +910,10 @@ function createEmptyForm(date = todayISO()): ShiftForm {
     date,
     location: "",
     kind: "MT",
+    period: SHIFT_BY_CODE.MT.period,
     paid: false,
     amount: "",
+    expectedPaymentDate: "",
     notes: "",
     personType: "PF",
   }
@@ -844,12 +945,19 @@ function buildCalendar(monthKey: string) {
 
 function shiftsForCsv(shifts: Shift[]) {
   return shifts.map((shift) => ({
+    id: shift.id,
     date: shift.date,
     location: shift.location,
     kind: shift.kind,
-    period: SHIFT_BY_CODE[shift.kind]?.period,
+    period: getShiftPeriod(shift),
     paid: shift.paid,
     amount: shift.amount,
+    expectedPaymentDate: shift.expectedPaymentDate,
+    paymentDate: shift.paymentDate,
+    netAmount: shift.netAmount,
+    deductions: shift.deductions,
+    invoiceNumber: shift.invoiceNumber,
+    paymentNotes: shift.paymentNotes,
     notes: shift.notes,
     personType: shift.personType,
   }))
@@ -871,7 +979,10 @@ function exportYearCsv(
   year: number,
   personScope: PersonScope = "todos",
 ) {
-  const yearShifts = shifts.filter((shift) => shift.date.startsWith(`${year}-`))
+  const yearShifts = shifts.filter((shift) => {
+    const yearSource = shift.paid ? getFinancialDate(shift) : shift.date
+    return yearSource.startsWith(`${year}-`)
+  })
   downloadShiftsCsv(shiftsForCsv(yearShifts), {
     label: String(year),
     personScope,
@@ -958,12 +1069,12 @@ function PaymentStatusBadge({ shift }: { shift: Shift }) {
 function ShiftCard({
   onDelete,
   onEdit,
-  onTogglePaid,
+  onReceive,
   shift,
 }: {
   onDelete: (shift: Shift) => void
   onEdit: (shift: Shift) => void
-  onTogglePaid: (shiftId: string) => void
+  onReceive: (shift: Shift) => void
   shift: Shift
 }) {
   const meta = SHIFT_BY_CODE[shift.kind]
@@ -982,7 +1093,7 @@ function ShiftCard({
               </h3>
               <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
                 <Clock3 className="size-3.5" />
-                {shift.kind} · {meta.name} · {meta.period}
+                {shift.kind} · {meta.name} · {getShiftPeriod(shift)}
               </p>
             </div>
             <PaymentStatusBadge shift={shift} />
@@ -1018,7 +1129,12 @@ function ShiftCard({
             </span>
             {shift.amount ? (
               <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-                {formatCurrency(shift.amount)}
+                Bruto {formatCurrency(shift.amount)}
+              </span>
+            ) : null}
+            {shift.paid ? (
+              <span className="rounded-full border border-primary/25 bg-secondary px-2.5 py-1 text-xs font-semibold text-primary">
+                Líquido {formatCurrency(getShiftNetAmount(shift))}
               </span>
             ) : null}
           </div>
@@ -1035,10 +1151,10 @@ function ShiftCard({
             type="button"
             variant={shift.paid ? "secondary" : "outline"}
             size="sm"
-            onClick={() => onTogglePaid(shift.id)}
+            onClick={() => onReceive(shift)}
           >
             <CheckCircle2 className="size-4" />
-            {shift.paid ? "Recebido" : "Marcar recebido"}
+            {shift.paid ? "Editar recebimento" : "Marcar recebido"}
           </Button>
           <Button
             type="button"
@@ -1133,6 +1249,14 @@ function App() {
   const [form, setForm] = useState<ShiftForm>(() => createEmptyForm())
   const [selectedTemplateId, setSelectedTemplateId] = useState("none")
   const [newLocationName, setNewLocationName] = useState("")
+  const [receiptShiftId, setReceiptShiftId] = useState<string | null>(null)
+  const [receiptForm, setReceiptForm] = useState<ReceiptForm>(() => ({
+    paymentDate: todayISO(),
+    netAmount: "",
+    deductions: "",
+    invoiceNumber: "",
+    paymentNotes: "",
+  }))
   const [profileOpen, setProfileOpen] = useState(false)
   const [tutorialOpen, setTutorialOpen] = useState(false)
   const [profileYear, setProfileYear] = useState(() => new Date().getFullYear())
@@ -1405,16 +1529,21 @@ function App() {
 
   const stats = useMemo(() => {
     const paid = monthShifts.filter((shift) => shift.paid).length
+    const receivedInSelectedMonth = shifts.filter(
+      (shift) => shift.paid && getFinancialDate(shift).startsWith(selectedMonth),
+    )
     const totalHours = monthShifts.reduce((sum, shift) => {
       return sum + SHIFT_BY_CODE[shift.kind].hours
     }, 0)
     const totalAmount = monthShifts.reduce((sum, shift) => {
-      return sum + (shift.amount ?? 0)
+      return sum + getShiftGrossAmount(shift)
     }, 0)
-    const receivedAmount = monthShifts.reduce((sum, shift) => {
-      return sum + (shift.paid ? shift.amount ?? 0 : 0)
+    const receivedAmount = receivedInSelectedMonth.reduce((sum, shift) => {
+      return sum + getShiftNetAmount(shift)
     }, 0)
-    const pendingAmount = totalAmount - receivedAmount
+    const pendingAmount = monthShifts.reduce((sum, shift) => {
+      return sum + (shift.paid ? 0 : getShiftGrossAmount(shift))
+    }, 0)
     const byLocation = summaryLocations
       .map((location) => ({
         location,
@@ -1436,12 +1565,13 @@ function App() {
     }).filter((item) => item.count > 0)
     const pfShifts = monthShifts.filter((shift) => (shift.personType ?? "PF") === "PF")
     const pjShifts = monthShifts.filter((shift) => (shift.personType ?? "PF") === "PJ")
-    const pfAmount = pfShifts.reduce((sum, shift) => sum + (shift.amount ?? 0), 0)
-    const pjAmount = pjShifts.reduce((sum, shift) => sum + (shift.amount ?? 0), 0)
+    const pfAmount = pfShifts.reduce((sum, shift) => sum + getShiftGrossAmount(shift), 0)
+    const pjAmount = pjShifts.reduce((sum, shift) => sum + getShiftGrossAmount(shift), 0)
 
     return {
       total: monthShifts.length,
       paid,
+      receivedInMonth: receivedInSelectedMonth.length,
       pending: monthShifts.length - paid,
       totalHours,
       totalAmount,
@@ -1454,7 +1584,7 @@ function App() {
       pfAmount,
       pjAmount,
     }
-  }, [monthShifts, summaryLocations])
+  }, [monthShifts, selectedMonth, shifts, summaryLocations])
 
   const availableYears = useMemo(() => {
     const years = new Set<number>([new Date().getFullYear()])
@@ -1467,24 +1597,54 @@ function App() {
 
   const annualStats = useMemo(() => {
     const prefix = `${profileYear}-`
-    const yearShifts = shifts.filter((shift) => shift.date.startsWith(prefix))
+    const yearShifts = shifts.filter((shift) => {
+      const yearSource = shift.paid ? getFinancialDate(shift) : shift.date
+      return yearSource.startsWith(prefix)
+    })
     const pf = yearShifts.filter((shift) => (shift.personType ?? "PF") === "PF")
     const pj = yearShifts.filter((shift) => (shift.personType ?? "PF") === "PJ")
-    const totalAmount = yearShifts.reduce((sum, s) => sum + (s.amount ?? 0), 0)
-    const pfAmount = pf.reduce((sum, s) => sum + (s.amount ?? 0), 0)
-    const pjAmount = pj.reduce((sum, s) => sum + (s.amount ?? 0), 0)
+    const totalAmount = yearShifts.reduce((sum, s) => sum + getShiftGrossAmount(s), 0)
+    const netAmount = yearShifts.reduce((sum, s) => sum + (s.paid ? getShiftNetAmount(s) : 0), 0)
+    const pendingAmount = yearShifts.reduce((sum, s) => sum + (s.paid ? 0 : getShiftGrossAmount(s)), 0)
+    const pfAmount = pf.reduce((sum, s) => sum + getShiftGrossAmount(s), 0)
+    const pjAmount = pj.reduce((sum, s) => sum + getShiftGrossAmount(s), 0)
     const pfPct = totalAmount > 0 ? Math.round((pfAmount / totalAmount) * 100) : 0
     const pjPct = totalAmount > 0 ? 100 - pfPct : 0
+    const byMonth = Array.from({ length: 12 }, (_, index) => {
+      const month = `${profileYear}-${String(index + 1).padStart(2, "0")}`
+      const monthItems = yearShifts.filter((shift) =>
+        (shift.paid ? getFinancialDate(shift) : shift.date).startsWith(month),
+      )
+      return {
+        month,
+        gross: monthItems.reduce((sum, shift) => sum + getShiftGrossAmount(shift), 0),
+        net: monthItems.reduce((sum, shift) => sum + (shift.paid ? getShiftNetAmount(shift) : 0), 0),
+        pending: monthItems.reduce((sum, shift) => sum + (shift.paid ? 0 : getShiftGrossAmount(shift)), 0),
+      }
+    }).filter((item) => item.gross > 0 || item.net > 0 || item.pending > 0)
+    const byLocation = mergeLocations(yearShifts.map((shift) => shift.location)).map((location) => {
+      const items = yearShifts.filter((shift) => shift.location === location)
+      return {
+        label: location,
+        gross: items.reduce((sum, shift) => sum + getShiftGrossAmount(shift), 0),
+        net: items.reduce((sum, shift) => sum + (shift.paid ? getShiftNetAmount(shift) : 0), 0),
+        pending: items.reduce((sum, shift) => sum + (shift.paid ? 0 : getShiftGrossAmount(shift)), 0),
+      }
+    })
     return {
       yearShifts,
       total: yearShifts.length,
       totalAmount,
+      netAmount,
+      pendingAmount,
       pfCount: pf.length,
       pjCount: pj.length,
       pfAmount,
       pjAmount,
       pfPct,
       pjPct,
+      byMonth,
+      byLocation,
     }
   }, [profileYear, shifts])
 
@@ -1495,6 +1655,9 @@ function App() {
     return letters.toUpperCase().slice(0, 2) || "U"
   }, [session?.fullName, session?.email])
 
+  const receiptShift = receiptShiftId
+    ? shifts.find((shift) => shift.id === receiptShiftId) ?? null
+    : null
 
 
   const handleAuthSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -1650,8 +1813,10 @@ function App() {
       date: shift.date,
       location: shift.location,
       kind: shift.kind,
+      period: getShiftPeriod(shift),
       paid: shift.paid,
-      amount: shift.amount ? String(shift.amount).replace(".", ",") : "",
+      amount: amountToInput(shift.amount),
+      expectedPaymentDate: shift.expectedPaymentDate ?? "",
       notes: shift.notes ?? "",
       personType: shift.personType ?? "PF",
     })
@@ -1705,8 +1870,10 @@ function App() {
       date: form.date,
       location: normalizeLocationName(form.location),
       kind: form.kind,
+      period: form.period.trim() || SHIFT_BY_CODE[form.kind].period,
       paid: form.paid,
       amount: parseAmount(form.amount),
+      expectedPaymentDate: form.expectedPaymentDate,
       notes: form.notes.trim(),
       personType: form.personType,
     }
@@ -1721,6 +1888,15 @@ function App() {
             ? {
                 ...shift,
                 ...payload,
+                paymentDate: payload.paid
+                  ? shift.paymentDate || todayISO()
+                  : "",
+                netAmount: payload.paid
+                  ? shift.netAmount ?? payload.amount
+                  : undefined,
+                deductions: payload.paid ? shift.deductions : undefined,
+                invoiceNumber: payload.paid ? shift.invoiceNumber ?? "" : "",
+                paymentNotes: payload.paid ? shift.paymentNotes ?? "" : "",
                 updatedAt: new Date().toISOString(),
               }
             : shift,
@@ -1732,6 +1908,11 @@ function App() {
         {
           id: createId(),
           ...payload,
+          paymentDate: payload.paid ? todayISO() : "",
+          netAmount: payload.paid ? payload.amount : undefined,
+          deductions: undefined,
+          invoiceNumber: "",
+          paymentNotes: "",
           createdAt: new Date().toISOString(),
         },
       ])
@@ -1741,18 +1922,73 @@ function App() {
     setDialogOpen(false)
   }
 
-  const togglePaid = (shiftId: string) => {
+  const openReceiptDialog = (shift: Shift) => {
+    setReceiptShiftId(shift.id)
+    setReceiptForm(createReceiptForm(shift))
+  }
+
+  const closeReceiptDialog = () => {
+    setReceiptShiftId(null)
+    setReceiptForm({
+      paymentDate: todayISO(),
+      netAmount: "",
+      deductions: "",
+      invoiceNumber: "",
+      paymentNotes: "",
+    })
+  }
+
+  const handleReceiptSave = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    if (!receiptShiftId) {
+      return
+    }
+
+    const currentShift = shifts.find((shift) => shift.id === receiptShiftId)
+    const netAmount = parseAmount(receiptForm.netAmount) ?? currentShift?.amount
+
     setShifts((current) =>
       current.map((shift) =>
-        shift.id === shiftId
+        shift.id === receiptShiftId
           ? {
               ...shift,
-              paid: !shift.paid,
+              paid: true,
+              paymentDate: receiptForm.paymentDate || todayISO(),
+              netAmount,
+              deductions: parseAmount(receiptForm.deductions),
+              invoiceNumber: receiptForm.invoiceNumber.trim(),
+              paymentNotes: receiptForm.paymentNotes.trim(),
               updatedAt: new Date().toISOString(),
             }
           : shift,
       ),
     )
+    closeReceiptDialog()
+  }
+
+  const clearReceipt = () => {
+    if (!receiptShiftId) {
+      return
+    }
+
+    setShifts((current) =>
+      current.map((shift) =>
+        shift.id === receiptShiftId
+          ? {
+              ...shift,
+              paid: false,
+              paymentDate: "",
+              netAmount: undefined,
+              deductions: undefined,
+              invoiceNumber: "",
+              paymentNotes: "",
+              updatedAt: new Date().toISOString(),
+            }
+          : shift,
+      ),
+    )
+    closeReceiptDialog()
   }
 
   const deleteShift = (shift: Shift) => {
@@ -2115,7 +2351,8 @@ function App() {
     )
   }
 
-  const hasAmounts = stats.totalAmount > 0
+  const hasAmounts =
+    stats.totalAmount > 0 || stats.receivedAmount > 0 || stats.pendingAmount > 0
   const isCurrentMonth = selectedMonth === monthKeyFromDate(new Date())
 
   return (
@@ -2531,12 +2768,12 @@ function App() {
 
                   <div className="space-y-2">
                     <Label className="text-xs font-semibold uppercase text-muted-foreground">
-                      Tipo para ir
+                      Tipo de recebimento
                     </Label>
                     <div
                       className="flex flex-wrap gap-2"
                       role="group"
-                      aria-label="Filtrar por tipo de pessoa"
+                        aria-label="Filtrar por tipo de recebimento"
                     >
                       {(
                         [
@@ -2708,7 +2945,7 @@ function App() {
                             shift={shift}
                             onEdit={openEditShift}
                             onDelete={deleteShift}
-                            onTogglePaid={togglePaid}
+                            onReceive={openReceiptDialog}
                           />
                         ))}
                       </div>
@@ -2745,9 +2982,9 @@ function App() {
             {hasAmounts ? (
               <div className="grid grid-cols-2 gap-3 lg:col-span-2">
                 <MetricCard
-                  label="Já recebido"
+                  label="Recebido"
                   value={formatCurrency(stats.receivedAmount)}
-                  detail={`${stats.paid} plantões quitados`}
+                  detail={`${stats.receivedInMonth} recebidos no mês`}
                   icon={<WalletCards className="size-5" />}
                   accentClassName="bg-emerald-50 text-emerald-700"
                 />
@@ -3018,7 +3255,7 @@ function App() {
                   style={{ background: "var(--gradient-brand)" }}
                 >
                   <p className="text-[10px] font-semibold uppercase tracking-wide opacity-80">
-                    Total anual
+                    Valor combinado
                   </p>
                   <p className="text-base font-extrabold">
                     {formatCurrency(annualStats.totalAmount)}
@@ -3027,6 +3264,31 @@ function App() {
                     {formatShiftCount(annualStats.total)}
                   </p>
                 </div>
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-900/70">
+                    Valor recebido
+                  </p>
+                  <p className="text-base font-extrabold text-emerald-900">
+                    {formatCurrency(annualStats.netAmount)}
+                  </p>
+                  <p className="text-xs text-emerald-900/80">
+                    Somente plantões recebidos
+                  </p>
+                </div>
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-amber-900/70">
+                    Pendências
+                  </p>
+                  <p className="text-base font-extrabold text-amber-900">
+                    {formatCurrency(annualStats.pendingAmount)}
+                  </p>
+                  <p className="text-xs text-amber-900/80">
+                    Valores ainda não recebidos
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-3">
                   <p className="text-[10px] font-semibold uppercase tracking-wide text-amber-900/70">
                     PF
@@ -3074,6 +3336,54 @@ function App() {
                       className="h-full rounded-full bg-emerald-600"
                       style={{ width: `${annualStats.pjPct}%` }}
                     />
+                  </div>
+                </div>
+              </div>
+
+              <Separator className="bg-secondary" />
+
+              <div className="grid gap-3 lg:grid-cols-2">
+                <div className="space-y-2 rounded-xl border border-border bg-secondary/40 p-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    Totais por mês
+                  </p>
+                  <div className="space-y-2">
+                    {annualStats.byMonth.length > 0 ? (
+                      annualStats.byMonth.map((item) => (
+                        <div key={item.month} className="grid grid-cols-[1fr_auto] gap-2 text-xs">
+                          <span className="font-semibold text-foreground">
+                            {formatMonth(item.month)}
+                          </span>
+                          <span className="text-right text-muted-foreground">
+                            {formatCurrency(item.net)} recebidos · {formatCurrency(item.pending)} pendentes
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-muted-foreground">Nenhum dado no ano.</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2 rounded-xl border border-border bg-secondary/40 p-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    Totais por local
+                  </p>
+                  <div className="space-y-2">
+                    {annualStats.byLocation.length > 0 ? (
+                      annualStats.byLocation.map((item) => (
+                        <div key={item.label} className="grid grid-cols-[1fr_auto] gap-2 text-xs">
+                          <span className="truncate font-semibold text-foreground">
+                            {item.label}
+                          </span>
+                          <span className="text-right text-muted-foreground">
+                            {formatCurrency(item.gross)} bruto · {formatCurrency(item.net)} líquido
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-muted-foreground">Nenhum local no ano.</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -3260,6 +3570,7 @@ function App() {
                         setForm((current) => ({
                           ...current,
                           kind: shiftType.code,
+                          period: shiftType.period,
                         }))
                       }
                     >
@@ -3277,11 +3588,25 @@ function App() {
             </div>
 
             <div className="grid gap-2">
-              <Label>Tipo para ir</Label>
+              <Label>Horário</Label>
+              <Input
+                value={form.period}
+                placeholder="Ex.: 07:00-19:00"
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    period: event.target.value,
+                  }))
+                }
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label>Tipo de recebimento</Label>
               <div
                 className="grid grid-cols-2 gap-2"
                 role="radiogroup"
-                aria-label="Tipo para ir"
+                aria-label="Tipo de recebimento"
               >
                 {(["PF", "PJ"] as const).map((type) => {
                   const selected = form.personType === type
@@ -3311,7 +3636,7 @@ function App() {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="grid gap-2">
-                <Label htmlFor="shift-amount">Valor</Label>
+                <Label htmlFor="shift-amount">Valor combinado</Label>
                 <Input
                   id="shift-amount"
                   inputMode="decimal"
@@ -3326,24 +3651,39 @@ function App() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="shift-notes">Observações</Label>
+                <Label htmlFor="expected-payment-date">Previsão de recebimento</Label>
                 <Input
-                  id="shift-notes"
-                  placeholder="Opcional"
-                  value={form.notes}
+                  id="expected-payment-date"
+                  type="date"
+                  value={form.expectedPaymentDate}
                   onChange={(event) =>
                     setForm((current) => ({
                       ...current,
-                      notes: event.target.value,
+                      expectedPaymentDate: event.target.value,
                     }))
                   }
                 />
               </div>
             </div>
 
+            <div className="grid gap-2">
+              <Label htmlFor="shift-notes">Observações</Label>
+              <Input
+                id="shift-notes"
+                placeholder="Opcional"
+                value={form.notes}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    notes: event.target.value,
+                  }))
+                }
+              />
+            </div>
+
             <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-secondary/70 p-4">
               <div>
-                <Label htmlFor="paid">Recebi</Label>
+                <Label htmlFor="paid">Já recebi?</Label>
                 <p className="text-sm text-muted-foreground">
                   {form.paid ? "Marcado como recebido" : "Marcado como pendente"}
                 </p>
@@ -3376,6 +3716,133 @@ function App() {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(receiptShift)}
+        onOpenChange={(open) => {
+          if (!open) closeReceiptDialog()
+        }}
+      >
+        <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-[420px]">
+          <DialogHeader>
+            <DialogTitle>Registrar recebimento</DialogTitle>
+          </DialogHeader>
+
+          {receiptShift ? (
+            <form className="space-y-4" onSubmit={handleReceiptSave}>
+              <div className="rounded-xl border border-border bg-secondary/60 p-3 text-sm">
+                <p className="font-semibold text-foreground">{receiptShift.location}</p>
+                <p className="text-muted-foreground">
+                  {formatShortDate(receiptShift.date)} · {receiptShift.kind} ·{" "}
+                  {getShiftPeriod(receiptShift)}
+                </p>
+                <p className="mt-1 font-semibold text-primary">
+                  Valor combinado: {formatCurrency(getShiftGrossAmount(receiptShift))}
+                </p>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="receipt-date">Data do recebimento</Label>
+                <Input
+                  id="receipt-date"
+                  type="date"
+                  required
+                  value={receiptForm.paymentDate}
+                  onChange={(event) =>
+                    setReceiptForm((current) => ({
+                      ...current,
+                      paymentDate: event.target.value,
+                    }))
+                  }
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="grid gap-2">
+                  <Label htmlFor="receipt-net">Valor líquido recebido</Label>
+                  <Input
+                    id="receipt-net"
+                    inputMode="decimal"
+                    placeholder={amountToInput(receiptShift.amount) || "Ex.: 600"}
+                    value={receiptForm.netAmount}
+                    onChange={(event) =>
+                      setReceiptForm((current) => ({
+                        ...current,
+                        netAmount: event.target.value,
+                      }))
+                    }
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="receipt-deductions">Descontos</Label>
+                  <Input
+                    id="receipt-deductions"
+                    inputMode="decimal"
+                    placeholder="Opcional"
+                    value={receiptForm.deductions}
+                    onChange={(event) =>
+                      setReceiptForm((current) => ({
+                        ...current,
+                        deductions: event.target.value,
+                      }))
+                    }
+                  />
+                </div>
+              </div>
+
+              {(receiptShift.personType ?? "PF") === "PJ" ? (
+                <div className="grid gap-2">
+                  <Label htmlFor="receipt-invoice">Número da nota fiscal</Label>
+                  <Input
+                    id="receipt-invoice"
+                    placeholder="Opcional"
+                    value={receiptForm.invoiceNumber}
+                    onChange={(event) =>
+                      setReceiptForm((current) => ({
+                        ...current,
+                        invoiceNumber: event.target.value,
+                      }))
+                    }
+                  />
+                </div>
+              ) : null}
+
+              <div className="grid gap-2">
+                <Label htmlFor="receipt-notes">Observações</Label>
+                <Input
+                  id="receipt-notes"
+                  placeholder="Opcional"
+                  value={receiptForm.paymentNotes}
+                  onChange={(event) =>
+                    setReceiptForm((current) => ({
+                      ...current,
+                      paymentNotes: event.target.value,
+                    }))
+                  }
+                />
+              </div>
+
+              <Separator />
+
+              <DialogFooter className="gap-2 sm:justify-between">
+                {receiptShift.paid ? (
+                  <Button type="button" variant="outline" onClick={clearReceipt}>
+                    Marcar pendente
+                  </Button>
+                ) : (
+                  <Button type="button" variant="outline" onClick={closeReceiptDialog}>
+                    Cancelar
+                  </Button>
+                )}
+                <Button type="submit">
+                  <CheckCircle2 className="size-4" />
+                  Salvar recebimento
+                </Button>
+              </DialogFooter>
+            </form>
+          ) : null}
         </DialogContent>
       </Dialog>
     </div>
