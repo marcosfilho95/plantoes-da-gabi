@@ -2463,11 +2463,19 @@ function App() {
           setActiveTab={setActiveTab}
         />
 
-        {syncError ? (
-          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900 shadow-sm">
-            {syncError}
-          </div>
+        {session ? (
+          <SyncStatus
+            status={sync.status}
+            lastSyncedAt={sync.lastSyncedAt}
+            pendingCount={sync.pendingCount}
+            error={sync.error}
+            onSyncNow={() => {
+              void sync.syncNow()
+            }}
+          />
         ) : null}
+
+
 
         <Tabs
           value={activeTab}
