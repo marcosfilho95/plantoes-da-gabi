@@ -3652,7 +3652,7 @@ function App() {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="grid gap-2">
-                <Label htmlFor="shift-amount">Valor combinado</Label>
+                <Label htmlFor="shift-amount">Valor Bruto</Label>
                 <Input
                   id="shift-amount"
                   inputMode="decimal"
