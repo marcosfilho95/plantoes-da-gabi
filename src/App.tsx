@@ -1487,7 +1487,10 @@ function App() {
             </div>
 
             <Card className="relative overflow-hidden rounded-[1.75rem] border-border/80 bg-card/95 shadow-elevated backdrop-blur-xl">
-              <div className="absolute right-4 top-4 z-10">
+              <div className="absolute right-4 top-4 z-10 flex items-center gap-1.5 rounded-full border border-border/60 bg-card/80 px-2 py-1 shadow-sm backdrop-blur">
+                <span className="select-none text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                  Tema
+                </span>
                 <ThemeToggle theme={theme} onChange={setTheme} size="sm" />
               </div>
               <CardContent
