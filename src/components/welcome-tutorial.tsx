@@ -1,36 +1,29 @@
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 import {
   BarChart3,
   CalendarDays,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  Moon,
+  HelpCircle,
+  MousePointerClick,
   Sparkles,
   Sun,
   Table2,
+  User,
+  X,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 
 const SEEN_KEY_PREFIX = "plantoes-gabi:tutorial-seen:"
 
-function storageKey(userId: string) {
-  return `${SEEN_KEY_PREFIX}${userId}`
-}
-
 export function hasSeenTutorial(userId: string | undefined | null) {
   if (!userId || typeof window === "undefined") return true
   try {
-    return window.localStorage.getItem(storageKey(userId)) === "1"
+    return window.localStorage.getItem(`${SEEN_KEY_PREFIX}${userId}`) === "1"
   } catch {
     return true
   }
@@ -38,149 +31,348 @@ export function hasSeenTutorial(userId: string | undefined | null) {
 
 export function markTutorialSeen(userId: string) {
   try {
-    window.localStorage.setItem(storageKey(userId), "1")
+    window.localStorage.setItem(`${SEEN_KEY_PREFIX}${userId}`, "1")
   } catch {}
 }
 
+type TabId = "agenda" | "plantoes" | "resumo"
+
 type Step = {
+  selector?: string
+  tab?: TabId
   icon: React.ComponentType<{ className?: string }>
   eyebrow: string
   title: string
   body: string
+  placement?: "top" | "bottom" | "auto"
 }
 
 const STEPS: Step[] = [
   {
     icon: Sparkles,
     eyebrow: "Bem-vinda",
-    title: "Sua agenda de plantões, simples e segura",
-    body: "Em poucos toques você organiza, acompanha valores e exporta tudo quando precisar.",
+    title: "Vamos conhecer a aplicação juntas",
+    body: "Em alguns passos eu vou destacar cada parte. Você pode pular quando quiser.",
   },
   {
+    selector: '[data-tour="tabs"]',
+    icon: MousePointerClick,
+    eyebrow: "Navegação",
+    title: "Três abas para tudo que importa",
+    body: "Agenda, Plantões e Resumo. Vamos passar por cada uma.",
+    placement: "bottom",
+  },
+  {
+    tab: "agenda",
+    selector: '[data-tour="calendar"]',
     icon: CalendarDays,
-    eyebrow: "Passo 1",
-    title: "Toque em um dia para adicionar um plantão",
-    body: "Pelo calendário da aba Agenda, é só tocar na data desejada para registrar local, horário e pagamento.",
+    eyebrow: "Agenda",
+    title: "Calendário do mês",
+    body: "Aqui você visualiza os dias com plantão. Use as setas do topo para trocar de mês.",
+    placement: "bottom",
   },
   {
+    tab: "agenda",
+    selector: '[data-tour="add-hint"]',
+    icon: MousePointerClick,
+    eyebrow: "Adicionar",
+    title: "Toque em um dia para registrar",
+    body: "É só tocar na data desejada no calendário para abrir o formulário de plantão.",
+    placement: "bottom",
+  },
+  {
+    tab: "plantoes",
+    selector: '[data-tour="plantoes-content"]',
     icon: Table2,
-    eyebrow: "Passo 2",
-    title: "Veja e edite a lista na aba Plantões",
-    body: "Filtre por local, pessoa ou status de pagamento. Tudo fica sincronizado entre seus dispositivos.",
+    eyebrow: "Plantões",
+    title: "Lista completa com filtros",
+    body: "Filtre por status, local ou pessoa. Edite ou apague qualquer plantão em poucos toques.",
+    placement: "bottom",
   },
   {
+    tab: "resumo",
+    selector: '[data-tour="resumo-content"]',
     icon: BarChart3,
-    eyebrow: "Passo 3",
-    title: "Acompanhe o resumo financeiro",
-    body: "Na aba Resumo você vê totais por mês e pode exportar em CSV para o seu controle.",
+    eyebrow: "Resumo",
+    title: "Seu controle financeiro",
+    body: "Veja totais já recebidos e a receber, e exporte tudo em CSV quando precisar.",
+    placement: "bottom",
   },
   {
+    selector: '[data-tour="theme-toggle"]',
     icon: Sun,
-    eyebrow: "Dica final",
-    title: "Tema claro ou escuro, quando quiser",
-    body: "O botão com o sol/lua, no topo da tela, alterna entre os temas com uma transição suave.",
+    eyebrow: "Tema",
+    title: "Alterne claro e escuro",
+    body: "Toque no botão Tema para alternar — a transição é suave, no ritmo do amanhecer.",
+    placement: "bottom",
+  },
+  {
+    selector: '[data-tour="profile-btn"]',
+    icon: User,
+    eyebrow: "Perfil",
+    title: "Seus dados e ajustes",
+    body: "Aqui você gerencia seu perfil, vê o histórico anual e ajusta preferências.",
+    placement: "bottom",
+  },
+  {
+    selector: '[data-tour="tutorial-btn"]',
+    icon: HelpCircle,
+    eyebrow: "Dica",
+    title: "Pode rever este tour quando quiser",
+    body: "Toque no ícone de interrogação no topo da tela para abrir o tutorial novamente.",
+    placement: "bottom",
+  },
+  {
+    icon: CheckCircle2,
+    eyebrow: "Tudo pronto",
+    title: "Bons plantões!",
+    body: "Você já pode começar. Qualquer dúvida, é só voltar aqui pelo botão de ajuda.",
   },
 ]
+
+type Rect = { top: number; left: number; width: number; height: number }
+
+function getRect(el: Element): Rect {
+  const r = el.getBoundingClientRect()
+  return { top: r.top, left: r.left, width: r.width, height: r.height }
+}
 
 export function WelcomeTutorial({
   userId,
   firstName,
+  open,
+  onOpenChange,
+  setActiveTab,
 }: {
   userId: string
   firstName?: string
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  setActiveTab: (tab: TabId) => void
 }) {
-  const [open, setOpen] = useState(false)
   const [step, setStep] = useState(0)
+  const [rect, setRect] = useState<Rect | null>(null)
+  const [mounted, setMounted] = useState(false)
+  const tooltipRef = useRef<HTMLDivElement>(null)
+  const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number } | null>(null)
 
+  useEffect(() => setMounted(true), [])
+
+  // Reset to first step on open.
   useEffect(() => {
-    if (!userId) return
-    if (!hasSeenTutorial(userId)) {
-      setOpen(true)
-      setStep(0)
-    }
-  }, [userId])
+    if (open) setStep(0)
+  }, [open])
 
   const total = STEPS.length
   const current = STEPS[step]!
   const isLast = step === total - 1
-  const Icon = current.icon
+
+  // Switch tab if required.
+  useEffect(() => {
+    if (!open) return
+    if (current.tab) setActiveTab(current.tab)
+  }, [open, current.tab, setActiveTab])
+
+  // Locate target & update rect.
+  const updateRect = useCallback(() => {
+    if (!current.selector) {
+      setRect(null)
+      return
+    }
+    const el = document.querySelector(current.selector)
+    if (!el) {
+      setRect(null)
+      return
+    }
+    // Scroll into view (centered) before measuring.
+    el.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" })
+    // Wait a bit for scroll to settle.
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => setRect(getRect(el)))
+    })
+  }, [current.selector])
+
+  useLayoutEffect(() => {
+    if (!open) return
+    setRect(null)
+    // Allow tab switch / DOM to settle.
+    const t = window.setTimeout(updateRect, 120)
+    return () => window.clearTimeout(t)
+  }, [open, step, updateRect])
+
+  useEffect(() => {
+    if (!open) return
+    const handler = () => updateRect()
+    window.addEventListener("resize", handler)
+    window.addEventListener("scroll", handler, true)
+    return () => {
+      window.removeEventListener("resize", handler)
+      window.removeEventListener("scroll", handler, true)
+    }
+  }, [open, updateRect])
+
+  // Compute tooltip position.
+  useLayoutEffect(() => {
+    if (!open) return
+    const vw = window.innerWidth
+    const vh = window.innerHeight
+    const node = tooltipRef.current
+    const tw = node?.offsetWidth ?? Math.min(360, vw - 24)
+    const th = node?.offsetHeight ?? 220
+    const margin = 12
+    const gap = 14
+
+    if (!rect) {
+      setTooltipPos({
+        top: Math.max(margin, (vh - th) / 2),
+        left: Math.max(margin, (vw - tw) / 2),
+      })
+      return
+    }
+
+    const placement = current.placement ?? "auto"
+    const spaceBelow = vh - (rect.top + rect.height)
+    const spaceAbove = rect.top
+    const showBelow =
+      placement === "bottom"
+        ? true
+        : placement === "top"
+          ? false
+          : spaceBelow >= th + gap + margin || spaceBelow >= spaceAbove
+
+    const top = showBelow
+      ? Math.min(vh - th - margin, rect.top + rect.height + gap)
+      : Math.max(margin, rect.top - th - gap)
+
+    const centerLeft = rect.left + rect.width / 2 - tw / 2
+    const left = Math.min(Math.max(margin, centerLeft), vw - tw - margin)
+
+    setTooltipPos({ top, left })
+  }, [open, rect, current.placement, step])
+
+  function close() {
+    markTutorialSeen(userId)
+    onOpenChange(false)
+  }
 
   const greeting = useMemo(
     () => (firstName ? `Olá, ${firstName}!` : "Olá!"),
     [firstName],
   )
 
-  function close() {
-    markTutorialSeen(userId)
-    setOpen(false)
-  }
+  if (!mounted || !open) return null
+  const Icon = current.icon
 
-  return (
-    <Dialog
-      open={open}
-      onOpenChange={(next) => {
-        if (!next) close()
-      }}
-    >
-      <DialogContent className="max-w-[min(420px,calc(100vw-2rem))] gap-0 overflow-hidden rounded-3xl border-border/70 bg-card p-0 shadow-elevated">
+  const spotlightPadding = 8
+  const spotlightStyle: React.CSSProperties | undefined = rect
+    ? {
+        top: rect.top - spotlightPadding,
+        left: rect.left - spotlightPadding,
+        width: rect.width + spotlightPadding * 2,
+        height: rect.height + spotlightPadding * 2,
+      }
+    : undefined
+
+  const overlay = (
+    <div className="fixed inset-0 z-[100]" aria-modal="true" role="dialog">
+      {/* Backdrop with spotlight cutout via box-shadow */}
+      {rect ? (
+        <>
+          <div
+            className="pointer-events-auto fixed rounded-2xl ring-2 ring-primary/80 transition-all duration-300 ease-out"
+            style={{
+              ...spotlightStyle,
+              boxShadow:
+                "0 0 0 9999px rgba(8, 8, 20, 0.62), 0 0 0 4px rgba(255,255,255,0.18), 0 0 24px 4px hsl(var(--primary) / 0.45)",
+            }}
+            onClick={() => {
+              /* swallow clicks on highlighted area to prevent accidental nav */
+            }}
+          />
+          {/* Pulsing halo */}
+          <div
+            className="pointer-events-none fixed rounded-2xl"
+            style={{
+              ...spotlightStyle,
+              animation: "tour-pulse 1.8s ease-out infinite",
+            }}
+            aria-hidden
+          />
+        </>
+      ) : (
+        <div className="pointer-events-auto fixed inset-0 bg-[rgba(8,8,20,0.62)]" />
+      )}
+
+      {/* Tooltip */}
+      <div
+        ref={tooltipRef}
+        className="pointer-events-auto fixed w-[min(360px,calc(100vw-1.5rem))] origin-top rounded-3xl border border-border/70 bg-card text-card-foreground shadow-elevated transition-[top,left] duration-300 ease-out"
+        style={{
+          top: tooltipPos?.top ?? -9999,
+          left: tooltipPos?.left ?? -9999,
+        }}
+      >
         <div
-          className="relative px-6 pb-5 pt-7 text-primary-foreground"
+          className="flex items-start gap-3 rounded-t-3xl px-5 pb-4 pt-5 text-primary-foreground"
           style={{ background: "var(--gradient-brand)" }}
         >
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-foreground/85">
-            {greeting}
-          </p>
-          <p className="mt-1 text-sm font-medium text-primary-foreground/90">
-            Um tour rápido em {total} passos
-          </p>
-          <div className="mt-4 flex items-center gap-1.5" aria-hidden>
+          <span
+            className="grid size-10 shrink-0 place-items-center rounded-2xl bg-white/15 ring-1 ring-white/25"
+            aria-hidden
+          >
+            <Icon className="size-5" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary-foreground/85">
+              {step === 0 ? greeting : current.eyebrow}
+            </p>
+            <p className="mt-0.5 truncate text-xs font-semibold text-primary-foreground/90">
+              Passo {step + 1} de {total}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={close}
+            aria-label="Fechar tutorial"
+            className="grid size-7 shrink-0 place-items-center rounded-full bg-white/15 text-primary-foreground transition-colors hover:bg-white/25"
+          >
+            <X className="size-4" />
+          </button>
+        </div>
+
+        <div className="space-y-2 px-5 pb-2 pt-4">
+          <h3 className="font-display text-lg font-semibold leading-snug text-foreground sm:text-xl">
+            {current.title}
+          </h3>
+          <p className="text-sm leading-relaxed text-muted-foreground">{current.body}</p>
+        </div>
+
+        <div className="px-5 pb-3 pt-2">
+          <div className="flex items-center gap-1" aria-hidden>
             {STEPS.map((_, i) => (
               <span
                 key={i}
                 className={cn(
-                  "h-1.5 flex-1 rounded-full transition-all",
-                  i <= step ? "bg-primary-foreground" : "bg-primary-foreground/30",
+                  "h-1 flex-1 rounded-full transition-all",
+                  i < step
+                    ? "bg-primary/70"
+                    : i === step
+                      ? "bg-primary"
+                      : "bg-muted",
                 )}
               />
             ))}
           </div>
         </div>
 
-        <div className="px-6 pb-2 pt-6">
-          <div
-            className="mb-4 inline-flex size-12 items-center justify-center rounded-2xl bg-secondary text-primary shadow-sm ring-1 ring-border"
-            aria-hidden
-          >
-            <Icon className="size-6" />
-          </div>
-          <DialogHeader className="space-y-2 text-left">
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary/80">
-              {current.eyebrow}
-            </p>
-            <DialogTitle className="font-display text-xl leading-snug text-foreground sm:text-2xl">
-              {current.title}
-            </DialogTitle>
-            <DialogDescription className="text-sm leading-relaxed text-muted-foreground">
-              {current.body}
-            </DialogDescription>
-          </DialogHeader>
-
-          {isLast ? (
-            <div className="mt-4 flex items-center gap-2 rounded-2xl border border-dashed border-primary/40 bg-secondary/70 p-3 text-xs text-foreground">
-              <Moon className="size-4 shrink-0 text-primary" aria-hidden />
-              <span>Você pode trocar de tema a qualquer momento. Bons plantões!</span>
-            </div>
-          ) : null}
-        </div>
-
-        <div className="flex items-center justify-between gap-2 px-6 pb-6 pt-4">
+        <div className="flex items-center justify-between gap-2 px-4 pb-4 pt-1">
           <Button
             variant="ghost"
             size="sm"
             onClick={close}
             className="text-xs font-semibold text-muted-foreground hover:text-foreground"
           >
-            Pular tutorial
+            Pular
           </Button>
           <div className="flex items-center gap-2">
             <Button
@@ -196,7 +388,7 @@ export function WelcomeTutorial({
             {isLast ? (
               <Button size="sm" onClick={close} className="gap-1.5">
                 <CheckCircle2 className="size-4" />
-                Começar
+                Concluir
               </Button>
             ) : (
               <Button
@@ -210,7 +402,17 @@ export function WelcomeTutorial({
             )}
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+
+      <style>{`
+        @keyframes tour-pulse {
+          0% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.55); }
+          70% { box-shadow: 0 0 0 14px hsl(var(--primary) / 0); }
+          100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
+        }
+      `}</style>
+    </div>
   )
+
+  return createPortal(overlay, document.body)
 }

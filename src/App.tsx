@@ -10,6 +10,7 @@ import {
   Eye,
   EyeOff,
   Filter,
+  HelpCircle,
   KeyRound,
   LogIn,
   LogOut,
@@ -64,7 +65,7 @@ import { isSupabaseConfigured, supabase } from "@/lib/supabase"
 import { cn } from "@/lib/utils"
 import { SiteFooter, GoogleLogo } from "@/components/site-footer"
 import { ThemeToggle, useTheme } from "@/components/theme-toggle"
-import { WelcomeTutorial } from "@/components/welcome-tutorial"
+import { WelcomeTutorial, hasSeenTutorial } from "@/components/welcome-tutorial"
 import {
   downloadShiftsCsv,
   type PersonScope,
@@ -903,7 +904,18 @@ function App() {
   const [form, setForm] = useState<ShiftForm>(() => createEmptyForm())
   const [newLocationName, setNewLocationName] = useState("")
   const [profileOpen, setProfileOpen] = useState(false)
+  const [tutorialOpen, setTutorialOpen] = useState(false)
   const [profileYear, setProfileYear] = useState(() => new Date().getFullYear())
+
+  useEffect(() => {
+    if (!session?.userId) return
+    if (!hasSeenTutorial(session.userId)) {
+      const t = window.setTimeout(() => setTutorialOpen(true), 600)
+      return () => window.clearTimeout(t)
+    }
+  }, [session?.userId])
+
+
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(shifts))
@@ -1869,6 +1881,7 @@ function App() {
           <div className="flex w-full flex-col items-stretch gap-1.5 sm:w-auto sm:justify-self-end">
             <button
               type="button"
+              data-tour="profile-btn"
               onClick={() => setProfileOpen(true)}
               aria-label="Abrir meu perfil"
               title="Abrir meu perfil"
@@ -1888,7 +1901,20 @@ function App() {
                 <LogOut className="size-3.5" />
                 Sair
               </button>
-              <div className="flex items-center gap-1.5 rounded-full border border-border/60 bg-card/70 px-2 py-0.5 shadow-sm">
+              <button
+                type="button"
+                data-tour="tutorial-btn"
+                onClick={() => setTutorialOpen(true)}
+                aria-label="Abrir tutorial"
+                title="Ver tutorial"
+                className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-border bg-card/70 text-primary shadow-sm transition-colors hover:bg-secondary"
+              >
+                <HelpCircle className="size-4" />
+              </button>
+              <div
+                data-tour="theme-toggle"
+                className="flex items-center gap-1.5 rounded-full border border-border/60 bg-card/70 px-2 py-0.5 shadow-sm"
+              >
                 <span className="select-none text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
                   Tema
                 </span>
@@ -1900,7 +1926,13 @@ function App() {
       </header>
 
       <main className="mx-auto w-full max-w-[520px] space-y-5 px-4 pb-8 pt-4 lg:max-w-[960px]">
-        <WelcomeTutorial userId={session.userId} firstName={session.firstName} />
+        <WelcomeTutorial
+          userId={session.userId}
+          firstName={session.firstName}
+          open={tutorialOpen}
+          onOpenChange={setTutorialOpen}
+          setActiveTab={setActiveTab}
+        />
 
 
         <Tabs
@@ -1908,7 +1940,8 @@ function App() {
           onValueChange={(value) => setActiveTab(value as TabId)}
           className="lg:col-start-1 lg:row-start-2"
         >
-          <TabsList className="grid w-full grid-cols-3 lg:max-w-md">
+          <TabsList data-tour="tabs" className="grid w-full grid-cols-3 lg:max-w-md">
+
             <TabsTrigger value="agenda">
               <CalendarDays className="size-4" />
               Agenda
@@ -1925,7 +1958,7 @@ function App() {
 
           <TabsContent value="agenda" className="space-y-4">
 
-            <Card className="border-border bg-card shadow-sm">
+            <Card data-tour="calendar" className="border-border bg-card shadow-sm">
               <CardHeader className="pb-3">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -1935,6 +1968,7 @@ function App() {
                     </CardDescription>
                   </div>
                   <div
+                    data-tour="add-hint"
                     className="flex items-center gap-2 rounded-full border border-dashed border-primary/40 bg-secondary/80 px-3 py-1.5 text-left"
                     role="note"
                   >
@@ -2163,7 +2197,7 @@ function App() {
           </TabsContent>
 
 
-          <TabsContent value="plantoes" className="space-y-4">
+          <TabsContent value="plantoes" data-tour="plantoes-content" className="space-y-4">
             <section aria-label="Filtros">
               <div className="mb-3 flex h-10 items-center gap-2 px-1 text-base font-semibold text-foreground">
                 <Filter className="size-4 text-muted-foreground" />
@@ -2402,6 +2436,7 @@ function App() {
 
           <TabsContent
             value="resumo"
+            data-tour="resumo-content"
             className="space-y-4 lg:grid lg:grid-cols-2 lg:items-start lg:gap-4 lg:space-y-0"
           >
             {hasAmounts ? (
