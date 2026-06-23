@@ -3792,7 +3792,7 @@ function App() {
                   {getShiftPeriod(receiptShift)}
                 </p>
                 <p className="mt-1 font-semibold text-primary">
-                  Valor bruto/combinado: {formatCurrency(receiptGrossAmount)}
+                  Valor bruto: {formatCurrency(receiptGrossAmount)}
                 </p>
               </div>
 
@@ -3814,7 +3814,7 @@ function App() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="grid gap-2">
-                  <Label>Valor bruto/combinado</Label>
+                  <Label>Valor bruto</Label>
                   <div className="flex h-10 items-center rounded-md border border-border bg-secondary px-3 text-sm font-semibold text-foreground">
                     {formatCurrency(receiptGrossAmount)}
                   </div>
