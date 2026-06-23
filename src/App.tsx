@@ -1739,7 +1739,7 @@ function App() {
   return (
     <div className="min-h-dvh bg-[#FFF4F6] text-foreground">
       <header className="safe-top sticky top-0 z-30 border-b border-[#F3D5DC] bg-white/90 backdrop-blur-xl">
-        <div className="mx-auto grid w-full max-w-[480px] grid-cols-1 justify-items-center gap-2 px-4 pb-3 sm:grid-cols-[1fr_auto_1fr] sm:items-center sm:gap-3 lg:max-w-[1180px]">
+        <div className="mx-auto grid w-full max-w-[480px] grid-cols-1 justify-items-center gap-3 px-4 pb-3 sm:grid-cols-[1fr_auto_1fr] sm:items-center lg:max-w-[1180px]">
           <div className="min-w-0 justify-self-center overflow-hidden rounded-xl bg-white sm:justify-self-start lg:w-fit">
             <img
               src="/logo-plantoes-gabi.png"
@@ -1787,63 +1787,37 @@ function App() {
               >
                 Voltar para o mês atual
               </button>
-          ) : null}
-            <div className="mt-2 flex items-center justify-center sm:hidden">
-              <Button
-                type="button"
-                variant="outline"
-                className="h-9 rounded-xl border-rose-200 bg-white px-5 text-sm font-semibold text-rose-700 shadow-sm hover:bg-rose-50"
-                onClick={handleLogout}
-              >
-                Sair
-              </Button>
-            </div>
+            ) : null}
           </div>
-          <div className="hidden min-w-0 justify-self-end sm:block">
+
+          <div className="flex w-full max-w-[260px] flex-col items-stretch gap-2 justify-self-center sm:max-w-none sm:justify-self-end">
+            <div className="flex items-center gap-2 rounded-xl border border-[#F3D5DC] bg-white px-3 py-2 shadow-sm">
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-700">
+                <User className="size-4" />
+              </div>
+              <div className="min-w-0 text-left">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Perfil
+                </p>
+                <p className="truncate text-sm font-semibold text-foreground">
+                  {session.email}
+                </p>
+              </div>
+            </div>
             <Button
               type="button"
               variant="outline"
-              className="h-10 rounded-xl border-rose-200 bg-white px-5 text-sm font-semibold text-rose-700 shadow-sm hover:bg-rose-50"
+              className="h-9 w-full rounded-xl border-rose-200 bg-white px-4 text-sm font-semibold text-rose-700 shadow-sm hover:bg-rose-50"
               onClick={handleLogout}
             >
+              <LogOut className="size-4" />
               Sair
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-[480px] space-y-5 px-4 pb-8 pt-4 lg:grid lg:max-w-[1180px] lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-6 lg:space-y-0">
-        <section className="lg:col-span-2" aria-label="Resumo mensal">
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-            <MetricCard
-              label="Total geral"
-              value={formatCurrency(stats.totalAmount)}
-              detail={formatShiftCount(stats.total)}
-              icon={<CalendarDays className="size-5" />}
-            />
-            <MetricCard
-              label="Horas"
-              value={`${stats.totalHours}h`}
-              detail="Somadas no mês"
-              icon={<Clock3 className="size-5" />}
-              accentClassName="bg-slate-100 text-slate-700"
-            />
-            <MetricCard
-              label="Recebidos"
-              value={String(stats.paid)}
-              detail={`${formatCurrency(stats.receivedAmount)} recebidos`}
-              icon={<WalletCards className="size-5" />}
-              accentClassName="bg-emerald-50 text-emerald-700"
-            />
-            <MetricCard
-              label="Pendentes"
-              value={String(stats.pending)}
-              detail={`${formatCurrency(stats.pendingAmount)} a receber`}
-              icon={<CheckCircle2 className="size-5" />}
-              accentClassName="bg-amber-50 text-amber-700"
-            />
-          </div>
-        </section>
+      <main className="mx-auto w-full max-w-[520px] space-y-5 px-4 pb-8 pt-4 lg:max-w-[960px]">
 
         <Tabs
           value={activeTab}
