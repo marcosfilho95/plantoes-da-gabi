@@ -10,6 +10,7 @@ import {
   Eye,
   EyeOff,
   Filter,
+  HelpCircle,
   KeyRound,
   LogIn,
   LogOut,
