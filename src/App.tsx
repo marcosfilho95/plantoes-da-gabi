@@ -26,6 +26,7 @@ import {
 } from "lucide-react"
 import type { Session } from "@supabase/supabase-js"
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -78,6 +79,10 @@ import {
   downloadShiftsCsv,
   type PersonScope,
 } from "@/lib/csv"
+import { useAppSync, type SyncPayload } from "@/lib/sync"
+import { SyncStatus } from "@/components/sync-status"
+import { registerServiceWorker } from "@/lib/pwa"
+import { toast } from "sonner"
 
 const STORAGE_KEY = "plantoes-gabi:v1"
 const LOCATIONS_STORAGE_KEY = "plantoes-gabi:locations:v1"
@@ -1293,6 +1298,17 @@ function App() {
     }
   }, [session?.userId])
 
+  // Register the service worker for auto-update PWA support.
+  useEffect(() => {
+    void registerServiceWorker({
+      onUpdate: () => {
+        toast.success("Nova versão disponível", {
+          description: "O app foi atualizado em segundo plano.",
+        })
+      },
+    })
+  }, [])
+
 
 
   useEffect(() => {
@@ -1390,91 +1406,63 @@ function App() {
     }
   }, [authMode])
 
+  const handleRemoteLoaded = useCallback(
+    (remote: SyncPayload) => {
+      const accountLocations = mergeLocations(
+        DEFAULT_LOCATIONS,
+        remote.locations as string[],
+      )
+      const accountShifts = sanitizeShifts(remote.shifts)
+      const accountTemplates = sanitizeShiftTemplates(remote.shiftTemplates)
+
+      setLocations((current) => mergeLocations(current, accountLocations))
+      setShifts((current) => mergeShifts(current, accountShifts))
+      setShiftTemplates((current) => {
+        const safeTemplates =
+          accountTemplates.length > 0
+            ? accountTemplates
+            : buildShiftTemplatesFromShifts(accountShifts)
+        return sanitizeShiftTemplates([...current, ...safeTemplates])
+      })
+      setSyncError("")
+      setHasLoadedRemote(true)
+      setAuthStatus("authenticated")
+    },
+    [],
+  )
+
+  const sync = useAppSync({
+    enabled: Boolean(session) && authMode !== "update-password",
+    userId: session?.userId ?? null,
+    onRemoteData: handleRemoteLoaded,
+  })
+
+  // Push local changes (debounced) once remote has loaded.
   useEffect(() => {
-    if (!session || authMode === "update-password") {
-      return
-    }
+    if (!session || !hasLoadedRemote || authMode === "update-password") return
+    sync.trackLocal({ locations, shifts, shiftTemplates })
+  }, [
+    authMode,
+    hasLoadedRemote,
+    locations,
+    session,
+    shiftTemplates,
+    shifts,
+    sync,
+  ])
 
-    let isActive = true
-
-    apiRequest<{
-      locations: string[]
-      shifts: Shift[]
-      shiftTemplates?: ShiftTemplate[]
-    }>("/api/app-data", {
-      method: "GET",
-      token: session.token,
-    })
-      .then((remoteData) => {
-        if (!isActive) {
-          return
-        }
-
-        const accountLocations = mergeLocations(DEFAULT_LOCATIONS, remoteData.locations)
-        const accountShifts = sanitizeShifts(remoteData.shifts)
-        const accountTemplates = sanitizeShiftTemplates(remoteData.shiftTemplates)
-
-        setLocations((current) => mergeLocations(current, accountLocations))
-        setShifts((current) => mergeShifts(current, accountShifts))
-        setShiftTemplates((current) => {
-          const safeTemplates =
-            accountTemplates.length > 0
-              ? accountTemplates
-              : buildShiftTemplatesFromShifts(accountShifts)
-
-          return sanitizeShiftTemplates([...current, ...safeTemplates])
-        })
-        setSyncError("")
-        setHasLoadedRemote(true)
-        setAuthStatus("authenticated")
-      })
-      .catch((error: Error) => {
-        if (!isActive) {
-          return
-        }
-
-        if (error.message === "Sessão expirada") {
-          setSession(null)
-          setAuthStatus("anonymous")
-          setAuthError("Sessão expirada. Entre novamente.")
-          return
-        }
-
-        console.error(error.message)
-        setSyncError(
-          "Não foi possível sincronizar com o Supabase. Seus dados continuam salvos neste navegador, mas confira a configuração do backup.",
-        )
-        setAuthStatus("authenticated")
-        setHasLoadedRemote(false)
-      })
-
-    return () => {
-      isActive = false
-    }
-  }, [authMode, session])
-
+  // Surface sync errors in the legacy banner state for backward-compat.
   useEffect(() => {
-    if (!session || !hasLoadedRemote || authMode === "update-password") {
-      return
+    if (sync.status === "error") {
+      setSyncError(
+        sync.error ??
+          "Não foi possível salvar no Supabase. Seus dados continuam salvos neste navegador.",
+      )
+    } else if (sync.status === "synced") {
+      setSyncError("")
     }
+  }, [sync.status, sync.error])
 
-    const timeout = window.setTimeout(() => {
-      apiRequest("/api/app-data", {
-        method: "PUT",
-        token: session.token,
-        body: JSON.stringify({ locations, shifts, shiftTemplates }),
-      })
-        .then(() => setSyncError(""))
-        .catch((error: Error) => {
-          console.error(error.message)
-          setSyncError(
-            "Não foi possível salvar o backup no Supabase. Seus dados continuam salvos neste navegador.",
-          )
-        })
-    }, 400)
-
-    return () => window.clearTimeout(timeout)
-  }, [authMode, hasLoadedRemote, locations, session, shiftTemplates, shifts])
 
   const monthShifts = useMemo(() => {
     return shifts.filter((shift) => shift.date.startsWith(selectedMonth)).sort(sortShifts)
@@ -2486,11 +2474,19 @@ function App() {
           setActiveTab={setActiveTab}
         />
 
-        {syncError ? (
-          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900 shadow-sm">
-            {syncError}
-          </div>
+        {session ? (
+          <SyncStatus
+            status={sync.status}
+            lastSyncedAt={sync.lastSyncedAt}
+            pendingCount={sync.pendingCount}
+            error={sync.error}
+            onSyncNow={() => {
+              void sync.syncNow()
+            }}
+          />
         ) : null}
+
+
 
         <Tabs
           value={activeTab}
