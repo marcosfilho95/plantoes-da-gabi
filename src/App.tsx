@@ -1900,6 +1900,8 @@ function App() {
       </header>
 
       <main className="mx-auto w-full max-w-[520px] space-y-5 px-4 pb-8 pt-4 lg:max-w-[960px]">
+        <WelcomeTutorial userId={session.userId} firstName={session.firstName} />
+
 
         <Tabs
           value={activeTab}
