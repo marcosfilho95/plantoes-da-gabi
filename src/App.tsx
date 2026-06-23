@@ -904,6 +904,7 @@ function App() {
   const [form, setForm] = useState<ShiftForm>(() => createEmptyForm())
   const [newLocationName, setNewLocationName] = useState("")
   const [profileOpen, setProfileOpen] = useState(false)
+  const [tutorialOpen, setTutorialOpen] = useState(false)
   const [profileYear, setProfileYear] = useState(() => new Date().getFullYear())
 
   useEffect(() => {
