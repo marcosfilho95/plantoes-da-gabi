@@ -1124,6 +1124,10 @@ function App() {
         }, 0),
       }
     }).filter((item) => item.count > 0)
+    const pfShifts = monthShifts.filter((shift) => (shift.personType ?? "PF") === "PF")
+    const pjShifts = monthShifts.filter((shift) => (shift.personType ?? "PF") === "PJ")
+    const pfAmount = pfShifts.reduce((sum, shift) => sum + (shift.amount ?? 0), 0)
+    const pjAmount = pjShifts.reduce((sum, shift) => sum + (shift.amount ?? 0), 0)
 
     return {
       total: monthShifts.length,
@@ -1135,6 +1139,10 @@ function App() {
       pendingAmount,
       byLocation,
       byType,
+      pfCount: pfShifts.length,
+      pjCount: pjShifts.length,
+      pfAmount,
+      pjAmount,
     }
   }, [monthShifts, summaryLocations])
 
