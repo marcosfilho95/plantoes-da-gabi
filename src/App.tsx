@@ -78,6 +78,10 @@ import {
   downloadShiftsCsv,
   type PersonScope,
 } from "@/lib/csv"
+import { useAppSync, type SyncPayload } from "@/lib/sync"
+import { SyncStatus } from "@/components/sync-status"
+import { registerServiceWorker } from "@/lib/pwa"
+import { toast } from "sonner"
 
 const STORAGE_KEY = "plantoes-gabi:v1"
 const LOCATIONS_STORAGE_KEY = "plantoes-gabi:locations:v1"
