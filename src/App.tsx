@@ -71,7 +71,7 @@ import {
 const STORAGE_KEY = "plantoes-gabi:v1"
 const LOCATIONS_STORAGE_KEY = "plantoes-gabi:locations:v1"
 
-const DEFAULT_LOCATIONS = ["FROTINHA M", "EVENTO HAP", "ANA LIMA", "ANT PRUD"]
+const DEFAULT_LOCATIONS: string[] = []
 
 const SHIFT_TYPES = [
   {
@@ -581,7 +581,7 @@ function formatAuthError(error: unknown) {
 function createEmptyForm(date = todayISO()): ShiftForm {
   return {
     date,
-    location: DEFAULT_LOCATIONS[0],
+    location: "",
     kind: "MT",
     paid: false,
     amount: "",
@@ -666,21 +666,21 @@ function MetricCard({
 }) {
   return (
     <Card className="h-full border-[#F3D5DC] bg-white shadow-sm">
-      <CardContent className="grid min-h-24 grid-cols-[auto_1fr] items-center gap-3 p-4">
+      <CardContent className="grid min-h-24 grid-cols-[auto_minmax(0,1fr)] items-center gap-2 p-3 sm:gap-3 sm:p-4">
         <div
           className={cn(
-            "flex size-10 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-primary",
+            "flex size-9 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-primary sm:size-10",
             accentClassName,
           )}
         >
           {icon}
         </div>
         <div className="min-w-0 space-y-1">
-          <p className="text-sm font-semibold text-muted-foreground">
+          <p className="truncate text-xs font-semibold text-muted-foreground sm:text-sm">
             {label}
           </p>
-          <p className="text-2xl font-bold leading-none text-foreground">{value}</p>
-          <p className="truncate text-sm text-muted-foreground">{detail}</p>
+          <p className="truncate text-lg font-bold leading-tight text-foreground sm:text-2xl">{value}</p>
+          <p className="truncate text-xs text-muted-foreground sm:text-sm">{detail}</p>
         </div>
       </CardContent>
     </Card>
@@ -1861,11 +1861,13 @@ function App() {
             <button
               type="button"
               onClick={() => setProfileOpen(true)}
-              aria-label="Abrir perfil"
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[#F3D5DC] bg-white px-4 text-sm font-semibold text-primary shadow-sm transition-colors hover:bg-rose-50"
+              aria-label="Abrir meu perfil"
+              title="Abrir meu perfil"
+              className="group inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[#F3D5DC] bg-white px-4 text-sm font-semibold text-primary shadow-sm transition-all hover:-translate-y-0.5 hover:bg-rose-50 hover:shadow-md"
             >
               <User className="size-4" />
-              {session.firstName ? `Olá, ${session.firstName}` : "Perfil"}
+              <span>{session.firstName ? `Olá, ${session.firstName}` : "Perfil"}</span>
+              <ChevronRight className="size-4 text-rose-400 transition-transform group-hover:translate-x-0.5" aria-hidden />
             </button>
             <button
               type="button"
@@ -1906,28 +1908,29 @@ function App() {
 
             <Card className="border-[#F3D5DC] bg-white shadow-sm">
               <CardHeader className="pb-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <CardTitle>Calendário</CardTitle>
-                    <CardDescription className="flex items-center gap-1">
-                      <Plus className="size-3 text-primary" aria-hidden />
-                      <span>
-                        {formatShiftCount(stats.total)} no mês · toque em um dia para adicionar
-                      </span>
-                    </CardDescription>
-                  </div>
-                  <Button
-                    type="button"
-                    size="sm"
-                    className="shrink-0 rounded-xl shadow-soft"
-                    onClick={() => openNewShift(todayISO())}
-                  >
-                    <Plus className="size-4" />
-                    Novo plantão
-                  </Button>
-                </div>
+                <CardTitle>Calendário</CardTitle>
+                <CardDescription>
+                  {formatShiftCount(stats.total)} em {formatMonth(selectedMonth)}
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
+                <div
+                  className="flex items-center gap-3 rounded-xl border border-dashed border-primary/40 bg-rose-50/80 p-3 text-left"
+                  role="note"
+                >
+                  <span
+                    className="flex size-9 shrink-0 items-center justify-center rounded-full text-primary-foreground shadow-brand"
+                    style={{ background: "var(--gradient-brand)" }}
+                  >
+                    <Plus className="size-5" aria-hidden />
+                  </span>
+                  <p className="text-xs font-semibold text-foreground sm:text-sm">
+                    <span className="block text-[10px] font-bold uppercase tracking-wide text-primary">
+                      Como adicionar
+                    </span>
+                    Toque em qualquer dia do calendário abaixo para registrar um plantão.
+                  </p>
+                </div>
                 <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-muted-foreground">
                   {["seg", "ter", "qua", "qui", "sex", "sáb", "dom"].map((day) => (
                     <span key={day}>{day}</span>
@@ -1952,11 +1955,11 @@ function App() {
                             : `Dia ${day.label} — adicionar plantão`
                         }
                         className={cn(
-                          "group relative min-h-14 rounded-lg border p-1.5 text-left transition-colors lg:min-h-20 lg:p-2",
+                          "group relative min-h-16 cursor-pointer rounded-lg border p-1.5 text-left transition-all hover:-translate-y-0.5 hover:shadow-md lg:min-h-20 lg:p-2",
                           dayShifts.length > 0
-                            ? "border-rose-200 bg-rose-50/90"
-                            : "border-dashed border-rose-100 bg-white hover:border-rose-300 hover:bg-rose-50",
-                          isToday && "border-solid border-primary",
+                            ? "border-rose-200 bg-rose-50/90 hover:border-rose-300"
+                            : "border-dashed border-rose-200 bg-white hover:border-primary hover:bg-rose-50",
+                          isToday && "border-solid border-primary ring-1 ring-primary/30",
                         )}
                         onClick={() => openNewShift(day.iso)}
                       >
@@ -1969,10 +1972,12 @@ function App() {
                           {day.label}
                         </span>
                         {dayShifts.length === 0 ? (
-                          <Plus
-                            className="pointer-events-none absolute bottom-1 right-1 size-3 text-rose-300 opacity-60 transition-opacity group-hover:opacity-100 lg:size-3.5"
+                          <span
+                            className="pointer-events-none absolute bottom-1 right-1 inline-flex size-5 items-center justify-center rounded-full bg-rose-100 text-primary opacity-80 transition-all group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground group-hover:opacity-100 lg:size-6"
                             aria-hidden
-                          />
+                          >
+                            <Plus className="size-3 lg:size-3.5" strokeWidth={3} />
+                          </span>
                         ) : null}
                         <div className="mt-1 flex min-h-6 flex-wrap items-start gap-1">
                           {dayShifts.slice(0, 2).map((shift) => {
@@ -2113,17 +2118,18 @@ function App() {
                   className="flex w-full items-center gap-3 rounded-xl border border-primary/30 bg-gradient-to-r from-rose-50 to-white p-3 text-left text-sm text-foreground shadow-sm transition-colors hover:border-primary/50 hover:bg-rose-50"
                 >
                   <span
-                    className="flex size-9 shrink-0 items-center justify-center rounded-full text-primary-foreground shadow-brand"
+                    className="flex size-9 shrink-0 items-center justify-center rounded-full text-lg shadow-brand"
                     style={{ background: "var(--gradient-brand)" }}
+                    aria-hidden
                   >
-                    <User className="size-4" />
+                    🦁
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block text-[10px] font-bold uppercase tracking-wide text-primary">
                       Declaração anual
                     </span>
                     <span className="block text-xs font-medium text-muted-foreground">
-                      Veja os rendimentos totais do ano no <span className="font-semibold text-foreground">Perfil</span>.
+                      Para ver os rendimentos anuais, abra o <span className="font-semibold text-foreground">Perfil</span>.
                     </span>
                   </span>
                   <ChevronRight className="size-4 shrink-0 text-primary" />
@@ -2243,10 +2249,34 @@ function App() {
                 Novo plantão
               </Button>
             </section>
+            <button
+              type="button"
+              onClick={() => setProfileOpen(true)}
+              className="flex w-full items-center gap-3 rounded-2xl border border-primary/30 bg-gradient-to-r from-rose-50 to-white p-3 text-left text-sm text-foreground shadow-sm transition-colors hover:border-primary/50 hover:bg-rose-50"
+            >
+              <span
+                className="flex size-9 shrink-0 items-center justify-center rounded-full text-lg shadow-brand"
+                style={{ background: "var(--gradient-brand)" }}
+                aria-hidden
+              >
+                🦁
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[10px] font-bold uppercase tracking-wide text-primary">
+                  Declaração anual
+                </span>
+                <span className="block text-xs font-medium text-muted-foreground">
+                  Para ver os rendimentos anuais, abra o <span className="font-semibold text-foreground">Perfil</span>.
+                </span>
+              </span>
+              <ChevronRight className="size-4 shrink-0 text-primary" />
+            </button>
             <Card className="overflow-hidden border-[#F3D5DC] bg-white shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#F3D5DC] p-4">
                 <div>
-                  <h2 className="text-base font-semibold">Plantões</h2>
+                  <h2 className="text-base font-semibold">
+                    Plantões {formatMonth(selectedMonth).split(" ")[0]}
+                  </h2>
                   <p
                     className="text-sm text-muted-foreground"
                     aria-live="polite"
@@ -2451,9 +2481,28 @@ function App() {
               </CardContent>
             </Card>
 
-            <p className="rounded-2xl border border-[#F3D5DC] bg-rose-50/60 p-3 text-center text-xs text-muted-foreground lg:col-span-2">
-              Para exportar o ano completo, abra o <span className="font-semibold text-primary">Perfil</span>.
-            </p>
+            <button
+              type="button"
+              onClick={() => setProfileOpen(true)}
+              className="flex w-full items-center gap-3 rounded-2xl border border-primary/30 bg-gradient-to-r from-rose-50 to-white p-3 text-left text-sm text-foreground shadow-sm transition-colors hover:border-primary/50 hover:bg-rose-50 lg:col-span-2"
+            >
+              <span
+                className="flex size-9 shrink-0 items-center justify-center rounded-full text-lg shadow-brand"
+                style={{ background: "var(--gradient-brand)" }}
+                aria-hidden
+              >
+                🦁
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[10px] font-bold uppercase tracking-wide text-primary">
+                  Declaração anual
+                </span>
+                <span className="block text-xs font-medium text-muted-foreground">
+                  Para ver os rendimentos anuais, abra o <span className="font-semibold text-foreground">Perfil</span>.
+                </span>
+              </span>
+              <ChevronRight className="size-4 shrink-0 text-primary" />
+            </button>
           </TabsContent>
 
         </Tabs>
