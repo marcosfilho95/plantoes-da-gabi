@@ -61,6 +61,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { isSupabaseConfigured, supabase } from "@/lib/supabase"
 import { cn } from "@/lib/utils"
 import { SiteFooter, GoogleLogo } from "@/components/site-footer"
+import {
+  downloadShiftsCsv,
+  validateExportYear,
+  type PersonScope,
+} from "@/lib/csv"
 
 const STORAGE_KEY = "plantoes-gabi:v1"
 const LOCATIONS_STORAGE_KEY = "plantoes-gabi:locations:v1"
@@ -122,6 +127,7 @@ type ShiftMeta = (typeof SHIFT_TYPES)[number]
 type ShiftCode = ShiftMeta["code"]
 type PaymentFilter = "todos" | "pendentes" | "recebidos"
 type ShiftFilter = "todos" | ShiftCode
+type PersonFilter = "todos" | "PF" | "PJ"
 type TabId = "agenda" | "plantoes" | "resumo"
 type PaymentStatus = "received" | "pending" | "overdue"
 
@@ -133,6 +139,7 @@ type Shift = {
   paid: boolean
   amount?: number
   notes?: string
+  personType: "PF" | "PJ"
   createdAt: string
   updatedAt?: string
 }
@@ -144,6 +151,7 @@ type ShiftForm = {
   paid: boolean
   amount: string
   notes: string
+  personType: "PF" | "PJ"
 }
 
 type AuthSession = {
@@ -380,6 +388,8 @@ function sanitizeShifts(value: unknown): Shift[] {
     const paid = Boolean(candidate.paid)
     const amount = Number(candidate.amount)
     const notes = typeof candidate.notes === "string" ? candidate.notes : ""
+    const personType: "PF" | "PJ" =
+      candidate.personType === "PJ" ? "PJ" : "PF"
 
     return [
       {
@@ -391,6 +401,7 @@ function sanitizeShifts(value: unknown): Shift[] {
         paid,
         amount: Number.isFinite(amount) && amount > 0 ? amount : undefined,
         notes,
+        personType,
         createdAt:
           typeof candidate.createdAt === "string"
             ? candidate.createdAt
@@ -555,6 +566,7 @@ function createEmptyForm(date = todayISO()): ShiftForm {
     paid: false,
     amount: "",
     notes: "",
+    personType: "PF",
   }
 }
 
@@ -582,47 +594,42 @@ function buildCalendar(monthKey: string) {
   return days
 }
 
-function exportShiftsAsCsv(shifts: Shift[], monthKey: string) {
-  const header = [
-    "data",
-    "local",
-    "turno",
-    "horario",
-    "recebido",
-    "valor",
-    "observacoes",
-  ]
-  const rows = shifts.map((shift) => {
-    const meta = SHIFT_BY_CODE[shift.kind]
-
-    return [
-      shift.date,
-      shift.location,
-      shift.kind,
-      meta.period,
-      shift.paid ? "sim" : "nao",
-      shift.amount ? String(shift.amount).replace(".", ",") : "",
-      shift.notes ?? "",
-    ]
-  })
-  const csv = [header, ...rows]
-    .map((row) =>
-      row
-        .map((cell) => `"${String(cell).replaceAll('"', '""')}"`)
-        .join(";"),
-    )
-    .join("\n")
-  const blob = new Blob([`\ufeff${csv}`], {
-    type: "text/csv;charset=utf-8",
-  })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement("a")
-
-  link.href = url
-  link.download = `plantoes-gabi-${monthKey}.csv`
-  link.click()
-  URL.revokeObjectURL(url)
+function shiftsForCsv(shifts: Shift[]) {
+  return shifts.map((shift) => ({
+    date: shift.date,
+    location: shift.location,
+    kind: shift.kind,
+    period: SHIFT_BY_CODE[shift.kind]?.period,
+    paid: shift.paid,
+    amount: shift.amount,
+    notes: shift.notes,
+    personType: shift.personType,
+  }))
 }
+
+function exportMonthCsv(
+  shifts: Shift[],
+  monthKey: string,
+  personScope: PersonScope = "todos",
+) {
+  downloadShiftsCsv(shiftsForCsv(shifts), {
+    label: monthKey,
+    personScope,
+  })
+}
+
+function exportYearCsv(
+  shifts: Shift[],
+  year: number,
+  personScope: PersonScope = "todos",
+) {
+  const yearShifts = shifts.filter((shift) => shift.date.startsWith(`${year}-`))
+  downloadShiftsCsv(shiftsForCsv(yearShifts), {
+    label: String(year),
+    personScope,
+  })
+}
+
 
 function MetricCard({
   accentClassName,
@@ -749,6 +756,18 @@ function ShiftCard({
             <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
               {meta.hours}h
             </span>
+            <span
+              className={cn(
+                "rounded-full border px-2.5 py-1 text-xs font-semibold",
+                (shift.personType ?? "PF") === "PF"
+                  ? "border-amber-200 bg-amber-50 text-amber-800"
+                  : "border-teal-200 bg-teal-50 text-teal-800",
+              )}
+            >
+              {(shift.personType ?? "PF") === "PF"
+                ? "Pessoa Física"
+                : "Pessoa Jurídica"}
+            </span>
             {shift.amount ? (
               <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
                 {formatCurrency(shift.amount)}
@@ -854,11 +873,16 @@ function App() {
   const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>("todos")
   const [locationFilter, setLocationFilter] = useState("todos")
   const [shiftFilter, setShiftFilter] = useState<ShiftFilter>("todos")
+  const [personFilter, setPersonFilter] = useState<PersonFilter>("todos")
   const [activeTab, setActiveTab] = useState<TabId>("agenda")
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<ShiftForm>(() => createEmptyForm())
   const [newLocationName, setNewLocationName] = useState("")
+  const [yearExportInput, setYearExportInput] = useState(() =>
+    String(new Date().getFullYear()),
+  )
+  const [yearExportError, setYearExportError] = useState("")
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(shifts))
@@ -1031,10 +1055,12 @@ function App() {
       const matchesLocation =
         locationFilter === "todos" || shift.location === locationFilter
       const matchesShift = shiftFilter === "todos" || shift.kind === shiftFilter
+      const matchesPerson =
+        personFilter === "todos" || (shift.personType ?? "PF") === personFilter
 
-      return matchesPayment && matchesLocation && matchesShift
+      return matchesPayment && matchesLocation && matchesShift && matchesPerson
     })
-  }, [locationFilter, monthShifts, paymentFilter, shiftFilter])
+  }, [locationFilter, monthShifts, paymentFilter, personFilter, shiftFilter])
 
   const groupedByDate = useMemo(() => {
     const groups = new Map<string, Shift[]>()
@@ -1264,6 +1290,7 @@ function App() {
       paid: shift.paid,
       amount: shift.amount ? String(shift.amount).replace(".", ",") : "",
       notes: shift.notes ?? "",
+      personType: shift.personType ?? "PF",
     })
     setNewLocationName("")
     setDialogOpen(true)
@@ -1302,6 +1329,7 @@ function App() {
       paid: form.paid,
       amount: parseAmount(form.amount),
       notes: form.notes.trim(),
+      personType: form.personType,
     }
 
     setLocations((current) => mergeLocations(current, [payload.location]))
@@ -1788,9 +1816,9 @@ function App() {
         <section className="lg:col-span-2" aria-label="Resumo mensal">
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
             <MetricCard
-              label="Plantões"
-              value={String(stats.total)}
-              detail={`${stats.paid} recebido${stats.paid === 1 ? "" : "s"} no mês`}
+              label="Total geral"
+              value={formatCurrency(stats.totalAmount)}
+              detail={formatShiftCount(stats.total)}
               icon={<CalendarDays className="size-5" />}
             />
             <MetricCard
@@ -1939,24 +1967,50 @@ function App() {
 
           <TabsContent value="plantoes" className="space-y-4">
             <Card className="overflow-hidden border-[#F3D5DC] bg-white shadow-sm">
-              <div className="flex items-center justify-between gap-3 border-b border-[#F3D5DC] p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#F3D5DC] p-4">
                 <div>
                   <h2 className="text-base font-semibold">Plantões</h2>
-                  <p className="text-sm text-muted-foreground">
+                  <p
+                    className="text-sm text-muted-foreground"
+                    aria-live="polite"
+                  >
                     {formatShiftCount(filteredShifts.length)} nos filtros
                   </p>
                 </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={filteredShifts.length === 0}
-                  onClick={() => exportShiftsAsCsv(filteredShifts, selectedMonth)}
+                <div
+                  className="flex flex-wrap items-center gap-2"
+                  role="group"
+                  aria-label="Exportar plantões filtrados"
                 >
-                  <Download className="size-4" />
-                  CSV
-                </Button>
+                  {(["todos", "PF", "PJ"] as const).map((scope) => {
+                    const subset =
+                      scope === "todos"
+                        ? filteredShifts
+                        : filteredShifts.filter(
+                            (shift) => (shift.personType ?? "PF") === scope,
+                          )
+                    const label =
+                      scope === "todos" ? "Todos" : scope
+                    return (
+                      <Button
+                        key={scope}
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={subset.length === 0}
+                        aria-label={`Exportar CSV ${label} (${subset.length} plantões)`}
+                        onClick={() =>
+                          exportMonthCsv(subset, selectedMonth, scope)
+                        }
+                      >
+                        <Download className="size-4" />
+                        {label}
+                      </Button>
+                    )
+                  })}
+                </div>
               </div>
+
 
               {groupedByDate.length > 0 ? (
                 <div className="space-y-5 bg-[#FFF4F6] p-4">
@@ -2119,7 +2173,75 @@ function App() {
                 )}
               </CardContent>
             </Card>
+
+            <Card className="border-[#F3D5DC] bg-white shadow-sm lg:col-span-2">
+              <CardHeader>
+                <CardTitle>Exportar ano completo</CardTitle>
+                <CardDescription>
+                  Gera um CSV com todos os plantões do ano informado.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex flex-wrap items-end gap-3">
+                  <div className="grid gap-1.5">
+                    <Label
+                      htmlFor="year-export-input"
+                      className="text-xs font-semibold uppercase text-muted-foreground"
+                    >
+                      Ano
+                    </Label>
+                    <Input
+                      id="year-export-input"
+                      inputMode="numeric"
+                      maxLength={4}
+                      className="w-28"
+                      value={yearExportInput}
+                      onChange={(event) => {
+                        setYearExportInput(event.target.value.replace(/\D/g, ""))
+                        setYearExportError("")
+                      }}
+                    />
+                  </div>
+                  {(["todos", "PF", "PJ"] as const).map((scope) => (
+                    <Button
+                      key={scope}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      aria-label={`Exportar ano ${scope === "todos" ? "completo" : scope}`}
+                      onClick={() => {
+                        const result = validateExportYear(yearExportInput)
+                        if (!result.ok) {
+                          setYearExportError(result.message)
+                          return
+                        }
+                        setYearExportError("")
+                        const yearShifts =
+                          scope === "todos"
+                            ? shifts
+                            : shifts.filter(
+                                (shift) => (shift.personType ?? "PF") === scope,
+                              )
+                        exportYearCsv(yearShifts, result.year, scope)
+                      }}
+                    >
+                      <Download className="size-4" />
+                      {scope === "todos" ? "Todos" : scope}
+                    </Button>
+                  ))}
+                </div>
+                {yearExportError ? (
+                  <p
+                    role="alert"
+                    className="text-sm font-medium text-red-700"
+                  >
+                    {yearExportError}
+                  </p>
+                ) : null}
+              </CardContent>
+            </Card>
           </TabsContent>
+
         </Tabs>
 
         <section className="lg:col-start-2 lg:row-start-2" aria-label="Filtros">
@@ -2143,6 +2265,33 @@ function App() {
                       key={option.value}
                       active={paymentFilter === option.value}
                       onClick={() => setPaymentFilter(option.value as PaymentFilter)}
+                    >
+                      {option.label}
+                    </FilterChip>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold uppercase text-muted-foreground">
+                  Tipo para ir
+                </Label>
+                <div
+                  className="flex gap-2 overflow-x-auto pb-1"
+                  role="group"
+                  aria-label="Filtrar por tipo de pessoa"
+                >
+                  {(
+                    [
+                      { value: "todos", label: "Todos" },
+                      { value: "PF", label: "PF" },
+                      { value: "PJ", label: "PJ" },
+                    ] as const
+                  ).map((option) => (
+                    <FilterChip
+                      key={option.value}
+                      active={personFilter === option.value}
+                      onClick={() => setPersonFilter(option.value)}
                     >
                       {option.label}
                     </FilterChip>
@@ -2318,6 +2467,39 @@ function App() {
                 })}
               </div>
             </div>
+
+            <div className="grid gap-2">
+              <Label>Tipo para ir</Label>
+              <div
+                className="grid grid-cols-2 gap-2"
+                role="radiogroup"
+                aria-label="Tipo para ir"
+              >
+                {(["PF", "PJ"] as const).map((type) => {
+                  const selected = form.personType === type
+                  return (
+                    <button
+                      key={type}
+                      type="button"
+                      role="radio"
+                      aria-checked={selected}
+                      className={cn(
+                        "rounded-lg border p-3 text-sm font-semibold transition-colors",
+                        selected
+                          ? "border-primary bg-rose-50 text-primary shadow-sm"
+                          : "border-border bg-white hover:border-rose-200 hover:bg-rose-50",
+                      )}
+                      onClick={() =>
+                        setForm((current) => ({ ...current, personType: type }))
+                      }
+                    >
+                      {type === "PF" ? "Pessoa Física" : "Pessoa Jurídica"}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
 
             <div className="grid grid-cols-2 gap-3">
               <div className="grid gap-2">
