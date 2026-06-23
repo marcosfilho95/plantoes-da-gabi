@@ -666,7 +666,7 @@ function MetricCard({
   value: string
 }) {
   return (
-    <Card className="h-full border-border bg-white shadow-sm">
+    <Card className="h-full border-border bg-card shadow-sm">
       <CardContent className="grid min-h-24 grid-cols-[auto_minmax(0,1fr)] items-center gap-2 p-3 sm:gap-3 sm:p-4">
         <div
           className={cn(
@@ -704,7 +704,7 @@ function FilterChip({
         "min-h-10 rounded-full border px-4 text-sm font-semibold transition-colors",
         active
           ? "border-primary bg-primary text-primary-foreground shadow-sm"
-          : "border-border bg-white text-muted-foreground hover:border-primary/40 hover:text-foreground",
+          : "border-border bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground",
       )}
       onClick={onClick}
     >
@@ -742,7 +742,7 @@ function ShiftCard({
   const meta = SHIFT_BY_CODE[shift.kind]
 
   return (
-    <Card className="overflow-hidden border-border bg-white shadow-sm">
+    <Card className="overflow-hidden border-border bg-card shadow-sm">
       <CardContent className="p-4">
         <div className="space-y-3">
           <div className="flex items-start justify-between gap-3">
@@ -1484,11 +1484,11 @@ function App() {
               <img
                 src="/logo-plantoes-gabi.png"
                 alt="Plantões da Gabi"
-                className="h-44 w-auto rounded-3xl bg-white object-contain p-2 shadow-elevated ring-1 ring-border sm:h-52"
+                className="h-44 w-auto rounded-3xl bg-card object-contain p-2 shadow-elevated ring-1 ring-border sm:h-52"
               />
             </div>
 
-            <Card className="overflow-hidden rounded-[1.75rem] border-border/80 bg-white/95 shadow-elevated backdrop-blur-xl">
+            <Card className="overflow-hidden rounded-[1.75rem] border-border/80 bg-card/95 shadow-elevated backdrop-blur-xl">
               <CardContent
                 key={authMode}
                 className="auth-panel px-7 pb-7 pt-8 sm:px-9"
@@ -1531,7 +1531,7 @@ function App() {
                         autoCapitalize="none"
                         inputMode={authMode === "login" ? "text" : "email"}
                         spellCheck={false}
-                        className="h-12 rounded-xl border-border bg-secondary/40 px-4 text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/40 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-primary/15"
+                        className="h-12 rounded-xl border-border bg-secondary/40 px-4 text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/40 focus-visible:bg-card focus-visible:ring-4 focus-visible:ring-primary/15"
                         value={authForm.email}
                         onPointerDown={() => emailInputRef.current?.focus()}
                         onTouchStart={() => emailInputRef.current?.focus()}
@@ -1559,7 +1559,7 @@ function App() {
                         autoCapitalize="none"
                         inputMode="text"
                         spellCheck={false}
-                        className="h-12 rounded-xl border-border bg-secondary/40 px-4 text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/40 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-primary/15"
+                        className="h-12 rounded-xl border-border bg-secondary/40 px-4 text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/40 focus-visible:bg-card focus-visible:ring-4 focus-visible:ring-primary/15"
                         placeholder="gabi"
                         value={authForm.username}
                         onChange={(event) =>
@@ -1591,7 +1591,7 @@ function App() {
                           }
                           autoCapitalize="none"
                           spellCheck={false}
-                          className="h-12 rounded-xl border-border bg-secondary/40 px-4 pr-12 text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/40 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-primary/15"
+                          className="h-12 rounded-xl border-border bg-secondary/40 px-4 pr-12 text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/40 focus-visible:bg-card focus-visible:ring-4 focus-visible:ring-primary/15"
                           value={authForm.password}
                           onPointerDown={() => passwordInputRef.current?.focus()}
                           onTouchStart={() => passwordInputRef.current?.focus()}
@@ -1632,7 +1632,7 @@ function App() {
                           autoComplete="new-password"
                           autoCapitalize="none"
                           spellCheck={false}
-                          className="h-12 rounded-xl border-border bg-secondary/40 px-4 pr-12 text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/40 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-primary/15"
+                          className="h-12 rounded-xl border-border bg-secondary/40 px-4 pr-12 text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/40 focus-visible:bg-card focus-visible:ring-4 focus-visible:ring-primary/15"
                           value={authForm.confirmPassword}
                           onChange={(event) =>
                             setAuthForm((current) => ({
@@ -1718,7 +1718,7 @@ function App() {
                           )
                         }
                       }}
-                      className="flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-border bg-white text-[15px] font-semibold text-foreground shadow-sm transition-all duration-200 hover:border-border hover:bg-secondary/60 active:scale-[0.99]"
+                      className="flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-border bg-card text-[15px] font-semibold text-foreground shadow-sm transition-all duration-200 hover:border-border hover:bg-secondary/60 active:scale-[0.99]"
                     >
                       <GoogleLogo />
                       Entrar com Google
@@ -1794,7 +1794,7 @@ function App() {
           <img
             src="/logo-plantoes-gabi.png"
             alt="Plantões da Gabi"
-            className="mx-auto h-28 w-auto rounded-3xl bg-white object-contain p-2 shadow-elevated ring-1 ring-border"
+            className="mx-auto h-28 w-auto rounded-3xl bg-card object-contain p-2 shadow-elevated ring-1 ring-border"
           />
           <p className="text-sm font-semibold text-muted-foreground">
             Sincronizando plantões...
@@ -1810,9 +1810,9 @@ function App() {
 
   return (
     <div className="min-h-dvh bg-gradient-canvas text-foreground">
-      <header className="safe-top sticky top-0 z-30 border-b border-border bg-white/90 backdrop-blur-xl">
+      <header className="safe-top sticky top-0 z-30 border-b border-border bg-card/90 backdrop-blur-xl">
         <div className="mx-auto grid w-full max-w-[480px] grid-cols-1 justify-items-center gap-3 px-4 pb-3 sm:grid-cols-[1fr_auto_1fr] sm:items-center lg:max-w-[1180px]">
-          <div className="min-w-0 justify-self-center overflow-hidden rounded-xl bg-white sm:justify-self-start lg:w-fit">
+          <div className="min-w-0 justify-self-center overflow-hidden rounded-xl bg-card sm:justify-self-start lg:w-fit">
             <img
               src="/logo-plantoes-gabi.png"
               alt="Plantões da Gabi"
@@ -1821,12 +1821,12 @@ function App() {
           </div>
 
           <div className="w-[240px] max-w-full justify-self-center sm:w-[280px]">
-            <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-border bg-white p-2 shadow-sm">
+            <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-border bg-card p-2 shadow-sm">
               <Button
                 type="button"
                 variant="outline"
                 size="icon"
-                className="size-10 bg-white"
+                className="size-10 bg-card"
                 onClick={() => setSelectedMonth((month) => addMonths(month, -1))}
                 aria-label="Mês anterior"
               >
@@ -1844,7 +1844,7 @@ function App() {
                 type="button"
                 variant="outline"
                 size="icon"
-                className="size-10 bg-white"
+                className="size-10 bg-card"
                 onClick={() => setSelectedMonth((month) => addMonths(month, 1))}
                 aria-label="Próximo mês"
               >
@@ -1868,7 +1868,7 @@ function App() {
               onClick={() => setProfileOpen(true)}
               aria-label="Abrir meu perfil"
               title="Abrir meu perfil"
-              className="group inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border bg-white px-4 text-sm font-semibold text-primary shadow-sm transition-all hover:-translate-y-0.5 hover:bg-secondary hover:shadow-md"
+              className="group inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-semibold text-primary shadow-sm transition-all hover:-translate-y-0.5 hover:bg-secondary hover:shadow-md"
             >
               <User className="size-4" />
               <span>{session.firstName ? `Olá, ${session.firstName}` : "Perfil"}</span>
@@ -1879,7 +1879,7 @@ function App() {
                 type="button"
                 onClick={handleLogout}
                 aria-label="Sair da conta"
-                className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-lg border border-border bg-white/70 px-3 text-xs font-semibold text-muted-foreground transition-colors hover:bg-secondary hover:text-primary"
+                className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-lg border border-border bg-card/70 px-3 text-xs font-semibold text-muted-foreground transition-colors hover:bg-secondary hover:text-primary"
               >
                 <LogOut className="size-3.5" />
                 Sair
@@ -1914,7 +1914,7 @@ function App() {
 
           <TabsContent value="agenda" className="space-y-4">
 
-            <Card className="border-border bg-white shadow-sm">
+            <Card className="border-border bg-card shadow-sm">
               <CardHeader className="pb-3">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -1970,7 +1970,7 @@ function App() {
                           "group relative min-h-16 cursor-pointer rounded-lg border p-1.5 text-left transition-all hover:-translate-y-0.5 hover:shadow-md lg:min-h-20 lg:p-2",
                           dayShifts.length > 0
                             ? "border-border bg-secondary/90 hover:border-primary/40"
-                            : "border-dashed border-border bg-white hover:border-primary hover:bg-secondary",
+                            : "border-dashed border-border bg-card hover:border-primary hover:bg-secondary",
                           isToday && "border-solid border-primary ring-1 ring-primary/30",
                         )}
                         onClick={() => openNewShift(day.iso)}
@@ -2008,7 +2008,7 @@ function App() {
                             )
                           })}
                           {dayShifts.length > 2 ? (
-                            <span className="rounded bg-white px-1.5 py-0.5 text-[10px] font-bold text-muted-foreground shadow-sm">
+                            <span className="rounded bg-card px-1.5 py-0.5 text-[10px] font-bold text-muted-foreground shadow-sm">
                               +{dayShifts.length - 2}
                             </span>
                           ) : null}
@@ -2045,7 +2045,7 @@ function App() {
               </CardContent>
             </Card>
 
-            <Card className="border-border bg-white shadow-sm">
+            <Card className="border-border bg-card shadow-sm">
               <CardHeader className="pb-3">
                 <CardTitle>Resumo fiscal</CardTitle>
                 <CardDescription className="capitalize">
@@ -2127,7 +2127,7 @@ function App() {
                 <button
                   type="button"
                   onClick={() => setProfileOpen(true)}
-                  className="flex w-full items-center gap-3 rounded-xl border border-primary/30 bg-gradient-to-r from-secondary to-white p-3 text-left text-sm text-foreground shadow-sm transition-colors hover:border-primary/50 hover:bg-secondary"
+                  className="flex w-full items-center gap-3 rounded-xl border border-primary/30 bg-gradient-to-r from-secondary to-card p-3 text-left text-sm text-foreground shadow-sm transition-colors hover:border-primary/50 hover:bg-secondary"
                 >
                   <span
                     className="flex size-9 shrink-0 items-center justify-center rounded-full text-lg shadow-brand"
@@ -2158,7 +2158,7 @@ function App() {
                 <Filter className="size-4 text-muted-foreground" />
                 Filtros
               </div>
-              <Card className="border-border bg-white shadow-sm">
+              <Card className="border-border bg-card shadow-sm">
                 <CardContent className="space-y-4 p-4">
                   <div className="space-y-2">
                     <Label className="text-xs font-semibold uppercase text-muted-foreground">
@@ -2264,7 +2264,7 @@ function App() {
             <button
               type="button"
               onClick={() => setProfileOpen(true)}
-              className="flex w-full items-center gap-3 rounded-2xl border border-primary/30 bg-gradient-to-r from-secondary to-white p-3 text-left text-sm text-foreground shadow-sm transition-colors hover:border-primary/50 hover:bg-secondary"
+              className="flex w-full items-center gap-3 rounded-2xl border border-primary/30 bg-gradient-to-r from-secondary to-card p-3 text-left text-sm text-foreground shadow-sm transition-colors hover:border-primary/50 hover:bg-secondary"
             >
               <span
                 className="flex size-9 shrink-0 items-center justify-center rounded-full text-lg shadow-brand"
@@ -2283,7 +2283,7 @@ function App() {
               </span>
               <ChevronRight className="size-4 shrink-0 text-primary" />
             </button>
-            <Card className="overflow-hidden border-border bg-white shadow-sm">
+            <Card className="overflow-hidden border-border bg-card shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4">
                 <div>
                   <h2 className="text-base font-semibold">
@@ -2344,7 +2344,7 @@ function App() {
                             {formatShiftCount(group.shifts.length)}
                           </p>
                         </div>
-                        <div className="flex size-11 shrink-0 flex-col items-center justify-center rounded-lg bg-white text-primary shadow-sm">
+                        <div className="flex size-11 shrink-0 flex-col items-center justify-center rounded-lg bg-card text-primary shadow-sm">
                           <span className="text-xs font-semibold">
                             {formatWeekday(group.date)}
                           </span>
@@ -2412,7 +2412,7 @@ function App() {
               </div>
             ) : null}
 
-            <Card className="border-border bg-white shadow-sm">
+            <Card className="border-border bg-card shadow-sm">
               <CardHeader>
                 <CardTitle>Por local</CardTitle>
                 <CardDescription>
@@ -2438,7 +2438,7 @@ function App() {
               </CardContent>
             </Card>
 
-            <Card className="border-border bg-white shadow-sm">
+            <Card className="border-border bg-card shadow-sm">
               <CardHeader>
                 <CardTitle>Por turno</CardTitle>
                 <CardDescription>
@@ -2496,7 +2496,7 @@ function App() {
             <button
               type="button"
               onClick={() => setProfileOpen(true)}
-              className="flex w-full items-center gap-3 rounded-2xl border border-primary/30 bg-gradient-to-r from-secondary to-white p-3 text-left text-sm text-foreground shadow-sm transition-colors hover:border-primary/50 hover:bg-secondary lg:col-span-2"
+              className="flex w-full items-center gap-3 rounded-2xl border border-primary/30 bg-gradient-to-r from-secondary to-card p-3 text-left text-sm text-foreground shadow-sm transition-colors hover:border-primary/50 hover:bg-secondary lg:col-span-2"
             >
               <span
                 className="flex size-9 shrink-0 items-center justify-center rounded-full text-lg shadow-brand"
@@ -2547,7 +2547,7 @@ function App() {
             </div>
 
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <div className="rounded-xl border border-border bg-white px-3 py-2.5">
+              <div className="rounded-xl border border-border bg-card px-3 py-2.5">
                 <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                   Nome
                 </p>
@@ -2555,7 +2555,7 @@ function App() {
                   {session.fullName || session.firstName}
                 </p>
               </div>
-              <div className="rounded-xl border border-border bg-white px-3 py-2.5">
+              <div className="rounded-xl border border-border bg-card px-3 py-2.5">
                 <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                   E-mail
                 </p>
@@ -2563,7 +2563,7 @@ function App() {
                   {session.email}
                 </p>
               </div>
-              <div className="rounded-xl border border-border bg-white px-3 py-2.5">
+              <div className="rounded-xl border border-border bg-card px-3 py-2.5">
                 <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                   Plantões
                 </p>
@@ -2573,7 +2573,7 @@ function App() {
               </div>
             </div>
 
-            <div className="space-y-3 rounded-2xl border border-border bg-white p-4 shadow-sm">
+            <div className="space-y-3 rounded-2xl border border-border bg-card p-4 shadow-sm">
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
@@ -2826,7 +2826,7 @@ function App() {
                         "rounded-lg border p-3 text-left transition-colors",
                         selected
                           ? "border-primary bg-secondary text-primary shadow-sm"
-                          : "border-border bg-white hover:border-border hover:bg-secondary",
+                          : "border-border bg-card hover:border-border hover:bg-secondary",
                       )}
                       onClick={() =>
                         setForm((current) => ({
@@ -2867,7 +2867,7 @@ function App() {
                         "rounded-lg border p-3 text-sm font-semibold transition-colors",
                         selected
                           ? "border-primary bg-secondary text-primary shadow-sm"
-                          : "border-border bg-white hover:border-border hover:bg-secondary",
+                          : "border-border bg-card hover:border-border hover:bg-secondary",
                       )}
                       onClick={() =>
                         setForm((current) => ({ ...current, personType: type }))
