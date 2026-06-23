@@ -159,6 +159,8 @@ type AuthSession = {
   email: string
   token: string
   userId: string
+  fullName: string
+  firstName: string
 }
 
 type AuthMode = "login" | "signup" | "recover" | "update-password"
