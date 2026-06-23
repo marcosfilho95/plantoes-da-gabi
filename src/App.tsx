@@ -66,6 +66,13 @@ import { cn } from "@/lib/utils"
 import { SiteFooter, GoogleLogo } from "@/components/site-footer"
 import { ThemeToggle, useTheme } from "@/components/theme-toggle"
 import { WelcomeTutorial, hasSeenTutorial } from "@/components/welcome-tutorial"
+import { FeedbackCard } from "@/components/feedback-card"
+import {
+  getTitlePref,
+  resolveTitle,
+  setTitlePref,
+  type TitlePref,
+} from "@/lib/title"
 import {
   downloadShiftsCsv,
   type PersonScope,
