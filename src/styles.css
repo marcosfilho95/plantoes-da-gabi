@@ -284,7 +284,7 @@
   }
 }
 
-/* Theme transition — circular blob reveal via View Transitions API */
+/* Theme transition — slow dawn/dusk reveal via View Transitions API */
 @supports (view-transition-name: root) {
   ::view-transition-old(root),
   ::view-transition-new(root) {
@@ -293,17 +293,31 @@
   }
   ::view-transition-old(root) {
     z-index: 1;
+    animation: theme-old-fade 2200ms cubic-bezier(0.45, 0, 0.55, 1) forwards;
   }
   ::view-transition-new(root) {
     z-index: 2;
-    animation: theme-blob-reveal 720ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation: theme-blob-reveal 2200ms cubic-bezier(0.45, 0, 0.55, 1) forwards;
   }
   @keyframes theme-blob-reveal {
-    from {
+    0% {
       clip-path: circle(0% at var(--theme-x, 50%) var(--theme-y, 50%));
+      filter: blur(8px) saturate(1.15);
     }
-    to {
-      clip-path: circle(150% at var(--theme-x, 50%) var(--theme-y, 50%));
+    60% {
+      filter: blur(2px) saturate(1.05);
+    }
+    100% {
+      clip-path: circle(160% at var(--theme-x, 50%) var(--theme-y, 50%));
+      filter: blur(0) saturate(1);
+    }
+  }
+  @keyframes theme-old-fade {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0.85;
     }
   }
 }
