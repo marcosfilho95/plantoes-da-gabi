@@ -168,6 +168,7 @@ function addTo<K extends string>(
 export function buildShiftsSummary(shifts: CsvShift[]): ShiftsSummary {
   const brutoMap = new Map<string, { total: number; quantidade: number }>()
   const liquidoMap = new Map<string, { total: number; quantidade: number }>()
+  const pendenteCompMap = new Map<string, { total: number; quantidade: number }>()
   const localMap = new Map<
     string,
     { bruto: number; liquido: number; quantidade: number }
@@ -178,6 +179,7 @@ export function buildShiftsSummary(shifts: CsvShift[]): ShiftsSummary {
   >()
   let pendenteTotal = 0
   let pendenteQtd = 0
+
 
   for (const shift of shifts) {
     const bruto = shift.amount ?? 0
