@@ -2249,10 +2249,34 @@ function App() {
                 Novo plantão
               </Button>
             </section>
+            <button
+              type="button"
+              onClick={() => setProfileOpen(true)}
+              className="flex w-full items-center gap-3 rounded-2xl border border-primary/30 bg-gradient-to-r from-rose-50 to-white p-3 text-left text-sm text-foreground shadow-sm transition-colors hover:border-primary/50 hover:bg-rose-50"
+            >
+              <span
+                className="flex size-9 shrink-0 items-center justify-center rounded-full text-lg shadow-brand"
+                style={{ background: "var(--gradient-brand)" }}
+                aria-hidden
+              >
+                🦁
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[10px] font-bold uppercase tracking-wide text-primary">
+                  Declaração anual
+                </span>
+                <span className="block text-xs font-medium text-muted-foreground">
+                  Para ver os rendimentos anuais, abra o <span className="font-semibold text-foreground">Perfil</span>.
+                </span>
+              </span>
+              <ChevronRight className="size-4 shrink-0 text-primary" />
+            </button>
             <Card className="overflow-hidden border-[#F3D5DC] bg-white shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#F3D5DC] p-4">
                 <div>
-                  <h2 className="text-base font-semibold">Plantões</h2>
+                  <h2 className="text-base font-semibold">
+                    Plantões {formatMonth(selectedMonth).split(" ")[0]}
+                  </h2>
                   <p
                     className="text-sm text-muted-foreground"
                     aria-live="polite"
