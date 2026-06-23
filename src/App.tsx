@@ -899,10 +899,9 @@ function App() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<ShiftForm>(() => createEmptyForm())
   const [newLocationName, setNewLocationName] = useState("")
-  const [yearExportInput, setYearExportInput] = useState(() =>
-    String(new Date().getFullYear()),
-  )
-  const [yearExportError, setYearExportError] = useState("")
+  const [profileOpenLocal, _unused] = useState(false)
+  void profileOpenLocal
+  void _unused
   const [profileOpen, setProfileOpen] = useState(false)
   const [profileYear, setProfileYear] = useState(() => new Date().getFullYear())
 
