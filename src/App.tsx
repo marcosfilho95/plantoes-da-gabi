@@ -566,6 +566,7 @@ function createEmptyForm(date = todayISO()): ShiftForm {
     paid: false,
     amount: "",
     notes: "",
+    personType: "PF",
   }
 }
 
