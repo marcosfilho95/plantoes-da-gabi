@@ -1979,7 +1979,93 @@ function App() {
               </CardContent>
             </Card>
 
+            <Card className="border-[#F3D5DC] bg-white shadow-sm">
+              <CardHeader className="pb-3">
+                <CardTitle>Resumo fiscal</CardTitle>
+                <CardDescription className="capitalize">
+                  {formatMonth(selectedMonth)}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-3">
+                  <div className="flex items-center justify-between gap-3 rounded-xl border border-amber-200/70 bg-amber-50 px-4 py-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-bold text-amber-900">
+                        Pessoa Física
+                      </p>
+                      <p className="text-xs text-amber-800/80">
+                        {formatShiftCount(stats.pfCount)}
+                      </p>
+                    </div>
+                    <p className="shrink-0 text-base font-extrabold text-amber-900">
+                      {formatCurrency(stats.pfAmount)}
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between gap-3 rounded-xl border border-emerald-200/70 bg-emerald-50 px-4 py-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-bold text-emerald-900">
+                        Pessoa Jurídica
+                      </p>
+                      <p className="text-xs text-emerald-800/80">
+                        {formatShiftCount(stats.pjCount)}
+                      </p>
+                    </div>
+                    <p className="shrink-0 text-base font-extrabold text-emerald-900">
+                      {formatCurrency(stats.pjAmount)}
+                    </p>
+                  </div>
+                </div>
+
+                <Separator className="bg-rose-100" />
+
+                <div className="space-y-2">
+                  <Button
+                    type="button"
+                    className="w-full rounded-xl shadow-soft"
+                    onClick={() => exportMonthCsv(monthShifts, selectedMonth, "todos")}
+                    disabled={monthShifts.length === 0}
+                  >
+                    <Download className="size-4" />
+                    Exportar mês
+                  </Button>
+                  <div
+                    className="grid grid-cols-3 gap-2"
+                    role="group"
+                    aria-label="Exportar plantões do mês por tipo"
+                  >
+                    {(["todos", "PF", "PJ"] as const).map((scope) => {
+                      const subset =
+                        scope === "todos"
+                          ? monthShifts
+                          : monthShifts.filter(
+                              (shift) => (shift.personType ?? "PF") === scope,
+                            )
+                      const label = scope === "todos" ? "Todos" : scope
+                      return (
+                        <Button
+                          key={scope}
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={subset.length === 0}
+                          aria-label={`Exportar CSV ${label} (${subset.length} plantões)`}
+                          onClick={() => exportMonthCsv(subset, selectedMonth, scope)}
+                        >
+                          {label}
+                        </Button>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                <p className="rounded-lg border border-rose-100 bg-rose-50/60 p-3 text-xs text-muted-foreground">
+                  Os rendimentos totais para declaração estão no perfil do usuário.
+                </p>
+              </CardContent>
+            </Card>
+
           </TabsContent>
+
 
           <TabsContent value="plantoes" className="space-y-4">
             <section aria-label="Filtros">
