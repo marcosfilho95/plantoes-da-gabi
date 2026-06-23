@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Heart, Send, Sparkles } from "lucide-react"
+import { Heart, MessageSquareHeart, Send } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -47,24 +47,27 @@ export function FeedbackCard({
   return (
     <Card className="overflow-hidden border-border/70 bg-card shadow-sm">
       <CardHeader className="gap-2 bg-gradient-soft">
-        <div className="flex items-center gap-2 text-primary">
+        <div className="flex items-center gap-2.5 text-primary">
           <span
-            className="grid size-8 place-items-center rounded-xl text-primary-foreground shadow-brand"
+            className="grid size-9 place-items-center rounded-xl text-primary-foreground shadow-brand"
             style={{ background: "var(--gradient-brand)" }}
           >
-            <Sparkles className="size-4" aria-hidden />
+            <MessageSquareHeart className="size-4" aria-hidden />
           </span>
-          <CardTitle className="text-base font-extrabold">Sua opinião importa</CardTitle>
+          <CardTitle className="text-base font-extrabold tracking-tight">
+            Sua opinião importa
+          </CardTitle>
         </div>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          Esta aplicação é <strong className="text-foreground">100% gratuita</strong>. O
-          objetivo é simples: facilitar a vida de quem é da medicina, ajudando a
-          organizar plantões e o financeiro em um só lugar. Se tiver crítica, ideia
-          ou melhoria, manda ver — é assim que ela fica melhor.
+          Esta aplicação é{" "}
+          <strong className="text-foreground">100% gratuita</strong>. O propósito
+          é simples: facilitar a rotina de quem é da medicina, organizando
+          plantões e finanças em um só lugar. Sua crítica ou ideia é o que
+          mantém o app vivo e evoluindo.
         </p>
       </CardHeader>
 
-      <CardContent className="space-y-4 pt-5">
+      <CardContent className="space-y-5 pt-5">
         <div className="grid gap-2">
           <Label htmlFor="feedback-title">Título</Label>
           <Input
@@ -85,7 +88,7 @@ export function FeedbackCard({
             placeholder="Conte o que está funcionando bem, o que poderia melhorar ou alguma ideia nova…"
             onChange={(e) => setMessage(e.target.value)}
           />
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-right text-[11px] tabular-nums text-muted-foreground">
             {message.length}/1500
           </p>
         </div>
@@ -95,17 +98,24 @@ export function FeedbackCard({
           Enviar feedback
         </Button>
 
-        <div className="rounded-2xl border border-dashed border-border bg-secondary/40 p-4">
-          <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
-            <Heart className="size-4 text-primary" aria-hidden />
-            Fortaleça esse trabalho
-          </p>
-          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-            Como a aplicação é gratuita, o maior apoio é seguir e compartilhar o
-            trabalho do desenvolvedor nas redes — isso ajuda a manter o projeto vivo
-            e a chegar em mais pessoas da medicina.
-          </p>
-          <SiteFooter className="mt-3" />
+        <div className="rounded-2xl border border-border/70 bg-gradient-soft p-4">
+          <div className="flex items-start gap-2.5">
+            <Heart
+              className="mt-0.5 size-4 shrink-0 text-primary"
+              aria-hidden
+            />
+            <div className="min-w-0 space-y-1">
+              <p className="text-sm font-semibold text-foreground">
+                Fortaleça este trabalho
+              </p>
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                Como o app é gratuito, o maior apoio é seguir e compartilhar o
+                trabalho do desenvolvedor — isso mantém o projeto vivo e
+                ajudando mais pessoas da medicina.
+              </p>
+            </div>
+          </div>
+          <SiteFooter className="mt-4" />
         </div>
       </CardContent>
     </Card>
