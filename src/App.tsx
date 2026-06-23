@@ -65,7 +65,6 @@ import { cn } from "@/lib/utils"
 import { SiteFooter, GoogleLogo } from "@/components/site-footer"
 import {
   downloadShiftsCsv,
-  validateExportYear,
   type PersonScope,
 } from "@/lib/csv"
 
