@@ -144,6 +144,7 @@ export type ShiftsSummary = {
   brutoPorCompetencia: Array<{ mes: string; total: number; quantidade: number }>
   liquidoPorRecebimento: Array<{ mes: string; total: number; quantidade: number }>
   pendente: { total: number; quantidade: number }
+  pendentePorCompetencia: Array<{ mes: string; total: number; quantidade: number }>
   porLocal: Array<{ local: string; bruto: number; liquido: number; quantidade: number }>
   porTipoRecebimento: Array<{
     tipo: string
@@ -167,6 +168,7 @@ function addTo<K extends string>(
 export function buildShiftsSummary(shifts: CsvShift[]): ShiftsSummary {
   const brutoMap = new Map<string, { total: number; quantidade: number }>()
   const liquidoMap = new Map<string, { total: number; quantidade: number }>()
+  const pendenteCompMap = new Map<string, { total: number; quantidade: number }>()
   const localMap = new Map<
     string,
     { bruto: number; liquido: number; quantidade: number }
@@ -177,6 +179,7 @@ export function buildShiftsSummary(shifts: CsvShift[]): ShiftsSummary {
   >()
   let pendenteTotal = 0
   let pendenteQtd = 0
+
 
   for (const shift of shifts) {
     const bruto = shift.amount ?? 0
@@ -190,7 +193,9 @@ export function buildShiftsSummary(shifts: CsvShift[]): ShiftsSummary {
     } else {
       pendenteTotal += bruto
       pendenteQtd += 1
+      if (mesComp) addTo(pendenteCompMap, mesComp, bruto)
     }
+
 
     const localKey = shift.location || "(sem local)"
     const localCur = localMap.get(localKey) ?? {
@@ -230,6 +235,10 @@ export function buildShiftsSummary(shifts: CsvShift[]): ShiftsSummary {
       "mes",
     ),
     pendente: { total: pendenteTotal, quantidade: pendenteQtd },
+    pendentePorCompetencia: sortByKey(
+      Array.from(pendenteCompMap.entries()).map(([mes, v]) => ({ mes, ...v })),
+      "mes",
+    ),
     porLocal: sortByKey(
       Array.from(localMap.entries()).map(([local, v]) => ({ local, ...v })),
       "local",
@@ -274,6 +283,15 @@ export function buildSummaryCsv(shifts: CsvShift[]): string {
     formatCsvAmount(s.pendente.total),
     "",
   ])
+  for (const item of s.pendentePorCompetencia) {
+    row([
+      "total_pendente_por_mes_competencia",
+      item.mes,
+      item.quantidade,
+      formatCsvAmount(item.total),
+      "",
+    ])
+  }
   for (const item of s.porLocal) {
     row([
       "total_por_local",
