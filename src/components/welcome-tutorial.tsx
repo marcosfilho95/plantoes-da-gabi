@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Filter,
   HelpCircle,
   MousePointerClick,
   Sparkles,
