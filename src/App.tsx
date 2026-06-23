@@ -756,6 +756,18 @@ function ShiftCard({
             <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
               {meta.hours}h
             </span>
+            <span
+              className={cn(
+                "rounded-full border px-2.5 py-1 text-xs font-semibold",
+                (shift.personType ?? "PF") === "PF"
+                  ? "border-amber-200 bg-amber-50 text-amber-800"
+                  : "border-teal-200 bg-teal-50 text-teal-800",
+              )}
+            >
+              {(shift.personType ?? "PF") === "PF"
+                ? "Pessoa Física"
+                : "Pessoa Jurídica"}
+            </span>
             {shift.amount ? (
               <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
                 {formatCurrency(shift.amount)}
