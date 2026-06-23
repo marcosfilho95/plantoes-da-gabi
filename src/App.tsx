@@ -81,7 +81,7 @@ const SHIFT_TYPES = [
     period: "07:00-13:00",
     hours: 6,
     start: 7,
-    tone: "border-pink-200 bg-pink-50 text-pink-700",
+    tone: "border-border bg-secondary text-primary",
   },
   {
     code: "RM",
@@ -105,7 +105,7 @@ const SHIFT_TYPES = [
     period: "07:00-19:00",
     hours: 12,
     start: 7,
-    tone: "border-rose-200 bg-rose-50 text-rose-700",
+    tone: "border-border bg-secondary text-primary",
   },
   {
     code: "RN",
@@ -666,11 +666,11 @@ function MetricCard({
   value: string
 }) {
   return (
-    <Card className="h-full border-[#F3D5DC] bg-white shadow-sm">
+    <Card className="h-full border-border bg-white shadow-sm">
       <CardContent className="grid min-h-24 grid-cols-[auto_minmax(0,1fr)] items-center gap-2 p-3 sm:gap-3 sm:p-4">
         <div
           className={cn(
-            "flex size-9 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-primary sm:size-10",
+            "flex size-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-primary sm:size-10",
             accentClassName,
           )}
         >
@@ -704,7 +704,7 @@ function FilterChip({
         "min-h-10 rounded-full border px-4 text-sm font-semibold transition-colors",
         active
           ? "border-primary bg-primary text-primary-foreground shadow-sm"
-          : "border-[#F3D5DC] bg-white text-muted-foreground hover:border-rose-300 hover:text-foreground",
+          : "border-border bg-white text-muted-foreground hover:border-primary/40 hover:text-foreground",
       )}
       onClick={onClick}
     >
@@ -742,7 +742,7 @@ function ShiftCard({
   const meta = SHIFT_BY_CODE[shift.kind]
 
   return (
-    <Card className="overflow-hidden border-[#F3D5DC] bg-white shadow-sm">
+    <Card className="overflow-hidden border-border bg-white shadow-sm">
       <CardContent className="p-4">
         <div className="space-y-3">
           <div className="flex items-start justify-between gap-3">
@@ -762,7 +762,7 @@ function ShiftCard({
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1 rounded-full border border-rose-100 bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700">
+            <span className="inline-flex items-center gap-1 rounded-full border border-border bg-secondary px-2.5 py-1 text-xs font-semibold text-primary">
               <MapPin className="size-3" />
               {shift.location}
             </span>
@@ -797,7 +797,7 @@ function ShiftCard({
           </div>
 
           {shift.notes ? (
-            <p className="rounded-lg bg-rose-50/70 px-3 py-2 text-sm text-muted-foreground">
+            <p className="rounded-lg bg-secondary/70 px-3 py-2 text-sm text-muted-foreground">
               {shift.notes}
             </p>
           ) : null}
@@ -859,7 +859,7 @@ function ProgressRow({
           {detail ?? value}
         </span>
       </div>
-      <div className="h-2.5 overflow-hidden rounded-full bg-rose-100">
+      <div className="h-2.5 overflow-hidden rounded-full bg-secondary">
         <div
           className="h-full rounded-full bg-primary"
           style={{ width: `${percent}%` }}
@@ -1472,7 +1472,7 @@ function App() {
     return (
       <div className="relative min-h-dvh overflow-hidden bg-gradient-canvas text-foreground">
         <div className="pointer-events-none absolute -left-32 -top-32 size-[420px] rounded-full bg-gradient-brand opacity-20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-40 -right-24 size-[480px] rounded-full bg-rose-200/40 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-40 -right-24 size-[480px] rounded-full bg-secondary/40 blur-3xl" />
 
         <div className="relative mx-auto flex min-h-dvh w-full max-w-md flex-col items-center justify-center gap-6 px-5 py-10">
           {/* Form panel */}
@@ -1484,11 +1484,11 @@ function App() {
               <img
                 src="/logo-plantoes-gabi.png"
                 alt="Plantões da Gabi"
-                className="h-44 w-auto rounded-3xl bg-white object-contain p-2 shadow-elevated ring-1 ring-rose-100 sm:h-52"
+                className="h-44 w-auto rounded-3xl bg-white object-contain p-2 shadow-elevated ring-1 ring-border sm:h-52"
               />
             </div>
 
-            <Card className="overflow-hidden rounded-[1.75rem] border-rose-100/80 bg-white/95 shadow-elevated backdrop-blur-xl">
+            <Card className="overflow-hidden rounded-[1.75rem] border-border/80 bg-white/95 shadow-elevated backdrop-blur-xl">
               <CardContent
                 key={authMode}
                 className="auth-panel px-7 pb-7 pt-8 sm:px-9"
@@ -1531,7 +1531,7 @@ function App() {
                         autoCapitalize="none"
                         inputMode={authMode === "login" ? "text" : "email"}
                         spellCheck={false}
-                        className="h-12 rounded-xl border-rose-100 bg-rose-50/40 px-4 text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/40 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-primary/15"
+                        className="h-12 rounded-xl border-border bg-secondary/40 px-4 text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/40 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-primary/15"
                         value={authForm.email}
                         onPointerDown={() => emailInputRef.current?.focus()}
                         onTouchStart={() => emailInputRef.current?.focus()}
@@ -1559,7 +1559,7 @@ function App() {
                         autoCapitalize="none"
                         inputMode="text"
                         spellCheck={false}
-                        className="h-12 rounded-xl border-rose-100 bg-rose-50/40 px-4 text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/40 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-primary/15"
+                        className="h-12 rounded-xl border-border bg-secondary/40 px-4 text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/40 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-primary/15"
                         placeholder="gabi"
                         value={authForm.username}
                         onChange={(event) =>
@@ -1591,7 +1591,7 @@ function App() {
                           }
                           autoCapitalize="none"
                           spellCheck={false}
-                          className="h-12 rounded-xl border-rose-100 bg-rose-50/40 px-4 pr-12 text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/40 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-primary/15"
+                          className="h-12 rounded-xl border-border bg-secondary/40 px-4 pr-12 text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/40 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-primary/15"
                           value={authForm.password}
                           onPointerDown={() => passwordInputRef.current?.focus()}
                           onTouchStart={() => passwordInputRef.current?.focus()}
@@ -1604,7 +1604,7 @@ function App() {
                         />
                         <button
                           type="button"
-                          className="absolute right-1.5 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-rose-50 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                          className="absolute right-1.5 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
                           onClick={() => setShowPassword((current) => !current)}
                           aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                         >
@@ -1632,7 +1632,7 @@ function App() {
                           autoComplete="new-password"
                           autoCapitalize="none"
                           spellCheck={false}
-                          className="h-12 rounded-xl border-rose-100 bg-rose-50/40 px-4 pr-12 text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/40 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-primary/15"
+                          className="h-12 rounded-xl border-border bg-secondary/40 px-4 pr-12 text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/40 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-primary/15"
                           value={authForm.confirmPassword}
                           onChange={(event) =>
                             setAuthForm((current) => ({
@@ -1643,7 +1643,7 @@ function App() {
                         />
                         <button
                           type="button"
-                          className="absolute right-1.5 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-rose-50 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                          className="absolute right-1.5 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
                           onClick={() => setShowConfirmPassword((current) => !current)}
                           aria-label={
                             showConfirmPassword
@@ -1683,7 +1683,7 @@ function App() {
                     </p>
                   ) : null}
                   <Button
-                    className="relative h-12 w-full overflow-hidden rounded-xl border border-rose-300/50 bg-[linear-gradient(135deg,#fda4af_0%,#fb7185_45%,#f43f5e_100%)] text-[15px] font-semibold tracking-wide text-white shadow-[0_18px_40px_-12px_rgba(244,63,94,0.55),inset_0_1px_0_rgba(255,255,255,0.45)] transition-all duration-200 hover:brightness-[1.06] hover:shadow-[0_22px_50px_-12px_rgba(244,63,94,0.65),inset_0_1px_0_rgba(255,255,255,0.5)] active:scale-[0.99] disabled:opacity-70"
+                    className="relative h-12 w-full overflow-hidden rounded-xl border border-primary/40 bg-[linear-gradient(135deg,#fda4af_0%,#fb7185_45%,#f43f5e_100%)] text-[15px] font-semibold tracking-wide text-white shadow-[0_18px_40px_-12px_rgba(244,63,94,0.55),inset_0_1px_0_rgba(255,255,255,0.45)] transition-all duration-200 hover:brightness-[1.06] hover:shadow-[0_22px_50px_-12px_rgba(244,63,94,0.65),inset_0_1px_0_rgba(255,255,255,0.5)] active:scale-[0.99] disabled:opacity-70"
                     disabled={
                       isAuthSubmitting ||
                       !isSupabaseConfigured ||
@@ -1718,7 +1718,7 @@ function App() {
                           )
                         }
                       }}
-                      className="flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-rose-100 bg-white text-[15px] font-semibold text-foreground shadow-sm transition-all duration-200 hover:border-rose-200 hover:bg-rose-50/60 active:scale-[0.99]"
+                      className="flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-border bg-white text-[15px] font-semibold text-foreground shadow-sm transition-all duration-200 hover:border-border hover:bg-secondary/60 active:scale-[0.99]"
                     >
                       <GoogleLogo />
                       Entrar com Google
@@ -1729,17 +1729,17 @@ function App() {
                 {authMode !== "update-password" ? (
                   <>
                     <div className="my-6 flex items-center gap-3">
-                      <span className="h-px flex-1 bg-rose-100" />
+                      <span className="h-px flex-1 bg-secondary" />
                       <span className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                         {authMode === "login" ? "ou" : ""}
                       </span>
-                      <span className="h-px flex-1 bg-rose-100" />
+                      <span className="h-px flex-1 bg-secondary" />
                     </div>
                     <div className="grid gap-2 text-center text-sm">
                       {authMode !== "login" ? (
                         <button
                           type="button"
-                          className="rounded-lg px-3 py-2 font-semibold text-primary transition-colors hover:bg-rose-50"
+                          className="rounded-lg px-3 py-2 font-semibold text-primary transition-colors hover:bg-secondary"
                           onClick={() => {
                             setAuthMode("login")
                             setAuthError("")
@@ -1753,7 +1753,7 @@ function App() {
                         <>
                           <button
                             type="button"
-                            className="rounded-lg px-3 py-2 font-semibold text-foreground transition-colors hover:bg-rose-50 hover:text-primary"
+                            className="rounded-lg px-3 py-2 font-semibold text-foreground transition-colors hover:bg-secondary hover:text-primary"
                             onClick={() => {
                               setAuthMode("signup")
                               setAuthError("")
@@ -1764,7 +1764,7 @@ function App() {
                           </button>
                           <button
                             type="button"
-                            className="rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-rose-50 hover:text-primary"
+                            className="rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-primary"
                             onClick={() => {
                               setAuthMode("recover")
                               setAuthError("")
@@ -1794,7 +1794,7 @@ function App() {
           <img
             src="/logo-plantoes-gabi.png"
             alt="Plantões da Gabi"
-            className="mx-auto h-28 w-auto rounded-3xl bg-white object-contain p-2 shadow-elevated ring-1 ring-rose-100"
+            className="mx-auto h-28 w-auto rounded-3xl bg-white object-contain p-2 shadow-elevated ring-1 ring-border"
           />
           <p className="text-sm font-semibold text-muted-foreground">
             Sincronizando plantões...
@@ -1810,7 +1810,7 @@ function App() {
 
   return (
     <div className="min-h-dvh bg-[#FFF4F6] text-foreground">
-      <header className="safe-top sticky top-0 z-30 border-b border-[#F3D5DC] bg-white/90 backdrop-blur-xl">
+      <header className="safe-top sticky top-0 z-30 border-b border-border bg-white/90 backdrop-blur-xl">
         <div className="mx-auto grid w-full max-w-[480px] grid-cols-1 justify-items-center gap-3 px-4 pb-3 sm:grid-cols-[1fr_auto_1fr] sm:items-center lg:max-w-[1180px]">
           <div className="min-w-0 justify-self-center overflow-hidden rounded-xl bg-white sm:justify-self-start lg:w-fit">
             <img
@@ -1821,7 +1821,7 @@ function App() {
           </div>
 
           <div className="w-[240px] max-w-full justify-self-center sm:w-[280px]">
-            <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-[#F3D5DC] bg-white p-2 shadow-sm">
+            <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-border bg-white p-2 shadow-sm">
               <Button
                 type="button"
                 variant="outline"
@@ -1868,18 +1868,18 @@ function App() {
               onClick={() => setProfileOpen(true)}
               aria-label="Abrir meu perfil"
               title="Abrir meu perfil"
-              className="group inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[#F3D5DC] bg-white px-4 text-sm font-semibold text-primary shadow-sm transition-all hover:-translate-y-0.5 hover:bg-rose-50 hover:shadow-md"
+              className="group inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border bg-white px-4 text-sm font-semibold text-primary shadow-sm transition-all hover:-translate-y-0.5 hover:bg-secondary hover:shadow-md"
             >
               <User className="size-4" />
               <span>{session.firstName ? `Olá, ${session.firstName}` : "Perfil"}</span>
-              <ChevronRight className="size-4 text-rose-400 transition-transform group-hover:translate-x-0.5" aria-hidden />
+              <ChevronRight className="size-4 text-primary/60 transition-transform group-hover:translate-x-0.5" aria-hidden />
             </button>
             <div className="flex items-center justify-between gap-2">
               <button
                 type="button"
                 onClick={handleLogout}
                 aria-label="Sair da conta"
-                className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-lg border border-rose-100 bg-white/70 px-3 text-xs font-semibold text-muted-foreground transition-colors hover:bg-rose-50 hover:text-primary"
+                className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-lg border border-border bg-white/70 px-3 text-xs font-semibold text-muted-foreground transition-colors hover:bg-secondary hover:text-primary"
               >
                 <LogOut className="size-3.5" />
                 Sair
@@ -1969,8 +1969,8 @@ function App() {
                         className={cn(
                           "group relative min-h-16 cursor-pointer rounded-lg border p-1.5 text-left transition-all hover:-translate-y-0.5 hover:shadow-md lg:min-h-20 lg:p-2",
                           dayShifts.length > 0
-                            ? "border-rose-200 bg-rose-50/90 hover:border-rose-300"
-                            : "border-dashed border-rose-200 bg-white hover:border-primary hover:bg-rose-50",
+                            ? "border-border bg-secondary/90 hover:border-primary/40"
+                            : "border-dashed border-border bg-white hover:border-primary hover:bg-secondary",
                           isToday && "border-solid border-primary ring-1 ring-primary/30",
                         )}
                         onClick={() => openNewShift(day.iso)}
@@ -1985,7 +1985,7 @@ function App() {
                         </span>
                         {dayShifts.length === 0 ? (
                           <span
-                            className="pointer-events-none absolute bottom-1 right-1 inline-flex size-5 items-center justify-center rounded-full bg-rose-100 text-primary opacity-80 transition-all group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground group-hover:opacity-100 lg:size-6"
+                            className="pointer-events-none absolute bottom-1 right-1 inline-flex size-5 items-center justify-center rounded-full bg-secondary text-primary opacity-80 transition-all group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground group-hover:opacity-100 lg:size-6"
                             aria-hidden
                           >
                             <Plus className="size-3 lg:size-3.5" strokeWidth={3} />
@@ -2017,7 +2017,7 @@ function App() {
                     )
                   })}
                 </div>
-                <div className="border-t border-rose-100 pt-3">
+                <div className="border-t border-border pt-3">
                   <p className="mb-2 text-xs font-semibold uppercase text-muted-foreground">
                     Legenda dos turnos
                   </p>
@@ -2025,7 +2025,7 @@ function App() {
                     {SHIFT_TYPES.map((shiftType) => (
                       <div
                         key={shiftType.code}
-                        className="flex items-center gap-1.5 rounded-full bg-rose-50/70 px-2 py-1"
+                        className="flex items-center gap-1.5 rounded-full bg-secondary/70 px-2 py-1"
                       >
                         <span
                           className={cn(
@@ -2045,7 +2045,7 @@ function App() {
               </CardContent>
             </Card>
 
-            <Card className="border-[#F3D5DC] bg-white shadow-sm">
+            <Card className="border-border bg-white shadow-sm">
               <CardHeader className="pb-3">
                 <CardTitle>Resumo fiscal</CardTitle>
                 <CardDescription className="capitalize">
@@ -2082,7 +2082,7 @@ function App() {
                   </div>
                 </div>
 
-                <Separator className="bg-rose-100" />
+                <Separator className="bg-secondary" />
 
                 <div className="space-y-2">
                   <Button
@@ -2127,7 +2127,7 @@ function App() {
                 <button
                   type="button"
                   onClick={() => setProfileOpen(true)}
-                  className="flex w-full items-center gap-3 rounded-xl border border-primary/30 bg-gradient-to-r from-rose-50 to-white p-3 text-left text-sm text-foreground shadow-sm transition-colors hover:border-primary/50 hover:bg-rose-50"
+                  className="flex w-full items-center gap-3 rounded-xl border border-primary/30 bg-gradient-to-r from-secondary to-white p-3 text-left text-sm text-foreground shadow-sm transition-colors hover:border-primary/50 hover:bg-secondary"
                 >
                   <span
                     className="flex size-9 shrink-0 items-center justify-center rounded-full text-lg shadow-brand"
@@ -2158,7 +2158,7 @@ function App() {
                 <Filter className="size-4 text-muted-foreground" />
                 Filtros
               </div>
-              <Card className="border-[#F3D5DC] bg-white shadow-sm">
+              <Card className="border-border bg-white shadow-sm">
                 <CardContent className="space-y-4 p-4">
                   <div className="space-y-2">
                     <Label className="text-xs font-semibold uppercase text-muted-foreground">
@@ -2264,7 +2264,7 @@ function App() {
             <button
               type="button"
               onClick={() => setProfileOpen(true)}
-              className="flex w-full items-center gap-3 rounded-2xl border border-primary/30 bg-gradient-to-r from-rose-50 to-white p-3 text-left text-sm text-foreground shadow-sm transition-colors hover:border-primary/50 hover:bg-rose-50"
+              className="flex w-full items-center gap-3 rounded-2xl border border-primary/30 bg-gradient-to-r from-secondary to-white p-3 text-left text-sm text-foreground shadow-sm transition-colors hover:border-primary/50 hover:bg-secondary"
             >
               <span
                 className="flex size-9 shrink-0 items-center justify-center rounded-full text-lg shadow-brand"
@@ -2283,8 +2283,8 @@ function App() {
               </span>
               <ChevronRight className="size-4 shrink-0 text-primary" />
             </button>
-            <Card className="overflow-hidden border-[#F3D5DC] bg-white shadow-sm">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#F3D5DC] p-4">
+            <Card className="overflow-hidden border-border bg-white shadow-sm">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4">
                 <div>
                   <h2 className="text-base font-semibold">
                     Plantões {formatMonth(selectedMonth).split(" ")[0]}
@@ -2369,7 +2369,7 @@ function App() {
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-4 p-8 text-center">
-                  <div className="flex size-12 items-center justify-center rounded-lg bg-rose-100 text-rose-700">
+                  <div className="flex size-12 items-center justify-center rounded-lg bg-secondary text-primary">
                     <Table2 className="size-5" />
                   </div>
                   <div className="space-y-1">
@@ -2412,7 +2412,7 @@ function App() {
               </div>
             ) : null}
 
-            <Card className="border-[#F3D5DC] bg-white shadow-sm">
+            <Card className="border-border bg-white shadow-sm">
               <CardHeader>
                 <CardTitle>Por local</CardTitle>
                 <CardDescription>
@@ -2438,7 +2438,7 @@ function App() {
               </CardContent>
             </Card>
 
-            <Card className="border-[#F3D5DC] bg-white shadow-sm">
+            <Card className="border-border bg-white shadow-sm">
               <CardHeader>
                 <CardTitle>Por turno</CardTitle>
                 <CardDescription>
@@ -2453,7 +2453,7 @@ function App() {
                     return (
                       <div
                         key={item.code}
-                        className="rounded-lg border border-rose-100 bg-rose-50/40 p-3"
+                        className="rounded-lg border border-border bg-secondary/40 p-3"
                       >
                         <div className="flex items-start gap-3">
                           <span
@@ -2496,7 +2496,7 @@ function App() {
             <button
               type="button"
               onClick={() => setProfileOpen(true)}
-              className="flex w-full items-center gap-3 rounded-2xl border border-primary/30 bg-gradient-to-r from-rose-50 to-white p-3 text-left text-sm text-foreground shadow-sm transition-colors hover:border-primary/50 hover:bg-rose-50 lg:col-span-2"
+              className="flex w-full items-center gap-3 rounded-2xl border border-primary/30 bg-gradient-to-r from-secondary to-white p-3 text-left text-sm text-foreground shadow-sm transition-colors hover:border-primary/50 hover:bg-secondary lg:col-span-2"
             >
               <span
                 className="flex size-9 shrink-0 items-center justify-center rounded-full text-lg shadow-brand"
@@ -2529,7 +2529,7 @@ function App() {
           </DialogHeader>
 
           <div className="space-y-4">
-            <div className="flex items-center gap-4 rounded-2xl border border-[#F3D5DC] bg-gradient-soft p-4">
+            <div className="flex items-center gap-4 rounded-2xl border border-border bg-gradient-soft p-4">
               <div
                 className="flex size-14 shrink-0 items-center justify-center rounded-2xl text-base font-extrabold text-primary-foreground shadow-brand"
                 style={{ background: "var(--gradient-brand)" }}
@@ -2547,7 +2547,7 @@ function App() {
             </div>
 
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <div className="rounded-xl border border-[#F3D5DC] bg-white px-3 py-2.5">
+              <div className="rounded-xl border border-border bg-white px-3 py-2.5">
                 <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                   Nome
                 </p>
@@ -2555,7 +2555,7 @@ function App() {
                   {session.fullName || session.firstName}
                 </p>
               </div>
-              <div className="rounded-xl border border-[#F3D5DC] bg-white px-3 py-2.5">
+              <div className="rounded-xl border border-border bg-white px-3 py-2.5">
                 <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                   E-mail
                 </p>
@@ -2563,7 +2563,7 @@ function App() {
                   {session.email}
                 </p>
               </div>
-              <div className="rounded-xl border border-[#F3D5DC] bg-white px-3 py-2.5">
+              <div className="rounded-xl border border-border bg-white px-3 py-2.5">
                 <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                   Plantões
                 </p>
@@ -2573,7 +2573,7 @@ function App() {
               </div>
             </div>
 
-            <div className="space-y-3 rounded-2xl border border-[#F3D5DC] bg-white p-4 shadow-sm">
+            <div className="space-y-3 rounded-2xl border border-border bg-white p-4 shadow-sm">
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
@@ -2674,7 +2674,7 @@ function App() {
                 </div>
               </div>
 
-              <Separator className="bg-rose-100" />
+              <Separator className="bg-secondary" />
 
               <div className="space-y-2">
                 <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
@@ -2781,7 +2781,7 @@ function App() {
                   ))}
                 </SelectContent>
               </Select>
-              <div className="rounded-lg border border-rose-100 bg-rose-50/60 p-3">
+              <div className="rounded-lg border border-border bg-secondary/60 p-3">
                 <Label htmlFor="new-location" className="text-xs text-muted-foreground">
                   Cadastrar outro local
                 </Label>
@@ -2825,8 +2825,8 @@ function App() {
                       className={cn(
                         "rounded-lg border p-3 text-left transition-colors",
                         selected
-                          ? "border-primary bg-rose-50 text-primary shadow-sm"
-                          : "border-border bg-white hover:border-rose-200 hover:bg-rose-50",
+                          ? "border-primary bg-secondary text-primary shadow-sm"
+                          : "border-border bg-white hover:border-border hover:bg-secondary",
                       )}
                       onClick={() =>
                         setForm((current) => ({
@@ -2866,8 +2866,8 @@ function App() {
                       className={cn(
                         "rounded-lg border p-3 text-sm font-semibold transition-colors",
                         selected
-                          ? "border-primary bg-rose-50 text-primary shadow-sm"
-                          : "border-border bg-white hover:border-rose-200 hover:bg-rose-50",
+                          ? "border-primary bg-secondary text-primary shadow-sm"
+                          : "border-border bg-white hover:border-border hover:bg-secondary",
                       )}
                       onClick={() =>
                         setForm((current) => ({ ...current, personType: type }))
@@ -2913,7 +2913,7 @@ function App() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between gap-4 rounded-lg border border-rose-100 bg-rose-50/70 p-4">
+            <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-secondary/70 p-4">
               <div>
                 <Label htmlFor="paid">Recebi</Label>
                 <p className="text-sm text-muted-foreground">
