@@ -289,11 +289,13 @@ export function WelcomeTutorial({
       {rect ? (
         <>
           <div
-            className="pointer-events-auto fixed rounded-2xl ring-2 ring-primary/80 transition-all duration-300 ease-out"
+            className="pointer-events-auto fixed rounded-2xl transition-all duration-300 ease-out"
             style={{
               ...spotlightStyle,
+              outline: "3px solid hsl(var(--primary))",
+              outlineOffset: "0px",
               boxShadow:
-                "0 0 0 9999px rgba(8, 8, 20, 0.62), 0 0 0 4px rgba(255,255,255,0.18), 0 0 24px 4px hsl(var(--primary) / 0.45)",
+                "0 0 0 9999px rgba(6, 6, 18, 0.74), 0 0 0 6px rgba(255,255,255,0.22), 0 0 0 10px hsl(var(--primary) / 0.35), 0 0 40px 6px hsl(var(--primary) / 0.55)",
             }}
             onClick={() => {
               /* swallow clicks on highlighted area to prevent accidental nav */
@@ -304,7 +306,7 @@ export function WelcomeTutorial({
             className="pointer-events-none fixed rounded-2xl"
             style={{
               ...spotlightStyle,
-              animation: "tour-pulse 1.8s ease-out infinite",
+              animation: "tour-pulse 1.6s ease-out infinite",
             }}
             aria-hidden
           />
