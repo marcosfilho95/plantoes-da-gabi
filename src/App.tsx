@@ -1761,7 +1761,7 @@ function App() {
             </div>
 
             <Card className="relative overflow-hidden rounded-[1.75rem] border-border/80 bg-card/95 shadow-elevated backdrop-blur-xl">
-              <div className="absolute right-4 top-4 z-10 flex items-center gap-1.5 rounded-full border border-border/60 bg-card/80 px-2 py-1 shadow-sm backdrop-blur">
+              <div className="absolute left-1/2 top-4 z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-border/60 bg-card/80 px-2 py-1 shadow-sm backdrop-blur">
                 <span className="select-none text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
                   Tema
                 </span>
@@ -1769,18 +1769,14 @@ function App() {
               </div>
               <CardContent
                 key={authMode}
-                className="auth-panel px-7 pb-7 pt-8 sm:px-9"
+                className="auth-panel px-7 pb-7 pt-14 sm:px-9"
               >
                 <div className="mb-6 space-y-1">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary/70">
-                    {authMode === "signup"
-                      ? "Nova conta"
-                      : authMode === "recover"
-                        ? "Recuperar acesso"
-                        : authMode === "update-password"
-                          ? "Nova senha"
-                          : "Bem-vindo de volta"}
-                  </p>
+                  {authMode === "recover" || authMode === "update-password" ? (
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary/70">
+                      {authMode === "recover" ? "Recuperar acesso" : "Nova senha"}
+                    </p>
+                  ) : null}
                   {authMode !== "login" ? (
                     <h2 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-[1.7rem]">
                       {authMode === "signup"
