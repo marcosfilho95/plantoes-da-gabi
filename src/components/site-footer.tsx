@@ -20,7 +20,7 @@ export function SiteFooter({ className = "" }: { className?: string }) {
           Repositório no GitHub
         </a>
         <a
-          href="https://www.linkedin.com/in/marcosantoniofelix"
+          href="https://www.linkedin.com/in/marcosantoniofelix/?skipRedirect=true"
           target="_blank"
           rel="noreferrer"
           className="inline-flex items-center gap-1.5 font-medium text-foreground/80 transition-colors hover:text-primary"
