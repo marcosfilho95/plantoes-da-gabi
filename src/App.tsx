@@ -1888,7 +1888,12 @@ function App() {
                 <LogOut className="size-3.5" />
                 Sair
               </button>
-              <ThemeToggle theme={theme} onChange={setTheme} size="sm" />
+              <div className="flex items-center gap-1.5 rounded-full border border-border/60 bg-card/70 px-2 py-0.5 shadow-sm">
+                <span className="select-none text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                  Tema
+                </span>
+                <ThemeToggle theme={theme} onChange={setTheme} size="sm" />
+              </div>
             </div>
           </div>
         </div>
