@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { SiteFooter } from "@/components/site-footer"
 import { toast } from "sonner"
 
-const FEEDBACK_EMAIL = "marcosfilhoo123@gmail.com"
+const FEEDBACK_EMAIL = "felixmarcos.dev@gmail.com"
 
 export function FeedbackCard({
   fromName,
