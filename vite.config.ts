@@ -6,10 +6,10 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [
-    tanstackStart({ server: { entry: "server" } }),
+    tanstackStart(),
     viteReact(),
     tailwindcss(),
-    nitro({ preset: "cloudflare-pages" }),
+    nitro(),
   ],
   resolve: {
     tsconfigPaths: true,
