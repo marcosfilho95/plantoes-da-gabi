@@ -3308,7 +3308,7 @@ function App() {
                   style={{ background: "var(--gradient-brand)" }}
                 >
                   <p className="text-[10px] font-semibold uppercase tracking-wide opacity-80">
-                    Valor combinado
+                    Valor bruto
                   </p>
                   <p className="text-base font-extrabold">
                     {formatCurrency(annualStats.totalAmount)}
