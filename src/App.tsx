@@ -388,6 +388,8 @@ function sanitizeShifts(value: unknown): Shift[] {
     const paid = Boolean(candidate.paid)
     const amount = Number(candidate.amount)
     const notes = typeof candidate.notes === "string" ? candidate.notes : ""
+    const personType: "PF" | "PJ" =
+      candidate.personType === "PJ" ? "PJ" : "PF"
 
     return [
       {
@@ -399,6 +401,7 @@ function sanitizeShifts(value: unknown): Shift[] {
         paid,
         amount: Number.isFinite(amount) && amount > 0 ? amount : undefined,
         notes,
+        personType,
         createdAt:
           typeof candidate.createdAt === "string"
             ? candidate.createdAt
