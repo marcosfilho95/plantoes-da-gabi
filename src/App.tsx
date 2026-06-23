@@ -1804,9 +1804,9 @@ function App() {
         <section className="lg:col-span-2" aria-label="Resumo mensal">
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
             <MetricCard
-              label="Plantões"
-              value={String(stats.total)}
-              detail={`${stats.paid} recebido${stats.paid === 1 ? "" : "s"} no mês`}
+              label="Total geral"
+              value={formatCurrency(stats.totalAmount)}
+              detail={formatShiftCount(stats.total)}
               icon={<CalendarDays className="size-5" />}
             />
             <MetricCard
