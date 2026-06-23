@@ -300,10 +300,9 @@ export function WelcomeTutorial({
             className="pointer-events-auto fixed rounded-2xl transition-all duration-300 ease-out"
             style={{
               ...spotlightStyle,
-              outline: "3px solid hsl(var(--primary))",
-              outlineOffset: "0px",
+              border: "2.5px solid hsl(var(--primary))",
               boxShadow:
-                "0 0 0 9999px rgba(6, 6, 18, 0.74), 0 0 0 6px rgba(255,255,255,0.22), 0 0 0 10px hsl(var(--primary) / 0.35), 0 0 40px 6px hsl(var(--primary) / 0.55)",
+                "0 0 0 9999px rgba(6, 6, 18, 0.68), 0 0 0 4px hsl(var(--primary) / 0.18), 0 8px 28px -6px hsl(var(--primary) / 0.45)",
             }}
             onClick={() => {
               /* swallow clicks on highlighted area to prevent accidental nav */
@@ -314,7 +313,7 @@ export function WelcomeTutorial({
             className="pointer-events-none fixed rounded-2xl"
             style={{
               ...spotlightStyle,
-              animation: "tour-pulse 1.6s ease-out infinite",
+              animation: "tour-pulse 1.8s ease-out infinite",
             }}
             aria-hidden
           />
