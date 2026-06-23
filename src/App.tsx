@@ -1955,11 +1955,11 @@ function App() {
                             : `Dia ${day.label} — adicionar plantão`
                         }
                         className={cn(
-                          "group relative min-h-14 rounded-lg border p-1.5 text-left transition-colors lg:min-h-20 lg:p-2",
+                          "group relative min-h-16 cursor-pointer rounded-lg border p-1.5 text-left transition-all hover:-translate-y-0.5 hover:shadow-md lg:min-h-20 lg:p-2",
                           dayShifts.length > 0
-                            ? "border-rose-200 bg-rose-50/90"
-                            : "border-dashed border-rose-100 bg-white hover:border-rose-300 hover:bg-rose-50",
-                          isToday && "border-solid border-primary",
+                            ? "border-rose-200 bg-rose-50/90 hover:border-rose-300"
+                            : "border-dashed border-rose-200 bg-white hover:border-primary hover:bg-rose-50",
+                          isToday && "border-solid border-primary ring-1 ring-primary/30",
                         )}
                         onClick={() => openNewShift(day.iso)}
                       >
@@ -1972,10 +1972,12 @@ function App() {
                           {day.label}
                         </span>
                         {dayShifts.length === 0 ? (
-                          <Plus
-                            className="pointer-events-none absolute bottom-1 right-1 size-3 text-rose-300 opacity-60 transition-opacity group-hover:opacity-100 lg:size-3.5"
+                          <span
+                            className="pointer-events-none absolute bottom-1 right-1 inline-flex size-5 items-center justify-center rounded-full bg-rose-100 text-primary opacity-80 transition-all group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground group-hover:opacity-100 lg:size-6"
                             aria-hidden
-                          />
+                          >
+                            <Plus className="size-3 lg:size-3.5" strokeWidth={3} />
+                          </span>
                         ) : null}
                         <div className="mt-1 flex min-h-6 flex-wrap items-start gap-1">
                           {dayShifts.slice(0, 2).map((shift) => {
