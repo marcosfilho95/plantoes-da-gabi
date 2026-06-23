@@ -1861,11 +1861,13 @@ function App() {
             <button
               type="button"
               onClick={() => setProfileOpen(true)}
-              aria-label="Abrir perfil"
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[#F3D5DC] bg-white px-4 text-sm font-semibold text-primary shadow-sm transition-colors hover:bg-rose-50"
+              aria-label="Abrir meu perfil"
+              title="Abrir meu perfil"
+              className="group inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[#F3D5DC] bg-white px-4 text-sm font-semibold text-primary shadow-sm transition-all hover:-translate-y-0.5 hover:bg-rose-50 hover:shadow-md"
             >
               <User className="size-4" />
-              {session.firstName ? `Olá, ${session.firstName}` : "Perfil"}
+              <span>{session.firstName ? `Olá, ${session.firstName}` : "Perfil"}</span>
+              <ChevronRight className="size-4 text-rose-400 transition-transform group-hover:translate-x-0.5" aria-hidden />
             </button>
             <button
               type="button"
