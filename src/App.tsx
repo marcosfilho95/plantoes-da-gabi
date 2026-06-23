@@ -1857,15 +1857,24 @@ function App() {
             ) : null}
           </div>
 
-          <div className="flex w-full justify-center sm:w-auto sm:justify-self-end">
+          <div className="flex w-full flex-col items-stretch gap-1.5 sm:w-auto sm:justify-self-end">
             <button
               type="button"
               onClick={() => setProfileOpen(true)}
               aria-label="Abrir perfil"
-              className="inline-flex h-10 items-center gap-2 rounded-xl border border-[#F3D5DC] bg-white px-4 text-sm font-semibold text-primary shadow-sm transition-colors hover:bg-rose-50"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[#F3D5DC] bg-white px-4 text-sm font-semibold text-primary shadow-sm transition-colors hover:bg-rose-50"
             >
               <User className="size-4" />
-              Perfil
+              {session.firstName ? `Olá, ${session.firstName}` : "Perfil"}
+            </button>
+            <button
+              type="button"
+              onClick={handleLogout}
+              aria-label="Sair da conta"
+              className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-rose-100 bg-white/70 px-3 text-xs font-semibold text-muted-foreground transition-colors hover:bg-rose-50 hover:text-primary"
+            >
+              <LogOut className="size-3.5" />
+              Sair
             </button>
           </div>
         </div>
