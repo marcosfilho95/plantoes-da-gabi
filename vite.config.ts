@@ -5,17 +5,13 @@ import { nitro } from "nitro/vite";
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  plugins: [tanstackStart(), viteReact(), tailwindcss(), nitro()],
+  plugins: [
+    tanstackStart({ server: { entry: "server" } }),
+    viteReact(),
+    tailwindcss(),
+    nitro({ preset: "cloudflare-pages" }),
+  ],
   resolve: {
     tsconfigPaths: true,
-  },
-  environments: {
-    ssr: {
-      build: {
-        rollupOptions: {
-          input: "./src/server.ts",
-        },
-      },
-    },
   },
 });
