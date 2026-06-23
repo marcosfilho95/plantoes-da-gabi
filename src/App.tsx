@@ -1884,10 +1884,23 @@ function App() {
 
             <Card className="border-[#F3D5DC] bg-white shadow-sm">
               <CardHeader className="pb-3">
-                <CardTitle>Calendário</CardTitle>
-                <CardDescription>
-                  {formatShiftCount(stats.total)} no mês
-                </CardDescription>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <CardTitle>Calendário</CardTitle>
+                    <CardDescription>
+                      {formatShiftCount(stats.total)} no mês · toque em um dia para adicionar plantão
+                    </CardDescription>
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="shrink-0 rounded-xl shadow-soft"
+                    onClick={() => openNewShift(todayISO())}
+                  >
+                    <Plus className="size-4" />
+                    Novo plantão
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-muted-foreground">
