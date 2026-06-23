@@ -293,11 +293,11 @@
   }
   ::view-transition-old(root) {
     z-index: 1;
-    animation: theme-old-fade 2200ms cubic-bezier(0.45, 0, 0.55, 1) forwards;
+    animation: theme-old-fade 1700ms cubic-bezier(0.45, 0, 0.55, 1) forwards;
   }
   ::view-transition-new(root) {
     z-index: 2;
-    animation: theme-blob-reveal 2200ms cubic-bezier(0.45, 0, 0.55, 1) forwards;
+    animation: theme-blob-reveal 1700ms cubic-bezier(0.45, 0, 0.55, 1) forwards;
   }
   @keyframes theme-blob-reveal {
     0% {
