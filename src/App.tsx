@@ -18,6 +18,7 @@ import {
   Plus,
   Table2,
   Trash2,
+  Palette,
   User,
   UserPlus,
   WalletCards,
