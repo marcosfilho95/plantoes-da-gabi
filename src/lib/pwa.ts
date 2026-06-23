@@ -1,11 +1,11 @@
 /**
  * Service worker registration wrapper.
  *
- * Guards per the PWA skill: never registers in dev, Lovable preview, iframes,
- * or when ?sw=off is present. Cleans up any matching registration in those
- * refused contexts.
+ * Guards: never registers in dev, Lovable preview, iframes, or when ?sw=off.
+ * Cleans up any matching registration in refused contexts.
  *
- * Calls onUpdate when a new worker is ready, so the app can prompt the user.
+ * Calls onUpdate when a fresh worker has taken control, so the app can toast
+ * "nova versão carregada".
  */
 type Options = {
   onUpdate?: () => void
@@ -69,28 +69,20 @@ export async function registerServiceWorker({ onUpdate }: Options = {}) {
   }
 
   try {
-    const { Workbox } = await import("workbox-window")
-    const wb = new Workbox(SW_PATH, { scope: "/" })
+    const reg = await navigator.serviceWorker.register(SW_PATH, { scope: "/" })
 
-    wb.addEventListener("waiting", () => {
-      onUpdate?.()
-      // Apply update on next click prompt (skipWaiting from app)
-      wb.addEventListener("controlling", () => {
-        window.location.reload()
-      })
+    // When a new SW takes control after the initial load, signal an update.
+    let hadController = Boolean(navigator.serviceWorker.controller)
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (hadController) onUpdate?.()
+      hadController = true
     })
 
-    await wb.register({ immediate: true })
+    // Periodically poll for updates so installed apps refresh in background.
+    setInterval(() => {
+      reg.update().catch(() => {})
+    }, 60 * 60 * 1000)
   } catch (error) {
     console.warn("[sw] register failed", error)
   }
-}
-
-/** Tell the waiting worker to take control. Called after user accepts update. */
-export async function activateWaitingWorker() {
-  if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) {
-    return
-  }
-  const reg = await navigator.serviceWorker.getRegistration(SW_PATH)
-  reg?.waiting?.postMessage({ type: "SKIP_WAITING" })
 }
