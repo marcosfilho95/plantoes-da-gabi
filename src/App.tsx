@@ -1461,7 +1461,7 @@ function App() {
                         ? "Recuperar acesso"
                         : authMode === "update-password"
                           ? "Nova senha"
-                          : "Bem-vinda de volta"}
+                          : "Bem-vindo de volta"}
                   </p>
                   {authMode !== "login" ? (
                     <h2 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-[1.7rem]">
