@@ -283,6 +283,15 @@ export function buildSummaryCsv(shifts: CsvShift[]): string {
     formatCsvAmount(s.pendente.total),
     "",
   ])
+  for (const item of s.pendentePorCompetencia) {
+    row([
+      "total_pendente_por_mes_competencia",
+      item.mes,
+      item.quantidade,
+      formatCsvAmount(item.total),
+      "",
+    ])
+  }
   for (const item of s.porLocal) {
     row([
       "total_por_local",
