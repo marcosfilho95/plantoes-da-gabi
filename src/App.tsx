@@ -1914,31 +1914,35 @@ function App() {
 
           <TabsContent value="agenda" className="space-y-4">
 
-            <Card className="border-[#F3D5DC] bg-white shadow-sm">
+            <Card className="border-border bg-white shadow-sm">
               <CardHeader className="pb-3">
-                <CardTitle>Calendário</CardTitle>
-                <CardDescription>
-                  {formatShiftCount(stats.total)} em {formatMonth(selectedMonth)}
-                </CardDescription>
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <CardTitle>Calendário</CardTitle>
+                    <CardDescription>
+                      {formatShiftCount(stats.total)} em {formatMonth(selectedMonth)}
+                    </CardDescription>
+                  </div>
+                  <div
+                    className="flex items-center gap-2 rounded-full border border-dashed border-primary/40 bg-secondary/80 px-3 py-1.5 text-left"
+                    role="note"
+                  >
+                    <span
+                      className="flex size-6 shrink-0 items-center justify-center rounded-full text-primary-foreground shadow-brand"
+                      style={{ background: "var(--gradient-brand)" }}
+                    >
+                      <Plus className="size-3.5" strokeWidth={3} aria-hidden />
+                    </span>
+                    <p className="text-[11px] font-semibold leading-tight text-foreground sm:text-xs">
+                      <span className="block text-[9px] font-bold uppercase tracking-wide text-primary">
+                        Como adicionar
+                      </span>
+                      Toque em um dia para registrar
+                    </p>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div
-                  className="flex items-center gap-3 rounded-xl border border-dashed border-primary/40 bg-rose-50/80 p-3 text-left"
-                  role="note"
-                >
-                  <span
-                    className="flex size-9 shrink-0 items-center justify-center rounded-full text-primary-foreground shadow-brand"
-                    style={{ background: "var(--gradient-brand)" }}
-                  >
-                    <Plus className="size-5" aria-hidden />
-                  </span>
-                  <p className="text-xs font-semibold text-foreground sm:text-sm">
-                    <span className="block text-[10px] font-bold uppercase tracking-wide text-primary">
-                      Como adicionar
-                    </span>
-                    Toque em qualquer dia do calendário abaixo para registrar um plantão.
-                  </p>
-                </div>
                 <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-muted-foreground">
                   {["seg", "ter", "qua", "qui", "sex", "sáb", "dom"].map((day) => (
                     <span key={day}>{day}</span>
