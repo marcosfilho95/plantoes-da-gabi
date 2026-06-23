@@ -1789,7 +1789,7 @@ function App() {
   }
   if (authStatus === "checking") {
     return (
-      <div className="flex min-h-dvh flex-col items-center justify-center gap-8 bg-[#FFF4F6] px-4 text-center text-foreground">
+      <div className="flex min-h-dvh flex-col items-center justify-center gap-8 bg-gradient-canvas px-4 text-center text-foreground">
         <div className="space-y-3">
           <img
             src="/logo-plantoes-gabi.png"
@@ -1809,7 +1809,7 @@ function App() {
   const isCurrentMonth = selectedMonth === monthKeyFromDate(new Date())
 
   return (
-    <div className="min-h-dvh bg-[#FFF4F6] text-foreground">
+    <div className="min-h-dvh bg-gradient-canvas text-foreground">
       <header className="safe-top sticky top-0 z-30 border-b border-border bg-white/90 backdrop-blur-xl">
         <div className="mx-auto grid w-full max-w-[480px] grid-cols-1 justify-items-center gap-3 px-4 pb-3 sm:grid-cols-[1fr_auto_1fr] sm:items-center lg:max-w-[1180px]">
           <div className="min-w-0 justify-self-center overflow-hidden rounded-xl bg-white sm:justify-self-start lg:w-fit">
@@ -2332,7 +2332,7 @@ function App() {
 
 
               {groupedByDate.length > 0 ? (
-                <div className="space-y-5 bg-[#FFF4F6] p-4">
+                <div className="space-y-5 bg-gradient-canvas p-4">
                   {groupedByDate.map((group) => (
                     <section key={group.date} className="space-y-3">
                       <div className="flex items-center justify-between gap-3 px-1">
