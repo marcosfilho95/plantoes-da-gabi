@@ -2474,7 +2474,7 @@ function App() {
           setActiveTab={setActiveTab}
         />
 
-        {session ? (
+        {session && (sync.status === "error" || sync.status === "offline" || sync.pendingCount > 0) ? (
           <SyncStatus
             status={sync.status}
             lastSyncedAt={sync.lastSyncedAt}
