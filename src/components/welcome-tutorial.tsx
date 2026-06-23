@@ -8,6 +8,7 @@ import {
   ChevronRight,
   Filter,
   HelpCircle,
+  MessageSquareHeart,
   MousePointerClick,
   Sparkles,
   Sun,
@@ -83,21 +84,21 @@ const STEPS: Step[] = [
   },
   {
     tab: "plantoes",
-    selector: '[data-tour="plantoes-list"]',
-    icon: Table2,
-    eyebrow: "Plantões",
-    title: "Tudo que você registrou",
-    body: "Esta é a aba Plantões. No topo, o resumo do mês e os botões para exportar em CSV. Logo abaixo vem a lista completa, onde você pode editar ou apagar cada plantão.",
-    placement: "top",
-  },
-  {
-    tab: "plantoes",
     selector: '[data-tour="plantoes-filter"]',
     icon: Filter,
     eyebrow: "Filtros",
     title: "Encontre rápido o que precisa",
     body: "Refine a lista por status de pagamento, local ou turno. Os filtros se combinam entre si.",
     placement: "bottom",
+  },
+  {
+    tab: "plantoes",
+    selector: '[data-tour="plantoes-list"]',
+    icon: Table2,
+    eyebrow: "Plantões",
+    title: "Tudo que você registrou",
+    body: "No topo, o resumo do mês e os botões para exportar em CSV. Abaixo vem a lista completa, onde você pode editar ou apagar cada plantão.",
+    placement: "top",
   },
   {
     tab: "resumo",
@@ -123,6 +124,15 @@ const STEPS: Step[] = [
     title: "Seus dados e ajustes",
     body: "Aqui você gerencia seu perfil, vê o histórico anual e ajusta preferências.",
     placement: "bottom",
+  },
+  {
+    tab: "agenda",
+    selector: '[data-tour="feedback-card"]',
+    icon: MessageSquareHeart,
+    eyebrow: "Feedback",
+    title: "Sua opinião move o app",
+    body: "Na aba Agenda, no final, você encontra o card de feedback. Mande ideias, críticas ou elogios — leio todos.",
+    placement: "top",
   },
   {
     selector: '[data-tour="tutorial-btn"]',
@@ -163,7 +173,7 @@ export function WelcomeTutorial({
   setActiveTab: (tab: TabId) => void
 }) {
   const closingTitle = title
-    ? `Bons plantões, ${title} ${firstName ?? ""}`.trim().replace(/\s+!?$/, "") + "!"
+    ? `Bons plantões, ${title.replace(/\.$/, "")}!`
     : "Bons plantões!"
   const stepsLocal = STEPS.map((s, i) =>
     i === STEPS.length - 1 ? { ...s, title: closingTitle } : s,

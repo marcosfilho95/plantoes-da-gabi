@@ -2212,6 +2212,9 @@ function App() {
               </CardContent>
             </Card>
 
+            <div data-tour="feedback-card">
+              <FeedbackCard fromName={session.fullName} fromEmail={session.email} />
+            </div>
           </TabsContent>
 
 
@@ -2582,8 +2585,6 @@ function App() {
           </TabsContent>
 
         </Tabs>
-
-        <FeedbackCard fromName={session.fullName} fromEmail={session.email} />
       </main>
 
 
