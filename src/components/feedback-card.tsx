@@ -60,10 +60,10 @@ export function FeedbackCard({
         </div>
         <p className="text-sm leading-relaxed text-muted-foreground">
           Esta aplicação é{" "}
-          <strong className="text-foreground">100% gratuita</strong>. O propósito
-          é simples: facilitar a rotina de quem é da medicina, organizando
-          plantões e finanças em um só lugar. Sua crítica ou ideia é o que
-          mantém o app vivo e evoluindo.
+          <strong className="text-foreground">100% gratuita</strong> e o
+          objetivo é tornar a vida dos médicos mais fácil, administrando os
+          plantões e as contas. Se tiver alguma ideia de melhoria ou crítica,
+          manda a ver — vai cair direto no meu e-mail.
         </p>
       </CardHeader>
 
