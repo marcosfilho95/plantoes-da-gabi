@@ -66,6 +66,13 @@ import { cn } from "@/lib/utils"
 import { SiteFooter, GoogleLogo } from "@/components/site-footer"
 import { ThemeToggle, useTheme } from "@/components/theme-toggle"
 import { WelcomeTutorial, hasSeenTutorial } from "@/components/welcome-tutorial"
+import { FeedbackCard } from "@/components/feedback-card"
+import {
+  getTitlePref,
+  resolveTitle,
+  setTitlePref,
+  type TitlePref,
+} from "@/lib/title"
 import {
   downloadShiftsCsv,
   type PersonScope,
@@ -906,6 +913,16 @@ function App() {
   const [profileOpen, setProfileOpen] = useState(false)
   const [tutorialOpen, setTutorialOpen] = useState(false)
   const [profileYear, setProfileYear] = useState(() => new Date().getFullYear())
+  const [titlePref, setTitlePrefState] = useState<TitlePref>(() =>
+    getTitlePref(session?.userId),
+  )
+  useEffect(() => {
+    setTitlePrefState(getTitlePref(session?.userId))
+  }, [session?.userId])
+  const userTitle = resolveTitle(session?.fullName ?? session?.firstName, titlePref)
+  const titledFirstName = userTitle
+    ? `${userTitle} ${session?.firstName ?? ""}`.trim()
+    : session?.firstName ?? ""
 
   useEffect(() => {
     if (!session?.userId) return
@@ -1888,7 +1905,7 @@ function App() {
               className="group inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-semibold text-primary shadow-sm transition-all hover:-translate-y-0.5 hover:bg-secondary hover:shadow-md"
             >
               <User className="size-4" />
-              <span>{session.firstName ? `Olá, ${session.firstName}` : "Perfil"}</span>
+              <span>{session.firstName ? `Olá, ${titledFirstName}` : "Perfil"}</span>
               <ChevronRight className="size-4 text-primary/60 transition-transform group-hover:translate-x-0.5" aria-hidden />
             </button>
             <div className="flex items-center justify-between gap-2">
@@ -1929,6 +1946,7 @@ function App() {
         <WelcomeTutorial
           userId={session.userId}
           firstName={session.firstName}
+          title={userTitle}
           open={tutorialOpen}
           onOpenChange={setTutorialOpen}
           setActiveTab={setActiveTab}
@@ -2564,6 +2582,8 @@ function App() {
           </TabsContent>
 
         </Tabs>
+
+        <FeedbackCard fromName={session.fullName} fromEmail={session.email} />
       </main>
 
       <SiteFooter className="mx-auto w-full max-w-[1180px] px-4 py-8 safe-bottom" />
@@ -2584,7 +2604,7 @@ function App() {
               </div>
               <div className="min-w-0">
                 <p className="truncate text-lg font-extrabold text-foreground">
-                  Olá, {session.firstName}
+                  Olá, {titledFirstName || session.firstName}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   Sessão ativa no Plantões da Gabi.
@@ -2618,6 +2638,62 @@ function App() {
                 </p>
               </div>
             </div>
+
+            <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Como devo te chamar?
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Detectamos automaticamente pelo seu nome, mas você pode ajustar.
+              </p>
+              <div
+                className="mt-3 grid grid-cols-3 gap-2"
+                role="radiogroup"
+                aria-label="Forma de tratamento"
+              >
+                {([
+                  { id: "auto" as TitlePref, label: "Automático" },
+                  { id: "dr" as TitlePref, label: "Dr." },
+                  { id: "dra" as TitlePref, label: "Dra." },
+                ]).map((opt) => {
+                  const selected = titlePref === opt.id
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={selected}
+                      onClick={() => {
+                        setTitlePrefState(opt.id)
+                        if (session?.userId) setTitlePref(session.userId, opt.id)
+                      }}
+                      className={cn(
+                        "rounded-lg border px-3 py-2 text-sm font-semibold transition-colors",
+                        selected
+                          ? "border-primary bg-secondary text-primary shadow-sm"
+                          : "border-border bg-card hover:border-border hover:bg-secondary",
+                      )}
+                    >
+                      {opt.label}
+                    </button>
+                  )
+                })}
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setTitlePrefState("none")
+                  if (session?.userId) setTitlePref(session.userId, "none")
+                }}
+                className={cn(
+                  "mt-2 text-xs font-semibold underline-offset-2 hover:underline",
+                  titlePref === "none" ? "text-primary" : "text-muted-foreground",
+                )}
+              >
+                Prefiro sem título
+              </button>
+            </div>
+
 
             <div className="space-y-3 rounded-2xl border border-border bg-card p-4 shadow-sm">
               <div className="flex flex-wrap items-end justify-between gap-3">

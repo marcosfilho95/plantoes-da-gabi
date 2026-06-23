@@ -150,16 +150,24 @@ function getRect(el: Element): Rect {
 export function WelcomeTutorial({
   userId,
   firstName,
+  title,
   open,
   onOpenChange,
   setActiveTab,
 }: {
+  title?: "Dr." | "Dra." | null
   userId: string
   firstName?: string
   open: boolean
   onOpenChange: (open: boolean) => void
   setActiveTab: (tab: TabId) => void
 }) {
+  const closingTitle = title
+    ? `Bons plantões, ${title} ${firstName ?? ""}`.trim().replace(/\s+!?$/, "") + "!"
+    : "Bons plantões!"
+  const stepsLocal = STEPS.map((s, i) =>
+    i === STEPS.length - 1 ? { ...s, title: closingTitle } : s,
+  )
   const [step, setStep] = useState(0)
   const [rect, setRect] = useState<Rect | null>(null)
   const [mounted, setMounted] = useState(false)
@@ -174,7 +182,7 @@ export function WelcomeTutorial({
   }, [open])
 
   const total = STEPS.length
-  const current = STEPS[step]!
+  const current = stepsLocal[step]!
   const isLast = step === total - 1
 
   // Switch tab if required.
