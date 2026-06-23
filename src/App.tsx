@@ -64,6 +64,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { isSupabaseConfigured, supabase } from "@/lib/supabase"
 import { cn } from "@/lib/utils"
 import { SiteFooter, GoogleLogo } from "@/components/site-footer"
+import { ThemeToggle, useTheme } from "@/components/theme-toggle"
 import {
   downloadShiftsCsv,
   type PersonScope,
