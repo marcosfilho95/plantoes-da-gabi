@@ -2639,6 +2639,62 @@ function App() {
               </div>
             </div>
 
+            <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Como devo te chamar?
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Detectamos automaticamente pelo seu nome, mas você pode ajustar.
+              </p>
+              <div
+                className="mt-3 grid grid-cols-3 gap-2"
+                role="radiogroup"
+                aria-label="Forma de tratamento"
+              >
+                {([
+                  { id: "auto" as TitlePref, label: "Automático" },
+                  { id: "dr" as TitlePref, label: "Dr." },
+                  { id: "dra" as TitlePref, label: "Dra." },
+                ]).map((opt) => {
+                  const selected = titlePref === opt.id
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={selected}
+                      onClick={() => {
+                        setTitlePrefState(opt.id)
+                        if (session?.userId) setTitlePref(session.userId, opt.id)
+                      }}
+                      className={cn(
+                        "rounded-lg border px-3 py-2 text-sm font-semibold transition-colors",
+                        selected
+                          ? "border-primary bg-secondary text-primary shadow-sm"
+                          : "border-border bg-card hover:border-border hover:bg-secondary",
+                      )}
+                    >
+                      {opt.label}
+                    </button>
+                  )
+                })}
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setTitlePrefState("none")
+                  if (session?.userId) setTitlePref(session.userId, "none")
+                }}
+                className={cn(
+                  "mt-2 text-xs font-semibold underline-offset-2 hover:underline",
+                  titlePref === "none" ? "text-primary" : "text-muted-foreground",
+                )}
+              >
+                Prefiro sem título
+              </button>
+            </div>
+
+
             <div className="space-y-3 rounded-2xl border border-border bg-card p-4 shadow-sm">
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
