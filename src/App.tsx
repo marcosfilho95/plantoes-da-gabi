@@ -127,6 +127,7 @@ type ShiftMeta = (typeof SHIFT_TYPES)[number]
 type ShiftCode = ShiftMeta["code"]
 type PaymentFilter = "todos" | "pendentes" | "recebidos"
 type ShiftFilter = "todos" | ShiftCode
+type PersonFilter = "todos" | "PF" | "PJ"
 type TabId = "agenda" | "plantoes" | "resumo"
 type PaymentStatus = "received" | "pending" | "overdue"
 
@@ -138,6 +139,7 @@ type Shift = {
   paid: boolean
   amount?: number
   notes?: string
+  personType: "PF" | "PJ"
   createdAt: string
   updatedAt?: string
 }
@@ -149,6 +151,7 @@ type ShiftForm = {
   paid: boolean
   amount: string
   notes: string
+  personType: "PF" | "PJ"
 }
 
 type AuthSession = {
