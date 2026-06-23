@@ -1,4 +1,4 @@
-import { Github, Instagram } from "lucide-react";
+import { Github, Instagram, Linkedin } from "lucide-react";
 
 export function SiteFooter({ className = "" }: { className?: string }) {
   return (
@@ -29,6 +29,16 @@ export function SiteFooter({ className = "" }: { className?: string }) {
         >
           <Instagram className="size-4" aria-hidden />
           <span>marcosfiilho95</span>
+        </a>
+        <a
+          href="https://www.linkedin.com/in/marcosantoniofelix/"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="LinkedIn de Marcos Antônio Felix"
+          className="inline-flex items-center gap-1.5 font-medium transition-colors hover:underline"
+        >
+          <Linkedin className="size-4" aria-hidden />
+          <span>marcosantoniofelix</span>
         </a>
       </div>
     </footer>
