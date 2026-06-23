@@ -1955,24 +1955,50 @@ function App() {
 
           <TabsContent value="plantoes" className="space-y-4">
             <Card className="overflow-hidden border-[#F3D5DC] bg-white shadow-sm">
-              <div className="flex items-center justify-between gap-3 border-b border-[#F3D5DC] p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#F3D5DC] p-4">
                 <div>
                   <h2 className="text-base font-semibold">Plantões</h2>
-                  <p className="text-sm text-muted-foreground">
+                  <p
+                    className="text-sm text-muted-foreground"
+                    aria-live="polite"
+                  >
                     {formatShiftCount(filteredShifts.length)} nos filtros
                   </p>
                 </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={filteredShifts.length === 0}
-                  onClick={() => exportShiftsAsCsv(filteredShifts, selectedMonth)}
+                <div
+                  className="flex flex-wrap items-center gap-2"
+                  role="group"
+                  aria-label="Exportar plantões filtrados"
                 >
-                  <Download className="size-4" />
-                  CSV
-                </Button>
+                  {(["todos", "PF", "PJ"] as const).map((scope) => {
+                    const subset =
+                      scope === "todos"
+                        ? filteredShifts
+                        : filteredShifts.filter(
+                            (shift) => (shift.personType ?? "PF") === scope,
+                          )
+                    const label =
+                      scope === "todos" ? "Todos" : scope
+                    return (
+                      <Button
+                        key={scope}
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={subset.length === 0}
+                        aria-label={`Exportar CSV ${label} (${subset.length} plantões)`}
+                        onClick={() =>
+                          exportMonthCsv(subset, selectedMonth, scope)
+                        }
+                      >
+                        <Download className="size-4" />
+                        {label}
+                      </Button>
+                    )
+                  })}
+                </div>
               </div>
+
 
               {groupedByDate.length > 0 ? (
                 <div className="space-y-5 bg-[#FFF4F6] p-4">
