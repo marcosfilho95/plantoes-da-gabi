@@ -242,6 +242,8 @@ export function WelcomeTutorial({
     };
   }, [open, updateRect]);
 
+  const isMobile = useIsMobile();
+
   // Compute tooltip position.
   useLayoutEffect(() => {
     if (!open) return;
@@ -252,6 +254,16 @@ export function WelcomeTutorial({
     const th = node?.offsetHeight ?? 220;
     const margin = 12;
     const gap = 14;
+
+    // On mobile, dock the tooltip to the bottom so it never shifts as the
+    // spotlight target moves — preventing the card from "walking" mid-tour.
+    if (isMobile) {
+      setTooltipPos({
+        top: vh - th - margin,
+        left: Math.max(margin, (vw - tw) / 2),
+      });
+      return;
+    }
 
     if (!rect) {
       setTooltipPos({
@@ -280,7 +292,7 @@ export function WelcomeTutorial({
     const left = Math.min(Math.max(margin, centerLeft), vw - tw - margin);
 
     setTooltipPos({ top, left });
-  }, [open, rect, current.placement, current.offsetY, step]);
+  }, [open, rect, current.placement, current.offsetY, step, isMobile]);
 
   function close() {
     markTutorialSeen(userId);
