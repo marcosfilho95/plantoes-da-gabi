@@ -1772,9 +1772,9 @@ function App() {
                 className="auth-panel px-7 pb-7 pt-14 sm:px-9"
               >
                 <div className="mb-6 space-y-1">
-                  {authMode === "recover" || authMode === "update-password" ? (
+                  {authMode === "update-password" ? (
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary/70">
-                      {authMode === "recover" ? "Recuperar acesso" : "Nova senha"}
+                      Nova senha
                     </p>
                   ) : null}
                   {authMode !== "login" ? (
@@ -1782,7 +1782,7 @@ function App() {
                       {authMode === "signup"
                         ? "Crie sua conta"
                         : authMode === "recover"
-                          ? "Vamos recuperar"
+                          ? "Recuperar Acesso"
                           : "Defina uma nova senha"}
                     </h2>
                   ) : null}
