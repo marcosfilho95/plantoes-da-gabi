@@ -2118,17 +2118,18 @@ function App() {
                   className="flex w-full items-center gap-3 rounded-xl border border-primary/30 bg-gradient-to-r from-rose-50 to-white p-3 text-left text-sm text-foreground shadow-sm transition-colors hover:border-primary/50 hover:bg-rose-50"
                 >
                   <span
-                    className="flex size-9 shrink-0 items-center justify-center rounded-full text-primary-foreground shadow-brand"
+                    className="flex size-9 shrink-0 items-center justify-center rounded-full text-lg shadow-brand"
                     style={{ background: "var(--gradient-brand)" }}
+                    aria-hidden
                   >
-                    <User className="size-4" />
+                    🦁
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block text-[10px] font-bold uppercase tracking-wide text-primary">
                       Declaração anual
                     </span>
                     <span className="block text-xs font-medium text-muted-foreground">
-                      Veja os rendimentos totais do ano no <span className="font-semibold text-foreground">Perfil</span>.
+                      Para ver os rendimentos anuais, abra o <span className="font-semibold text-foreground">Perfil</span>.
                     </span>
                   </span>
                   <ChevronRight className="size-4 shrink-0 text-primary" />
