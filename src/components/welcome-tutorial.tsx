@@ -75,7 +75,7 @@ const STEPS: Step[] = [
     title: "Calendário do mês",
     body: "Aqui você visualiza os dias com plantão. Use as setas do topo para trocar de mês.",
     placement: "top",
-    offsetY: 64,
+    offsetY: 112,
   },
   {
     tab: "agenda",
