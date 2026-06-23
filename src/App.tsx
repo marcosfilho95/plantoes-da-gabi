@@ -180,7 +180,6 @@ type ShiftForm = {
 type ReceiptForm = {
   paymentDate: string
   netAmount: string
-  deductions: string
   invoiceNumber: string
   paymentNotes: string
 }
@@ -343,10 +342,6 @@ function getShiftNetAmount(shift: Pick<Shift, "amount" | "netAmount">) {
   return shift.netAmount ?? shift.amount ?? 0
 }
 
-function getShiftDeductions(shift: Pick<Shift, "deductions">) {
-  return shift.deductions ?? 0
-}
-
 function getFinancialDate(shift: Shift) {
   return shift.paymentDate || shift.date
 }
@@ -370,11 +365,28 @@ function amountToInput(value: number | undefined) {
   return value ? String(value).replace(".", ",") : ""
 }
 
+function getCalculatedDifference(grossAmount: number, netAmount: number) {
+  return grossAmount - netAmount
+}
+
+function getReceiptDifferenceLabel(grossAmount: number, netAmount: number) {
+  const difference = getCalculatedDifference(grossAmount, netAmount)
+
+  if (Math.abs(difference) < 0.005) {
+    return "Sem diferença"
+  }
+
+  if (difference < 0) {
+    return `Valor recebido acima do combinado: ${formatCurrency(Math.abs(difference))}`
+  }
+
+  return `Diferença calculada: ${formatCurrency(difference)}`
+}
+
 function createReceiptForm(shift: Shift): ReceiptForm {
   return {
     paymentDate: shift.paymentDate || todayISO(),
     netAmount: amountToInput(shift.netAmount ?? shift.amount),
-    deductions: amountToInput(shift.deductions),
     invoiceNumber: shift.invoiceNumber ?? "",
     paymentNotes: shift.paymentNotes ?? "",
   }
@@ -956,6 +968,9 @@ function shiftsForCsv(shifts: Shift[]) {
     paymentDate: shift.paymentDate,
     netAmount: shift.netAmount,
     deductions: shift.deductions,
+    calculatedDifference: shift.paid
+      ? getCalculatedDifference(getShiftGrossAmount(shift), getShiftNetAmount(shift))
+      : undefined,
     invoiceNumber: shift.invoiceNumber,
     paymentNotes: shift.paymentNotes,
     notes: shift.notes,
@@ -1224,7 +1239,7 @@ function App() {
   const [authError, setAuthError] = useState(
     isSupabaseConfigured
       ? ""
-      : "Supabase não configurado. Defina VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.",
+      : "Supabase não configurado. Defina VITE_SUPABASE_URL e VITE_SUPABASE_PUBLISHABLE_KEY.",
   )
   const [authMessage, setAuthMessage] = useState("")
   const [syncError, setSyncError] = useState("")
@@ -1253,7 +1268,6 @@ function App() {
   const [receiptForm, setReceiptForm] = useState<ReceiptForm>(() => ({
     paymentDate: todayISO(),
     netAmount: "",
-    deductions: "",
     invoiceNumber: "",
     paymentNotes: "",
   }))
@@ -1658,6 +1672,13 @@ function App() {
   const receiptShift = receiptShiftId
     ? shifts.find((shift) => shift.id === receiptShiftId) ?? null
     : null
+  const receiptGrossAmount = receiptShift ? getShiftGrossAmount(receiptShift) : 0
+  const receiptNetPreview =
+    parseAmount(receiptForm.netAmount) ?? receiptGrossAmount
+  const receiptDifferenceLabel = getReceiptDifferenceLabel(
+    receiptGrossAmount,
+    receiptNetPreview,
+  )
 
 
   const handleAuthSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -1668,7 +1689,7 @@ function App() {
 
     if (!supabase) {
       setAuthError(
-        "Supabase não configurado. Defina VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.",
+        "Supabase não configurado. Defina VITE_SUPABASE_URL e VITE_SUPABASE_PUBLISHABLE_KEY.",
       )
       setIsAuthSubmitting(false)
       return
@@ -1894,7 +1915,7 @@ function App() {
                 netAmount: payload.paid
                   ? shift.netAmount ?? payload.amount
                   : undefined,
-                deductions: payload.paid ? shift.deductions : undefined,
+                deductions: undefined,
                 invoiceNumber: payload.paid ? shift.invoiceNumber ?? "" : "",
                 paymentNotes: payload.paid ? shift.paymentNotes ?? "" : "",
                 updatedAt: new Date().toISOString(),
@@ -1932,7 +1953,6 @@ function App() {
     setReceiptForm({
       paymentDate: todayISO(),
       netAmount: "",
-      deductions: "",
       invoiceNumber: "",
       paymentNotes: "",
     })
@@ -1956,7 +1976,7 @@ function App() {
               paid: true,
               paymentDate: receiptForm.paymentDate || todayISO(),
               netAmount,
-              deductions: parseAmount(receiptForm.deductions),
+              deductions: undefined,
               invoiceNumber: receiptForm.invoiceNumber.trim(),
               paymentNotes: receiptForm.paymentNotes.trim(),
               updatedAt: new Date().toISOString(),
@@ -3739,7 +3759,7 @@ function App() {
                   {getShiftPeriod(receiptShift)}
                 </p>
                 <p className="mt-1 font-semibold text-primary">
-                  Valor combinado: {formatCurrency(getShiftGrossAmount(receiptShift))}
+                  Valor bruto/combinado: {formatCurrency(receiptGrossAmount)}
                 </p>
               </div>
 
@@ -3761,11 +3781,17 @@ function App() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="grid gap-2">
+                  <Label>Valor bruto/combinado</Label>
+                  <div className="flex h-10 items-center rounded-md border border-border bg-secondary px-3 text-sm font-semibold text-foreground">
+                    {formatCurrency(receiptGrossAmount)}
+                  </div>
+                </div>
+                <div className="grid gap-2">
                   <Label htmlFor="receipt-net">Valor líquido recebido</Label>
                   <Input
                     id="receipt-net"
                     inputMode="decimal"
-                    placeholder={amountToInput(receiptShift.amount) || "Ex.: 600"}
+                    placeholder={amountToInput(receiptGrossAmount) || "Ex.: 600"}
                     value={receiptForm.netAmount}
                     onChange={(event) =>
                       setReceiptForm((current) => ({
@@ -3775,21 +3801,15 @@ function App() {
                     }
                   />
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="receipt-deductions">Descontos</Label>
-                  <Input
-                    id="receipt-deductions"
-                    inputMode="decimal"
-                    placeholder="Opcional"
-                    value={receiptForm.deductions}
-                    onChange={(event) =>
-                      setReceiptForm((current) => ({
-                        ...current,
-                        deductions: event.target.value,
-                      }))
-                    }
-                  />
-                </div>
+              </div>
+
+              <div className="rounded-lg border border-border bg-secondary/60 px-3 py-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Diferença calculada
+                </p>
+                <p className="text-sm font-semibold text-foreground">
+                  {receiptDifferenceLabel}
+                </p>
               </div>
 
               {(receiptShift.personType ?? "PF") === "PJ" ? (

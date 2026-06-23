@@ -48,53 +48,96 @@ function normalizeAppData(value: AppDataPayload) {
   return {
     locations: Array.isArray(value.locations) ? value.locations : [],
     shifts: Array.isArray(value.shifts) ? value.shifts : [],
-    shiftTemplates: Array.isArray(value.shiftTemplates) ? value.shiftTemplates : [],
+    shiftTemplates: Array.isArray(value.shiftTemplates)
+      ? value.shiftTemplates
+      : [],
   };
+}
+
+function backupErrorResponse(error: unknown) {
+  console.error(error);
+  const message = error instanceof Error ? error.message : String(error);
+
+  if (
+    message.includes("Missing Supabase environment variable") ||
+    message.includes("SUPABASE_SERVICE_ROLE_KEY")
+  ) {
+    return jsonResponse(
+      {
+        error:
+          "Backup do Supabase sem configuração completa. Confira SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY na Vercel.",
+      },
+      { status: 500 },
+    );
+  }
+
+  if (message.includes("app_data")) {
+    return jsonResponse(
+      {
+        error:
+          "Tabela app_data não encontrada no Supabase. Crie a tabela de backup antes de salvar os dados.",
+      },
+      { status: 500 },
+    );
+  }
+
+  return jsonResponse(
+    { error: "Não foi possível acessar o backup do Supabase." },
+    { status: 500 },
+  );
 }
 
 export const Route = createFileRoute("/api/app-data")({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        const userId = await getUserId(request);
+        try {
+          const userId = await getUserId(request);
 
-        if (!userId) {
-          return jsonResponse({ error: "Sessão expirada" }, { status: 401 });
+          if (!userId) {
+            return jsonResponse({ error: "Sessão expirada" }, { status: 401 });
+          }
+
+          const { data, error } = await supabaseAdmin
+            .from("app_data")
+            .select("data")
+            .eq("id", userId)
+            .maybeSingle();
+
+          if (error) {
+            throw error;
+          }
+
+          return jsonResponse(
+            normalizeAppData((data?.data ?? {}) as AppDataPayload),
+          );
+        } catch (error) {
+          return backupErrorResponse(error);
         }
-
-        const { data, error } = await supabaseAdmin
-          .from("app_data")
-          .select("data")
-          .eq("id", userId)
-          .maybeSingle();
-
-        if (error) {
-          console.error(error);
-          return jsonResponse({ error: "Não foi possível carregar seus dados." }, { status: 500 });
-        }
-
-        return jsonResponse(normalizeAppData((data?.data ?? {}) as AppDataPayload));
       },
       PUT: async ({ request }) => {
-        const userId = await getUserId(request);
+        try {
+          const userId = await getUserId(request);
 
-        if (!userId) {
-          return jsonResponse({ error: "Sessão expirada" }, { status: 401 });
+          if (!userId) {
+            return jsonResponse({ error: "Sessão expirada" }, { status: 401 });
+          }
+
+          const payload = normalizeAppData((await request.json()) as AppDataPayload);
+          const { error } = await supabaseAdmin.from("app_data").upsert({
+            id: userId,
+            data: payload,
+            updated_at: new Date().toISOString(),
+          });
+
+          if (error) {
+            throw error;
+          }
+
+          return jsonResponse(payload);
+        } catch (error) {
+          return backupErrorResponse(error);
         }
-
-        const payload = normalizeAppData((await request.json()) as AppDataPayload);
-        const { error } = await supabaseAdmin.from("app_data").upsert({
-          id: userId,
-          data: payload,
-          updated_at: new Date().toISOString(),
-        });
-
-        if (error) {
-          console.error(error);
-          return jsonResponse({ error: "Não foi possível salvar seus dados." }, { status: 500 });
-        }
-
-        return jsonResponse(payload);
       },
     },
   },

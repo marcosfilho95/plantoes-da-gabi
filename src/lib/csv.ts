@@ -30,6 +30,7 @@ export type CsvShift = {
   paymentDate?: string
   netAmount?: number
   deductions?: number
+  calculatedDifference?: number
   invoiceNumber?: string
   paymentNotes?: string
   notes?: string
@@ -50,7 +51,7 @@ export const CSV_HEADER = [
   "data_prevista_recebimento",
   "data_recebimento",
   "valor_liquido",
-  "descontos",
+  "diferenca_calculada",
   "numero_nota_fiscal",
   "observacoes",
 ] as const
@@ -88,7 +89,7 @@ function shiftRow(shift: CsvShift): string[] {
     shift.expectedPaymentDate ? formatCsvDate(shift.expectedPaymentDate) : "",
     shift.paymentDate ? formatCsvDate(shift.paymentDate) : "",
     formatCsvAmount(shift.netAmount),
-    formatCsvAmount(shift.deductions),
+    formatCsvAmount(shift.calculatedDifference),
     shift.invoiceNumber ?? "",
     [shift.notes, shift.paymentNotes].filter(Boolean).join(" | "),
   ]
