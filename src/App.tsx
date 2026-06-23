@@ -1842,6 +1842,37 @@ function App() {
           </TabsList>
 
           <TabsContent value="agenda" className="space-y-4">
+            <section aria-label="Resumo fiscal do mês">
+              <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+                <MetricCard
+                  label="Total geral"
+                  value={formatCurrency(stats.totalAmount)}
+                  detail={formatShiftCount(stats.total)}
+                  icon={<CalendarDays className="size-5" />}
+                />
+                <MetricCard
+                  label="Horas"
+                  value={`${stats.totalHours}h`}
+                  detail="Somadas no mês"
+                  icon={<Clock3 className="size-5" />}
+                  accentClassName="bg-slate-100 text-slate-700"
+                />
+                <MetricCard
+                  label="Recebidos"
+                  value={String(stats.paid)}
+                  detail={`${formatCurrency(stats.receivedAmount)} recebidos`}
+                  icon={<WalletCards className="size-5" />}
+                  accentClassName="bg-emerald-50 text-emerald-700"
+                />
+                <MetricCard
+                  label="Pendentes"
+                  value={String(stats.pending)}
+                  detail={`${formatCurrency(stats.pendingAmount)} a receber`}
+                  icon={<CheckCircle2 className="size-5" />}
+                  accentClassName="bg-amber-50 text-amber-700"
+                />
+              </div>
+            </section>
             <Card className="border-[#F3D5DC] bg-white shadow-sm">
               <CardHeader className="pb-3">
                 <CardTitle>Calendário</CardTitle>
