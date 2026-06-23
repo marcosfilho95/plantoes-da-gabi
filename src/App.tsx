@@ -65,7 +65,6 @@ import { cn } from "@/lib/utils"
 import { SiteFooter, GoogleLogo } from "@/components/site-footer"
 import {
   downloadShiftsCsv,
-  validateExportYear,
   type PersonScope,
 } from "@/lib/csv"
 
@@ -160,6 +159,8 @@ type AuthSession = {
   email: string
   token: string
   userId: string
+  fullName: string
+  firstName: string
 }
 
 type AuthMode = "login" | "signup" | "recover" | "update-password"
@@ -467,10 +468,27 @@ function toAuthSession(session: Session | null): AuthSession | null {
     return null
   }
 
+  const meta = (session.user.user_metadata ?? {}) as Record<string, unknown>
+  const rawName =
+    (typeof meta.full_name === "string" && meta.full_name) ||
+    (typeof meta.name === "string" && meta.name) ||
+    (typeof meta.given_name === "string" && meta.given_name) ||
+    ""
+  const email = session.user.email ?? ""
+  const fallback = email.split("@")[0]?.replace(/[._\-+\d]+/g, " ").trim() ?? ""
+  const fullName = (rawName || fallback).trim()
+  const firstNameRaw = fullName.split(/\s+/)[0] ?? ""
+  const firstName = firstNameRaw
+    ? firstNameRaw.charAt(0).toLocaleUpperCase("pt-BR") +
+      firstNameRaw.slice(1).toLocaleLowerCase("pt-BR")
+    : ""
+
   return {
-    email: session.user.email ?? "",
+    email,
     token: session.access_token,
     userId: session.user.id,
+    fullName: fullName || email,
+    firstName: firstName || (email ? email[0]!.toUpperCase() : "Usuário"),
   }
 }
 
@@ -881,10 +899,6 @@ function App() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<ShiftForm>(() => createEmptyForm())
   const [newLocationName, setNewLocationName] = useState("")
-  const [yearExportInput, setYearExportInput] = useState(() =>
-    String(new Date().getFullYear()),
-  )
-  const [yearExportError, setYearExportError] = useState("")
   const [profileOpen, setProfileOpen] = useState(false)
   const [profileYear, setProfileYear] = useState(() => new Date().getFullYear())
 
@@ -1181,12 +1195,11 @@ function App() {
   }, [profileYear, shifts])
 
   const userInitials = useMemo(() => {
-    const source = session?.email ?? ""
-    const local = source.split("@")[0] ?? ""
-    const parts = local.replace(/[._-]+/g, " ").trim().split(/\s+/)
+    const source = session?.fullName ?? session?.email ?? ""
+    const parts = source.replace(/[._\-+]+/g, " ").trim().split(/\s+/)
     const letters = (parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")
     return letters.toUpperCase().slice(0, 2) || "U"
-  }, [session?.email])
+  }, [session?.fullName, session?.email])
 
 
 
@@ -1844,15 +1857,24 @@ function App() {
             ) : null}
           </div>
 
-          <div className="flex w-full justify-center sm:w-auto sm:justify-self-end">
+          <div className="flex w-full flex-col items-stretch gap-1.5 sm:w-auto sm:justify-self-end">
             <button
               type="button"
               onClick={() => setProfileOpen(true)}
               aria-label="Abrir perfil"
-              className="inline-flex h-10 items-center gap-2 rounded-xl border border-[#F3D5DC] bg-white px-4 text-sm font-semibold text-primary shadow-sm transition-colors hover:bg-rose-50"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[#F3D5DC] bg-white px-4 text-sm font-semibold text-primary shadow-sm transition-colors hover:bg-rose-50"
             >
               <User className="size-4" />
-              Perfil
+              {session.firstName ? `Olá, ${session.firstName}` : "Perfil"}
+            </button>
+            <button
+              type="button"
+              onClick={handleLogout}
+              aria-label="Sair da conta"
+              className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-rose-100 bg-white/70 px-3 text-xs font-semibold text-muted-foreground transition-colors hover:bg-rose-50 hover:text-primary"
+            >
+              <LogOut className="size-3.5" />
+              Sair
             </button>
           </div>
         </div>
@@ -1887,8 +1909,11 @@ function App() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <CardTitle>Calendário</CardTitle>
-                    <CardDescription>
-                      {formatShiftCount(stats.total)} no mês · toque em um dia para adicionar plantão
+                    <CardDescription className="flex items-center gap-1">
+                      <Plus className="size-3 text-primary" aria-hidden />
+                      <span>
+                        {formatShiftCount(stats.total)} no mês · toque em um dia para adicionar
+                      </span>
                     </CardDescription>
                   </div>
                   <Button
@@ -1921,12 +1946,17 @@ function App() {
                       <button
                         key={day.iso}
                         type="button"
+                        aria-label={
+                          dayShifts.length > 0
+                            ? `Dia ${day.label} — adicionar plantão`
+                            : `Dia ${day.label} — adicionar plantão`
+                        }
                         className={cn(
-                          "min-h-14 rounded-lg border p-1.5 text-left transition-colors lg:min-h-20 lg:p-2",
+                          "group relative min-h-14 rounded-lg border p-1.5 text-left transition-colors lg:min-h-20 lg:p-2",
                           dayShifts.length > 0
                             ? "border-rose-200 bg-rose-50/90"
-                            : "border-transparent bg-white hover:border-rose-200 hover:bg-rose-50",
-                          isToday && "border-primary",
+                            : "border-dashed border-rose-100 bg-white hover:border-rose-300 hover:bg-rose-50",
+                          isToday && "border-solid border-primary",
                         )}
                         onClick={() => openNewShift(day.iso)}
                       >
@@ -1938,6 +1968,12 @@ function App() {
                         >
                           {day.label}
                         </span>
+                        {dayShifts.length === 0 ? (
+                          <Plus
+                            className="pointer-events-none absolute bottom-1 right-1 size-3 text-rose-300 opacity-60 transition-opacity group-hover:opacity-100 lg:size-3.5"
+                            aria-hidden
+                          />
+                        ) : null}
                         <div className="mt-1 flex min-h-6 flex-wrap items-start gap-1">
                           {dayShifts.slice(0, 2).map((shift) => {
                             const meta = SHIFT_BY_CODE[shift.kind]
@@ -2071,9 +2107,27 @@ function App() {
                   </div>
                 </div>
 
-                <p className="rounded-lg border border-rose-100 bg-rose-50/60 p-3 text-xs text-muted-foreground">
-                  Os rendimentos totais para declaração estão no perfil do usuário.
-                </p>
+                <button
+                  type="button"
+                  onClick={() => setProfileOpen(true)}
+                  className="flex w-full items-center gap-3 rounded-xl border border-primary/30 bg-gradient-to-r from-rose-50 to-white p-3 text-left text-sm text-foreground shadow-sm transition-colors hover:border-primary/50 hover:bg-rose-50"
+                >
+                  <span
+                    className="flex size-9 shrink-0 items-center justify-center rounded-full text-primary-foreground shadow-brand"
+                    style={{ background: "var(--gradient-brand)" }}
+                  >
+                    <User className="size-4" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-[10px] font-bold uppercase tracking-wide text-primary">
+                      Declaração anual
+                    </span>
+                    <span className="block text-xs font-medium text-muted-foreground">
+                      Veja os rendimentos totais do ano no <span className="font-semibold text-foreground">Perfil</span>.
+                    </span>
+                  </span>
+                  <ChevronRight className="size-4 shrink-0 text-primary" />
+                </button>
               </CardContent>
             </Card>
 
@@ -2397,72 +2451,9 @@ function App() {
               </CardContent>
             </Card>
 
-            <Card className="border-[#F3D5DC] bg-white shadow-sm lg:col-span-2">
-              <CardHeader>
-                <CardTitle>Exportar ano completo</CardTitle>
-                <CardDescription>
-                  Gera um CSV com todos os plantões do ano informado.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex flex-wrap items-end gap-3">
-                  <div className="grid gap-1.5">
-                    <Label
-                      htmlFor="year-export-input"
-                      className="text-xs font-semibold uppercase text-muted-foreground"
-                    >
-                      Ano
-                    </Label>
-                    <Input
-                      id="year-export-input"
-                      inputMode="numeric"
-                      maxLength={4}
-                      className="w-28"
-                      value={yearExportInput}
-                      onChange={(event) => {
-                        setYearExportInput(event.target.value.replace(/\D/g, ""))
-                        setYearExportError("")
-                      }}
-                    />
-                  </div>
-                  {(["todos", "PF", "PJ"] as const).map((scope) => (
-                    <Button
-                      key={scope}
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      aria-label={`Exportar ano ${scope === "todos" ? "completo" : scope}`}
-                      onClick={() => {
-                        const result = validateExportYear(yearExportInput)
-                        if (!result.ok) {
-                          setYearExportError(result.message)
-                          return
-                        }
-                        setYearExportError("")
-                        const yearShifts =
-                          scope === "todos"
-                            ? shifts
-                            : shifts.filter(
-                                (shift) => (shift.personType ?? "PF") === scope,
-                              )
-                        exportYearCsv(yearShifts, result.year, scope)
-                      }}
-                    >
-                      <Download className="size-4" />
-                      {scope === "todos" ? "Todos" : scope}
-                    </Button>
-                  ))}
-                </div>
-                {yearExportError ? (
-                  <p
-                    role="alert"
-                    className="text-sm font-medium text-red-700"
-                  >
-                    {yearExportError}
-                  </p>
-                ) : null}
-              </CardContent>
-            </Card>
+            <p className="rounded-2xl border border-[#F3D5DC] bg-rose-50/60 p-3 text-center text-xs text-muted-foreground lg:col-span-2">
+              Para exportar o ano completo, abra o <span className="font-semibold text-primary">Perfil</span>.
+            </p>
           </TabsContent>
 
         </Tabs>
@@ -2486,7 +2477,7 @@ function App() {
               </div>
               <div className="min-w-0">
                 <p className="truncate text-lg font-extrabold text-foreground">
-                  Olá, {session.email.split("@")[0]}
+                  Olá, {session.firstName}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   Sessão ativa no Plantões da Gabi.
@@ -2494,21 +2485,21 @@ function App() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <div className="rounded-xl border border-[#F3D5DC] bg-white px-3 py-2.5">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Nome
+                </p>
+                <p className="truncate text-sm font-semibold text-foreground">
+                  {session.fullName || session.firstName}
+                </p>
+              </div>
               <div className="rounded-xl border border-[#F3D5DC] bg-white px-3 py-2.5">
                 <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                   E-mail
                 </p>
                 <p className="truncate text-sm font-semibold text-foreground">
                   {session.email}
-                </p>
-              </div>
-              <div className="rounded-xl border border-[#F3D5DC] bg-white px-3 py-2.5">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  Usuário
-                </p>
-                <p className="truncate text-sm font-semibold text-foreground">
-                  Não informado
                 </p>
               </div>
               <div className="rounded-xl border border-[#F3D5DC] bg-white px-3 py-2.5">
