@@ -1881,6 +1881,7 @@ function App() {
           <div className="flex w-full flex-col items-stretch gap-1.5 sm:w-auto sm:justify-self-end">
             <button
               type="button"
+              data-tour="profile-btn"
               onClick={() => setProfileOpen(true)}
               aria-label="Abrir meu perfil"
               title="Abrir meu perfil"
@@ -1900,6 +1901,27 @@ function App() {
                 <LogOut className="size-3.5" />
                 Sair
               </button>
+              <button
+                type="button"
+                data-tour="tutorial-btn"
+                onClick={() => setTutorialOpen(true)}
+                aria-label="Abrir tutorial"
+                title="Ver tutorial"
+                className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-border bg-card/70 text-primary shadow-sm transition-colors hover:bg-secondary"
+              >
+                <HelpCircle className="size-4" />
+              </button>
+              <div
+                data-tour="theme-toggle"
+                className="flex items-center gap-1.5 rounded-full border border-border/60 bg-card/70 px-2 py-0.5 shadow-sm"
+              >
+                <span className="select-none text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                  Tema
+                </span>
+                <ThemeToggle theme={theme} onChange={setTheme} size="sm" />
+              </div>
+            </div>
+          </div>
               <div className="flex items-center gap-1.5 rounded-full border border-border/60 bg-card/70 px-2 py-0.5 shadow-sm">
                 <span className="select-none text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
                   Tema
