@@ -1943,12 +1943,17 @@ function App() {
                       <button
                         key={day.iso}
                         type="button"
+                        aria-label={
+                          dayShifts.length > 0
+                            ? `Dia ${day.label} — adicionar plantão`
+                            : `Dia ${day.label} — adicionar plantão`
+                        }
                         className={cn(
-                          "min-h-14 rounded-lg border p-1.5 text-left transition-colors lg:min-h-20 lg:p-2",
+                          "group relative min-h-14 rounded-lg border p-1.5 text-left transition-colors lg:min-h-20 lg:p-2",
                           dayShifts.length > 0
                             ? "border-rose-200 bg-rose-50/90"
-                            : "border-transparent bg-white hover:border-rose-200 hover:bg-rose-50",
-                          isToday && "border-primary",
+                            : "border-dashed border-rose-100 bg-white hover:border-rose-300 hover:bg-rose-50",
+                          isToday && "border-solid border-primary",
                         )}
                         onClick={() => openNewShift(day.iso)}
                       >
@@ -1960,6 +1965,12 @@ function App() {
                         >
                           {day.label}
                         </span>
+                        {dayShifts.length === 0 ? (
+                          <Plus
+                            className="pointer-events-none absolute bottom-1 right-1 size-3 text-rose-300 opacity-60 transition-opacity group-hover:opacity-100 lg:size-3.5"
+                            aria-hidden
+                          />
+                        ) : null}
                         <div className="mt-1 flex min-h-6 flex-wrap items-start gap-1">
                           {dayShifts.slice(0, 2).map((shift) => {
                             const meta = SHIFT_BY_CODE[shift.kind]
