@@ -1935,7 +1935,7 @@ function App() {
                     </span>
                     <p className="text-[11px] font-semibold leading-tight text-foreground sm:text-xs">
                       <span className="block text-[9px] font-bold uppercase tracking-wide text-primary">
-                        Como adicionar
+                        Como adicionar plantão
                       </span>
                       Toque em um dia para registrar
                     </p>
