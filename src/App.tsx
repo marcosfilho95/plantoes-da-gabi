@@ -2445,7 +2445,7 @@ function App() {
               </div>
               <div className="min-w-0">
                 <p className="truncate text-lg font-extrabold text-foreground">
-                  Olá, {session.email.split("@")[0]}
+                  Olá, {session.firstName}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   Sessão ativa no Plantões da Gabi.
@@ -2453,21 +2453,21 @@ function App() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <div className="rounded-xl border border-[#F3D5DC] bg-white px-3 py-2.5">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Nome
+                </p>
+                <p className="truncate text-sm font-semibold text-foreground">
+                  {session.fullName || session.firstName}
+                </p>
+              </div>
               <div className="rounded-xl border border-[#F3D5DC] bg-white px-3 py-2.5">
                 <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                   E-mail
                 </p>
                 <p className="truncate text-sm font-semibold text-foreground">
                   {session.email}
-                </p>
-              </div>
-              <div className="rounded-xl border border-[#F3D5DC] bg-white px-3 py-2.5">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  Usuário
-                </p>
-                <p className="truncate text-sm font-semibold text-foreground">
-                  Não informado
                 </p>
               </div>
               <div className="rounded-xl border border-[#F3D5DC] bg-white px-3 py-2.5">
