@@ -1683,7 +1683,7 @@ function App() {
                     </p>
                   ) : null}
                   <Button
-                    className="relative h-12 w-full overflow-hidden rounded-xl border border-primary/40 bg-[linear-gradient(135deg,#fda4af_0%,#fb7185_45%,#f43f5e_100%)] text-[15px] font-semibold tracking-wide text-white shadow-[0_18px_40px_-12px_rgba(244,63,94,0.55),inset_0_1px_0_rgba(255,255,255,0.45)] transition-all duration-200 hover:brightness-[1.06] hover:shadow-[0_22px_50px_-12px_rgba(244,63,94,0.65),inset_0_1px_0_rgba(255,255,255,0.5)] active:scale-[0.99] disabled:opacity-70"
+                    className="relative h-12 w-full overflow-hidden rounded-xl border border-primary/40 bg-gradient-brand text-[15px] font-semibold tracking-wide text-primary-foreground shadow-brand transition-all duration-200 hover:brightness-[1.06] active:scale-[0.99] disabled:opacity-70"
                     disabled={
                       isAuthSubmitting ||
                       !isSupabaseConfigured ||
