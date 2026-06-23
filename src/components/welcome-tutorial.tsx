@@ -182,7 +182,7 @@ export function WelcomeTutorial({
   }, [open])
 
   const total = STEPS.length
-  const current = STEPS[step]!
+  const current = stepsLocal[step]!
   const isLast = step === total - 1
 
   // Switch tab if required.
