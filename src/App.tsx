@@ -4,6 +4,7 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  ClipboardList,
   Clock3,
   Download,
   Edit3,
@@ -80,6 +81,8 @@ import {
 
 const STORAGE_KEY = "plantoes-gabi:v1"
 const LOCATIONS_STORAGE_KEY = "plantoes-gabi:locations:v1"
+const SHIFT_TEMPLATES_STORAGE_KEY = "plantoes-gabi:shift-templates:v1"
+const MAX_SHIFT_TEMPLATES = 8
 
 const DEFAULT_LOCATIONS: string[] = []
 
@@ -163,6 +166,19 @@ type ShiftForm = {
   amount: string
   notes: string
   personType: "PF" | "PJ"
+}
+
+type ShiftTemplate = {
+  id: string
+  location: string
+  kind: ShiftCode
+  amount?: number
+  notes?: string
+  personType: "PF" | "PJ"
+  createdAt: string
+  updatedAt?: string
+  lastUsedAt?: string
+  useCount: number
 }
 
 type AuthSession = {
@@ -329,6 +345,116 @@ function sortShifts(a: Shift, b: Shift) {
   return SHIFT_BY_CODE[a.kind].start - SHIFT_BY_CODE[b.kind].start
 }
 
+function sortShiftTemplates(a: ShiftTemplate, b: ShiftTemplate) {
+  const usageOrder = b.useCount - a.useCount
+
+  if (usageOrder !== 0) {
+    return usageOrder
+  }
+
+  return (b.lastUsedAt ?? b.updatedAt ?? b.createdAt).localeCompare(
+    a.lastUsedAt ?? a.updatedAt ?? a.createdAt,
+  )
+}
+
+function formatTemplateAmount(amount: number | undefined) {
+  return amount ? ` · ${formatCurrency(amount)}` : ""
+}
+
+function formatShiftTemplateLabel(template: ShiftTemplate) {
+  const meta = SHIFT_BY_CODE[template.kind]
+  return `${template.location} · ${template.kind} ${meta.period} · ${template.personType}${formatTemplateAmount(template.amount)}`
+}
+
+function shiftTemplateFromForm(
+  payload: Omit<ShiftForm, "date" | "amount"> & { amount?: number },
+) {
+  const now = new Date().toISOString()
+
+  return {
+    id: createId(),
+    location: payload.location,
+    kind: payload.kind,
+    amount: payload.amount,
+    notes: payload.notes.trim(),
+    personType: payload.personType,
+    createdAt: now,
+    updatedAt: now,
+    lastUsedAt: now,
+    useCount: 1,
+  } satisfies ShiftTemplate
+}
+
+function shiftTemplateKey(
+  template: Pick<
+    ShiftTemplate,
+    "location" | "kind" | "amount" | "notes" | "personType"
+  >,
+) {
+  return [
+    normalizeLocationName(template.location),
+    template.kind,
+    template.personType,
+    template.amount ?? "",
+    (template.notes ?? "").trim(),
+  ].join("|")
+}
+
+function upsertShiftTemplate(
+  templates: ShiftTemplate[],
+  payload: Omit<ShiftForm, "date" | "amount"> & { amount?: number },
+) {
+  if (!payload.location) {
+    return templates
+  }
+
+  const now = new Date().toISOString()
+  const incoming = shiftTemplateFromForm(payload)
+  const incomingKey = shiftTemplateKey(incoming)
+  const existing = templates.find(
+    (template) => shiftTemplateKey(template) === incomingKey,
+  )
+
+  const next = existing
+    ? templates.map((template) =>
+        template.id === existing.id
+          ? {
+              ...template,
+              updatedAt: now,
+              lastUsedAt: now,
+              useCount: template.useCount + 1,
+            }
+          : template,
+      )
+    : [incoming, ...templates]
+
+  return next.sort(sortShiftTemplates).slice(0, MAX_SHIFT_TEMPLATES)
+}
+
+function buildShiftTemplatesFromShifts(shifts: Shift[]) {
+  return shifts.reduce<ShiftTemplate[]>((templates, shift) => {
+    return upsertShiftTemplate(templates, {
+      location: shift.location,
+      kind: shift.kind,
+      paid: false,
+      amount: shift.amount,
+      notes: shift.notes ?? "",
+      personType: shift.personType ?? "PF",
+    })
+  }, [])
+}
+
+function formFromShiftTemplate(current: ShiftForm, template: ShiftTemplate): ShiftForm {
+  return {
+    ...current,
+    location: template.location,
+    kind: template.kind,
+    amount: template.amount ? String(template.amount).replace(".", ",") : "",
+    notes: template.notes ?? "",
+    personType: template.personType,
+  }
+}
+
 function normalizeLocationName(value: string) {
   return value.trim().replace(/\s+/g, " ").toUpperCase()
 }
@@ -426,6 +552,62 @@ function sanitizeShifts(value: unknown): Shift[] {
   })
 }
 
+function sanitizeShiftTemplates(value: unknown): ShiftTemplate[] {
+  if (!Array.isArray(value)) {
+    return []
+  }
+
+  const seen = new Set<string>()
+
+  return value.flatMap((template) => {
+    if (!template || typeof template !== "object") {
+      return []
+    }
+
+    const candidate = template as Partial<ShiftTemplate>
+    const location = normalizeLocationName(String(candidate.location ?? ""))
+    const isValid =
+      typeof candidate.id === "string" &&
+      location.length > 0 &&
+      typeof candidate.kind === "string" &&
+      candidate.kind in SHIFT_BY_CODE
+
+    if (!isValid) {
+      return []
+    }
+
+    const amount = Number(candidate.amount)
+    const normalized: ShiftTemplate = {
+      id: candidate.id,
+      location,
+      kind: candidate.kind as ShiftCode,
+      amount: Number.isFinite(amount) && amount > 0 ? amount : undefined,
+      notes: typeof candidate.notes === "string" ? candidate.notes.trim() : "",
+      personType: candidate.personType === "PJ" ? "PJ" : "PF",
+      createdAt:
+        typeof candidate.createdAt === "string"
+          ? candidate.createdAt
+          : new Date().toISOString(),
+      updatedAt:
+        typeof candidate.updatedAt === "string" ? candidate.updatedAt : undefined,
+      lastUsedAt:
+        typeof candidate.lastUsedAt === "string" ? candidate.lastUsedAt : undefined,
+      useCount:
+        typeof candidate.useCount === "number" && candidate.useCount > 0
+          ? candidate.useCount
+          : 1,
+    }
+    const key = shiftTemplateKey(normalized)
+
+    if (seen.has(key)) {
+      return []
+    }
+
+    seen.add(key)
+    return [normalized]
+  }).sort(sortShiftTemplates)
+}
+
 function readStoredShifts() {
   const raw = window.localStorage.getItem(STORAGE_KEY)
 
@@ -435,6 +617,20 @@ function readStoredShifts() {
 
   try {
     return sanitizeShifts(JSON.parse(raw))
+  } catch {
+    return []
+  }
+}
+
+function readStoredShiftTemplates() {
+  const raw = window.localStorage.getItem(SHIFT_TEMPLATES_STORAGE_KEY)
+
+  if (!raw) {
+    return []
+  }
+
+  try {
+    return sanitizeShiftTemplates(JSON.parse(raw))
   } catch {
     return []
   }
@@ -899,6 +1095,9 @@ function App() {
   const [hasLoadedRemote, setHasLoadedRemote] = useState(false)
   const [shifts, setShifts] = useState<Shift[]>(readStoredShifts)
   const [locations, setLocations] = useState<string[]>(readStoredLocations)
+  const [shiftTemplates, setShiftTemplates] = useState<ShiftTemplate[]>(
+    readStoredShiftTemplates,
+  )
   const [selectedMonth, setSelectedMonth] = useState(monthKeyFromDate(new Date()))
   const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>("todos")
   const [locationFilter, setLocationFilter] = useState("todos")
@@ -909,6 +1108,7 @@ function App() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<ShiftForm>(() => createEmptyForm())
+  const [selectedTemplateId, setSelectedTemplateId] = useState("none")
   const [newLocationName, setNewLocationName] = useState("")
   const [profileOpen, setProfileOpen] = useState(false)
   const [tutorialOpen, setTutorialOpen] = useState(false)
@@ -941,6 +1141,21 @@ function App() {
   useEffect(() => {
     window.localStorage.setItem(LOCATIONS_STORAGE_KEY, JSON.stringify(locations))
   }, [locations])
+
+  useEffect(() => {
+    window.localStorage.setItem(
+      SHIFT_TEMPLATES_STORAGE_KEY,
+      JSON.stringify(shiftTemplates),
+    )
+  }, [shiftTemplates])
+
+  useEffect(() => {
+    if (shiftTemplates.length > 0 || shifts.length === 0) {
+      return
+    }
+
+    setShiftTemplates(buildShiftTemplatesFromShifts(shifts))
+  }, [shiftTemplates.length, shifts])
 
   useEffect(() => {
     if (!isSupabaseConfigured || !supabase) {
@@ -1021,7 +1236,11 @@ function App() {
 
     let isActive = true
 
-    apiRequest<{ locations: string[]; shifts: Shift[] }>("/api/app-data", {
+    apiRequest<{
+      locations: string[]
+      shifts: Shift[]
+      shiftTemplates?: ShiftTemplate[]
+    }>("/api/app-data", {
       method: "GET",
       token: session.token,
     })
@@ -1032,9 +1251,15 @@ function App() {
 
         const accountLocations = mergeLocations(DEFAULT_LOCATIONS, remoteData.locations)
         const accountShifts = sanitizeShifts(remoteData.shifts)
+        const accountTemplates = sanitizeShiftTemplates(remoteData.shiftTemplates)
 
         setLocations(accountLocations)
         setShifts(accountShifts)
+        setShiftTemplates(
+          accountTemplates.length > 0
+            ? accountTemplates
+            : buildShiftTemplatesFromShifts(accountShifts),
+        )
         setHasLoadedRemote(true)
         setAuthStatus("authenticated")
       })
@@ -1069,13 +1294,13 @@ function App() {
       apiRequest("/api/app-data", {
         method: "PUT",
         token: session.token,
-        body: JSON.stringify({ locations, shifts }),
+        body: JSON.stringify({ locations, shifts, shiftTemplates }),
       })
         .catch((error: Error) => console.error(error.message))
     }, 400)
 
     return () => window.clearTimeout(timeout)
-  }, [authMode, hasLoadedRemote, locations, session, shifts])
+  }, [authMode, hasLoadedRemote, locations, session, shiftTemplates, shifts])
 
   const monthShifts = useMemo(() => {
     return shifts.filter((shift) => shift.date.startsWith(selectedMonth)).sort(sortShifts)
@@ -1086,8 +1311,9 @@ function App() {
       DEFAULT_LOCATIONS,
       locations,
       shifts.map((shift) => shift.location),
+      shiftTemplates.map((template) => template.location),
     )
-  }, [locations, shifts])
+  }, [locations, shiftTemplates, shifts])
 
   const summaryLocations = useMemo(() => {
     return mergeLocations(
@@ -1376,12 +1602,14 @@ function App() {
   const openNewShift = (date = todayISO()) => {
     setEditingId(null)
     setForm(createEmptyForm(date))
+    setSelectedTemplateId("none")
     setNewLocationName("")
     setDialogOpen(true)
   }
 
   const openEditShift = (shift: Shift) => {
     setEditingId(shift.id)
+    setSelectedTemplateId("none")
     setForm({
       date: shift.date,
       location: shift.location,
@@ -1393,6 +1621,22 @@ function App() {
     })
     setNewLocationName("")
     setDialogOpen(true)
+  }
+
+  const applyShiftTemplate = (templateId: string) => {
+    setSelectedTemplateId(templateId)
+
+    if (templateId === "none") {
+      return
+    }
+
+    const template = shiftTemplates.find((item) => item.id === templateId)
+
+    if (!template) {
+      return
+    }
+
+    setForm((current) => formFromShiftTemplate(current, template))
   }
 
   const addCustomLocation = () => {
@@ -1432,6 +1676,7 @@ function App() {
     }
 
     setLocations((current) => mergeLocations(current, [payload.location]))
+    setShiftTemplates((current) => upsertShiftTemplate(current, payload))
 
     if (editingId) {
       setShifts((current) =>
@@ -2880,6 +3125,30 @@ function App() {
                 }
               />
             </div>
+
+            {!editingId && shiftTemplates.length > 0 ? (
+              <div className="grid gap-2">
+                <Label>Usar modelo</Label>
+                <Select value={selectedTemplateId} onValueChange={applyShiftTemplate}>
+                  <SelectTrigger aria-label="Usar modelo de plantão">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Preencher manualmente</SelectItem>
+                    {shiftTemplates.map((template) => (
+                      <SelectItem key={template.id} value={template.id}>
+                        <span className="inline-flex min-w-0 items-center gap-2">
+                          <ClipboardList className="size-4 shrink-0 text-muted-foreground" />
+                          <span className="truncate">
+                            {formatShiftTemplateLabel(template)}
+                          </span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : null}
 
             <div className="grid gap-2">
               <Label>Local</Label>
