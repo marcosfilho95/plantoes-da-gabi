@@ -1148,6 +1148,48 @@ function App() {
     }
   }, [monthShifts, summaryLocations])
 
+  const availableYears = useMemo(() => {
+    const years = new Set<number>([new Date().getFullYear()])
+    shifts.forEach((shift) => {
+      const year = Number(shift.date.slice(0, 4))
+      if (Number.isFinite(year)) years.add(year)
+    })
+    return Array.from(years).sort((a, b) => b - a)
+  }, [shifts])
+
+  const annualStats = useMemo(() => {
+    const prefix = `${profileYear}-`
+    const yearShifts = shifts.filter((shift) => shift.date.startsWith(prefix))
+    const pf = yearShifts.filter((shift) => (shift.personType ?? "PF") === "PF")
+    const pj = yearShifts.filter((shift) => (shift.personType ?? "PF") === "PJ")
+    const totalAmount = yearShifts.reduce((sum, s) => sum + (s.amount ?? 0), 0)
+    const pfAmount = pf.reduce((sum, s) => sum + (s.amount ?? 0), 0)
+    const pjAmount = pj.reduce((sum, s) => sum + (s.amount ?? 0), 0)
+    const pfPct = totalAmount > 0 ? Math.round((pfAmount / totalAmount) * 100) : 0
+    const pjPct = totalAmount > 0 ? 100 - pfPct : 0
+    return {
+      yearShifts,
+      total: yearShifts.length,
+      totalAmount,
+      pfCount: pf.length,
+      pjCount: pj.length,
+      pfAmount,
+      pjAmount,
+      pfPct,
+      pjPct,
+    }
+  }, [profileYear, shifts])
+
+  const userInitials = useMemo(() => {
+    const source = session?.email ?? ""
+    const local = source.split("@")[0] ?? ""
+    const parts = local.replace(/[._-]+/g, " ").trim().split(/\s+/)
+    const letters = (parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")
+    return letters.toUpperCase().slice(0, 2) || "U"
+  }, [session?.email])
+
+
+
   const handleAuthSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setIsAuthSubmitting(true)
