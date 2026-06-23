@@ -1478,6 +1478,9 @@ function App() {
         <div className="relative mx-auto flex min-h-dvh w-full max-w-md flex-col items-center justify-center gap-6 px-5 py-10">
           {/* Form panel */}
           <div className="mx-auto w-full max-w-md">
+            <div className="mb-3 flex justify-end">
+              <ThemeToggle theme={theme} onChange={setTheme} size="sm" />
+            </div>
             <div className="mb-6 flex flex-col items-center text-center">
               <img
                 src="/logo-plantoes-gabi.png"
