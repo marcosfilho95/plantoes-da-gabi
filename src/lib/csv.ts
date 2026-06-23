@@ -8,14 +8,12 @@
  *  - Dates rendered as dd/mm/aaaa
  *  - Decimal values use comma (",") and no thousand separators
  *
- * Manual verification (steps):
- *  1. Open the app, navigate to month with shifts.
- *  2. Apply filters (status, local, turno, PF/PJ) on the Plantões tab.
- *  3. Click "Todos" / "PF" / "PJ" export buttons — confirm filename and rows.
- *  4. Open CSV in Excel/LibreOffice; confirm header, dates and comma decimals.
- *  5. In the yearly export, try a future year and a non-4-digit value —
- *     expect a friendly error and no download.
- *  6. Try a notes field containing  " ; \n  — expect escaped output.
+ * Contabilidade:
+ *  - data_plantao  -> produção médica (competência)
+ *  - data_recebimento -> financeiro / ano-calendário
+ *  - valor_bruto -> valor combinado do plantão
+ *  - valor_liquido -> apenas o efetivamente recebido (vazio se pendente)
+ *  - desconto_ou_ajuste -> valor_bruto - valor_liquido (negativo = adicional)
  */
 
 export type CsvShift = {
@@ -42,6 +40,7 @@ export type PersonScope = "todos" | "PF" | "PJ"
 export const CSV_HEADER = [
   "id",
   "data_plantao",
+  "mes_competencia",
   "local",
   "turno",
   "horario",
@@ -50,7 +49,10 @@ export const CSV_HEADER = [
   "valor_bruto",
   "data_prevista_recebimento",
   "data_recebimento",
+  "mes_recebimento",
+  "ano_calendario_recebimento",
   "valor_liquido",
+  "desconto_ou_ajuste",
   "diferenca_calculada",
   "numero_nota_fiscal",
   "observacoes",
@@ -65,7 +67,6 @@ export function escapeCsvCell(value: unknown): string {
 }
 
 export function formatCsvDate(iso: string): string {
-  // iso is YYYY-MM-DD
   const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso)
   if (!match) return iso
   return `${match[3]}/${match[2]}/${match[1]}`
@@ -76,10 +77,32 @@ export function formatCsvAmount(value: number | undefined): string {
   return value.toFixed(2).replace(".", ",")
 }
 
+function formatMonthKey(iso: string | undefined): string {
+  if (!iso) return ""
+  const match = /^(\d{4})-(\d{2})/.exec(iso)
+  return match ? `${match[1]}-${match[2]}` : ""
+}
+
+function formatYearKey(iso: string | undefined): string {
+  if (!iso) return ""
+  const match = /^(\d{4})/.exec(iso)
+  return match ? match[1] : ""
+}
+
+function computeAdjustment(shift: CsvShift): number | undefined {
+  if (!shift.paid) return undefined
+  if (shift.amount === undefined || shift.netAmount === undefined) return undefined
+  return Number((shift.amount - shift.netAmount).toFixed(2))
+}
+
 function shiftRow(shift: CsvShift): string[] {
+  const paymentDate = shift.paid ? shift.paymentDate : undefined
+  const netAmount = shift.paid ? shift.netAmount : undefined
+  const adjustment = computeAdjustment(shift)
   return [
     shift.id,
     formatCsvDate(shift.date),
+    formatMonthKey(shift.date),
     shift.location,
     shift.kind,
     shift.period ?? "",
@@ -87,8 +110,11 @@ function shiftRow(shift: CsvShift): string[] {
     shift.paid ? "recebido" : "pendente",
     formatCsvAmount(shift.amount),
     shift.expectedPaymentDate ? formatCsvDate(shift.expectedPaymentDate) : "",
-    shift.paymentDate ? formatCsvDate(shift.paymentDate) : "",
-    formatCsvAmount(shift.netAmount),
+    paymentDate ? formatCsvDate(paymentDate) : "",
+    formatMonthKey(paymentDate),
+    formatYearKey(paymentDate),
+    formatCsvAmount(netAmount),
+    formatCsvAmount(adjustment),
     formatCsvAmount(shift.calculatedDifference),
     shift.invoiceNumber ?? "",
     [shift.notes, shift.paymentNotes].filter(Boolean).join(" | "),
@@ -96,35 +122,184 @@ function shiftRow(shift: CsvShift): string[] {
 }
 
 export type BuildCsvOptions = {
-  /** Optional list of header columns. Defaults to CSV_HEADER. */
   header?: readonly string[]
 }
 
-/** Builds the CSV body (without BOM). Returns header + rows only. */
 export function buildShiftsCsv(
   shifts: CsvShift[],
   options: BuildCsvOptions = {},
 ): string {
   const header = options.header ?? CSV_HEADER
   const lines: string[] = []
-
   lines.push(header.map(escapeCsvCell).join(SEPARATOR))
-
   for (const shift of shifts) {
     lines.push(shiftRow(shift).map(escapeCsvCell).join(SEPARATOR))
+  }
+  return lines.join(LINE_BREAK)
+}
+
+// ===== Summary =====
+
+export type ShiftsSummary = {
+  brutoPorCompetencia: Array<{ mes: string; total: number; quantidade: number }>
+  liquidoPorRecebimento: Array<{ mes: string; total: number; quantidade: number }>
+  pendente: { total: number; quantidade: number }
+  porLocal: Array<{ local: string; bruto: number; liquido: number; quantidade: number }>
+  porTipoRecebimento: Array<{
+    tipo: string
+    bruto: number
+    liquido: number
+    quantidade: number
+  }>
+}
+
+function addTo<K extends string>(
+  map: Map<string, { total: number; quantidade: number }>,
+  key: K,
+  value: number,
+) {
+  const cur = map.get(key) ?? { total: 0, quantidade: 0 }
+  cur.total += value
+  cur.quantidade += 1
+  map.set(key, cur)
+}
+
+export function buildShiftsSummary(shifts: CsvShift[]): ShiftsSummary {
+  const brutoMap = new Map<string, { total: number; quantidade: number }>()
+  const liquidoMap = new Map<string, { total: number; quantidade: number }>()
+  const localMap = new Map<
+    string,
+    { bruto: number; liquido: number; quantidade: number }
+  >()
+  const tipoMap = new Map<
+    string,
+    { bruto: number; liquido: number; quantidade: number }
+  >()
+  let pendenteTotal = 0
+  let pendenteQtd = 0
+
+  for (const shift of shifts) {
+    const bruto = shift.amount ?? 0
+    const liquido = shift.paid ? shift.netAmount ?? 0 : 0
+    const mesComp = formatMonthKey(shift.date)
+    if (mesComp) addTo(brutoMap, mesComp, bruto)
+
+    if (shift.paid) {
+      const mesReceb = formatMonthKey(shift.paymentDate)
+      if (mesReceb) addTo(liquidoMap, mesReceb, liquido)
+    } else {
+      pendenteTotal += bruto
+      pendenteQtd += 1
+    }
+
+    const localKey = shift.location || "(sem local)"
+    const localCur = localMap.get(localKey) ?? {
+      bruto: 0,
+      liquido: 0,
+      quantidade: 0,
+    }
+    localCur.bruto += bruto
+    localCur.liquido += liquido
+    localCur.quantidade += 1
+    localMap.set(localKey, localCur)
+
+    const tipoKey = shift.personType ?? "(indefinido)"
+    const tipoCur = tipoMap.get(tipoKey) ?? {
+      bruto: 0,
+      liquido: 0,
+      quantidade: 0,
+    }
+    tipoCur.bruto += bruto
+    tipoCur.liquido += liquido
+    tipoCur.quantidade += 1
+    tipoMap.set(tipoKey, tipoCur)
+  }
+
+  const sortByKey = <T extends { [k: string]: unknown }>(
+    arr: T[],
+    key: keyof T,
+  ) => arr.sort((a, b) => String(a[key]).localeCompare(String(b[key])))
+
+  return {
+    brutoPorCompetencia: sortByKey(
+      Array.from(brutoMap.entries()).map(([mes, v]) => ({ mes, ...v })),
+      "mes",
+    ),
+    liquidoPorRecebimento: sortByKey(
+      Array.from(liquidoMap.entries()).map(([mes, v]) => ({ mes, ...v })),
+      "mes",
+    ),
+    pendente: { total: pendenteTotal, quantidade: pendenteQtd },
+    porLocal: sortByKey(
+      Array.from(localMap.entries()).map(([local, v]) => ({ local, ...v })),
+      "local",
+    ),
+    porTipoRecebimento: sortByKey(
+      Array.from(tipoMap.entries()).map(([tipo, v]) => ({ tipo, ...v })),
+      "tipo",
+    ),
+  }
+}
+
+export function buildSummaryCsv(shifts: CsvShift[]): string {
+  const s = buildShiftsSummary(shifts)
+  const lines: string[] = []
+  const row = (cells: unknown[]) =>
+    lines.push(cells.map(escapeCsvCell).join(SEPARATOR))
+
+  row(["secao", "chave", "quantidade", "valor_bruto", "valor_liquido"])
+
+  for (const item of s.brutoPorCompetencia) {
+    row([
+      "total_bruto_por_mes_competencia",
+      item.mes,
+      item.quantidade,
+      formatCsvAmount(item.total),
+      "",
+    ])
+  }
+  for (const item of s.liquidoPorRecebimento) {
+    row([
+      "total_liquido_por_mes_recebimento",
+      item.mes,
+      item.quantidade,
+      "",
+      formatCsvAmount(item.total),
+    ])
+  }
+  row([
+    "total_pendente",
+    "",
+    s.pendente.quantidade,
+    formatCsvAmount(s.pendente.total),
+    "",
+  ])
+  for (const item of s.porLocal) {
+    row([
+      "total_por_local",
+      item.local,
+      item.quantidade,
+      formatCsvAmount(item.bruto),
+      formatCsvAmount(item.liquido),
+    ])
+  }
+  for (const item of s.porTipoRecebimento) {
+    row([
+      "total_por_tipo_recebimento",
+      item.tipo,
+      item.quantidade,
+      formatCsvAmount(item.bruto),
+      formatCsvAmount(item.liquido),
+    ])
   }
 
   return lines.join(LINE_BREAK)
 }
 
 export type DownloadCsvOptions = BuildCsvOptions & {
-  /** Filename prefix, e.g. "plantoes-gabi". */
   filenameBase?: string
-  /** Main label segment, e.g. "2026-06" or "2026". */
   label?: string
-  /** Suffix derived from person scope. "todos" omits suffix. */
   personScope?: PersonScope
-  /** Override the full filename (without extension). */
   filename?: string
 }
 
@@ -138,19 +313,12 @@ export function buildCsvFilename(options: DownloadCsvOptions = {}): string {
   return `${parts.join("-")}.csv`
 }
 
-/** Builds and triggers a browser download. Returns the filename used. */
-export function downloadShiftsCsv(
-  shifts: CsvShift[],
-  options: DownloadCsvOptions = {},
-): string {
-  const csv = buildShiftsCsv(shifts, options)
+function triggerDownload(csv: string, filename: string) {
   const blob = new Blob([`\ufeff${csv}`], {
     type: "text/csv;charset=utf-8",
   })
   const url = URL.createObjectURL(blob)
   const link = document.createElement("a")
-  const filename = buildCsvFilename(options)
-
   link.href = url
   link.download = filename
   link.rel = "noopener"
@@ -158,6 +326,21 @@ export function downloadShiftsCsv(
   link.click()
   link.remove()
   URL.revokeObjectURL(url)
+}
+
+export function downloadShiftsCsv(
+  shifts: CsvShift[],
+  options: DownloadCsvOptions = {},
+): string {
+  const csv = buildShiftsCsv(shifts, options)
+  const filename = buildCsvFilename(options)
+  triggerDownload(csv, filename)
+
+  // Resumo contábil separado, com sufixo "-resumo".
+  const summaryCsv = buildSummaryCsv(shifts)
+  const baseName = filename.replace(/\.csv$/i, "")
+  triggerDownload(summaryCsv, `${baseName}-resumo.csv`)
+
   return filename
 }
 
@@ -165,7 +348,6 @@ export type YearValidation =
   | { ok: true; year: number }
   | { ok: false; message: string }
 
-/** Validates a yearly-export input string. */
 export function validateExportYear(
   raw: string,
   now: Date = new Date(),
