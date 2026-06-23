@@ -1,3 +1,5 @@
+import { Github, Linkedin } from "lucide-react";
+
 export function SiteFooter({ className = "" }: { className?: string }) {
   return (
     <footer
@@ -12,17 +14,21 @@ export function SiteFooter({ className = "" }: { className?: string }) {
           href="https://github.com/marcosfilho95"
           target="_blank"
           rel="noreferrer"
-          className="font-medium transition-colors hover:underline"
+          aria-label="GitHub de Marcos Antônio Felix"
+          className="inline-flex items-center gap-1.5 font-medium transition-colors hover:underline"
         >
-          GitHub: github.com/marcosfilho95
+          <Github className="size-4" aria-hidden />
+          <span>marcosfilho95</span>
         </a>
         <a
           href="https://www.linkedin.com/in/marcosantoniofelix/?skipRedirect=true"
           target="_blank"
           rel="noreferrer"
-          className="font-medium transition-colors hover:underline"
+          aria-label="LinkedIn de Marcos Antônio Felix"
+          className="inline-flex items-center gap-1.5 font-medium transition-colors hover:underline"
         >
-          LinkedIn: linkedin.com/in/marcosantoniofelix
+          <Linkedin className="size-4" aria-hidden />
+          <span>marcosantoniofelix</span>
         </a>
       </div>
     </footer>
