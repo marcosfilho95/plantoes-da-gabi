@@ -1908,28 +1908,29 @@ function App() {
 
             <Card className="border-[#F3D5DC] bg-white shadow-sm">
               <CardHeader className="pb-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <CardTitle>Calendário</CardTitle>
-                    <CardDescription className="flex items-center gap-1">
-                      <Plus className="size-3 text-primary" aria-hidden />
-                      <span>
-                        {formatShiftCount(stats.total)} no mês · toque em um dia para adicionar
-                      </span>
-                    </CardDescription>
-                  </div>
-                  <Button
-                    type="button"
-                    size="sm"
-                    className="shrink-0 rounded-xl shadow-soft"
-                    onClick={() => openNewShift(todayISO())}
-                  >
-                    <Plus className="size-4" />
-                    Novo plantão
-                  </Button>
-                </div>
+                <CardTitle>Calendário</CardTitle>
+                <CardDescription>
+                  {formatShiftCount(stats.total)} em {formatMonth(selectedMonth)}
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
+                <div
+                  className="flex items-center gap-3 rounded-xl border border-dashed border-primary/40 bg-rose-50/80 p-3 text-left"
+                  role="note"
+                >
+                  <span
+                    className="flex size-9 shrink-0 items-center justify-center rounded-full text-primary-foreground shadow-brand"
+                    style={{ background: "var(--gradient-brand)" }}
+                  >
+                    <Plus className="size-5" aria-hidden />
+                  </span>
+                  <p className="text-xs font-semibold text-foreground sm:text-sm">
+                    <span className="block text-[10px] font-bold uppercase tracking-wide text-primary">
+                      Como adicionar
+                    </span>
+                    Toque em qualquer dia do calendário abaixo para registrar um plantão.
+                  </p>
+                </div>
                 <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-muted-foreground">
                   {["seg", "ter", "qua", "qui", "sex", "sáb", "dom"].map((day) => (
                     <span key={day}>{day}</span>
