@@ -1377,70 +1377,10 @@ function App() {
         <div className="pointer-events-none absolute -left-32 -top-32 size-[420px] rounded-full bg-gradient-brand opacity-20 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-40 -right-24 size-[480px] rounded-full bg-rose-200/40 blur-3xl" />
 
-        <div className="relative mx-auto grid min-h-dvh w-full max-w-[1200px] grid-cols-1 items-center gap-10 px-5 py-10 lg:grid-cols-[1.05fr_1fr] lg:px-10 lg:py-16">
-          {/* Brand panel — desktop only */}
-          <aside className="hidden lg:flex">
-            <div className="relative isolate w-full overflow-hidden rounded-[2.25rem] bg-gradient-brand p-10 text-white shadow-elevated">
-              <div className="brand-grain absolute inset-0 opacity-50 mix-blend-overlay" />
-              <div className="absolute -right-24 -top-24 size-72 rounded-full bg-white/10 blur-2xl" />
-              <div className="absolute -bottom-20 -left-10 size-72 rounded-full bg-rose-300/30 blur-3xl" />
-
-              <div className="relative flex h-full min-h-[560px] flex-col justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="grid size-12 place-items-center rounded-2xl bg-white/95 shadow-brand">
-                    <img
-                      src="/logo-plantoes-gabi.png"
-                      alt=""
-                      className="size-10 object-contain"
-                    />
-                  </div>
-                  <div className="leading-tight">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-rose-100/80">
-                      Studio pessoal
-                    </p>
-                    <p className="font-display text-lg font-semibold text-white">
-                      Plantões da Gabi
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-6">
-                  <h2 className="font-display text-5xl font-semibold leading-[1.05] tracking-tight text-white">
-                    Sua agenda de plantões,
-                    <br />
-                    <span className="italic text-rose-100">refinada.</span>
-                  </h2>
-                  <p className="max-w-md text-base leading-relaxed text-rose-50/90">
-                    Acompanhe horas, valores e pagamentos com a elegância de um caderno
-                    artesanal — agora com a precisão de um app.
-                  </p>
-
-                  <ul className="grid gap-3 pt-2 text-sm text-rose-50/90">
-                    {[
-                      "Resumo mensal de horas e valores",
-                      "Filtros por PF, PJ e local",
-                      "Exportação em CSV pronta para a contabilidade",
-                    ].map((item) => (
-                      <li key={item} className="flex items-start gap-3">
-                        <span className="mt-1 grid size-5 shrink-0 place-items-center rounded-full bg-white/15 ring-1 ring-white/30">
-                          <span className="size-1.5 rounded-full bg-white" />
-                        </span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <p className="font-display text-xs italic text-rose-100/70">
-                  &ldquo;Cada plantão merece um registro bonito.&rdquo;
-                </p>
-              </div>
-            </div>
-          </aside>
-
+        <div className="relative mx-auto flex min-h-dvh w-full max-w-md flex-col items-center justify-center gap-6 px-5 py-10">
           {/* Form panel */}
           <div className="mx-auto w-full max-w-md">
-            <div className="mb-6 flex flex-col items-center text-center lg:hidden">
+            <div className="mb-6 flex flex-col items-center text-center">
               <img
                 src="/logo-plantoes-gabi.png"
                 alt="Plantões da Gabi"
