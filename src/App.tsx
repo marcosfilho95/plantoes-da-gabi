@@ -64,6 +64,7 @@ import { isSupabaseConfigured, supabase } from "@/lib/supabase"
 import { cn } from "@/lib/utils"
 import { SiteFooter, GoogleLogo } from "@/components/site-footer"
 import { ThemeToggle, useTheme } from "@/components/theme-toggle"
+import { WelcomeTutorial } from "@/components/welcome-tutorial"
 import {
   downloadShiftsCsv,
   type PersonScope,
