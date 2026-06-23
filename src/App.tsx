@@ -1199,12 +1199,11 @@ function App() {
   }, [profileYear, shifts])
 
   const userInitials = useMemo(() => {
-    const source = session?.email ?? ""
-    const local = source.split("@")[0] ?? ""
-    const parts = local.replace(/[._-]+/g, " ").trim().split(/\s+/)
+    const source = session?.fullName ?? session?.email ?? ""
+    const parts = source.replace(/[._\-+]+/g, " ").trim().split(/\s+/)
     const letters = (parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")
     return letters.toUpperCase().slice(0, 2) || "U"
-  }, [session?.email])
+  }, [session?.fullName, session?.email])
 
 
 
