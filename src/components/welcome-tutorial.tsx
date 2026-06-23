@@ -418,8 +418,9 @@ export function WelcomeTutorial({
 
       <style>{`
         @keyframes tour-pulse {
-          0% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.55); }
-          70% { box-shadow: 0 0 0 14px hsl(var(--primary) / 0); }
+        @keyframes tour-pulse {
+          0% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.7); }
+          70% { box-shadow: 0 0 0 22px hsl(var(--primary) / 0); }
           100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
         }
       `}</style>
