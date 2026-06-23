@@ -1392,6 +1392,17 @@ function App() {
         return
       }
 
+      // Ignore noisy events that fire on tab focus / hourly token refresh.
+      // Resetting state here would put us back into "checking" forever, since
+      // useAppSync only re-fetches when the userId changes.
+      if (event !== "SIGNED_IN" && event !== "USER_UPDATED") {
+        // Still keep the session object fresh (new access token), but don't
+        // touch authStatus / hasLoadedRemote.
+        const refreshed = toAuthSession(nextSupabaseSession)
+        if (refreshed) setSession(refreshed)
+        return
+      }
+
       const nextSession = toAuthSession(nextSupabaseSession)
       setSession(nextSession)
       setHasLoadedRemote(false)
