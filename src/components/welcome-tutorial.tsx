@@ -50,8 +50,8 @@ type Step = {
 const STEPS: Step[] = [
   {
     icon: Sparkles,
-    eyebrow: "Bem-vinda",
-    title: "Vamos conhecer a aplicação juntas",
+    eyebrow: "Boas-vindas",
+    title: "Vamos conhecer a aplicação juntos",
     body: "Em alguns passos eu vou destacar cada parte. Você pode pular quando quiser.",
   },
   {
@@ -85,8 +85,17 @@ const STEPS: Step[] = [
     selector: '[data-tour="plantoes-content"]',
     icon: Table2,
     eyebrow: "Plantões",
-    title: "Lista completa com filtros",
-    body: "Filtre por status, local ou pessoa. Edite ou apague qualquer plantão em poucos toques.",
+    title: "Lista de todos os seus plantões",
+    body: "Nesta aba você encontra cada plantão cadastrado, podendo editar ou apagar com facilidade.",
+    placement: "bottom",
+  },
+  {
+    tab: "plantoes",
+    selector: '[data-tour="plantoes-filter"]',
+    icon: Filter,
+    eyebrow: "Filtros",
+    title: "Encontre rápido o que precisa",
+    body: "Refine a lista por status de pagamento, local ou pessoa. Os filtros se combinam entre si.",
     placement: "bottom",
   },
   {
