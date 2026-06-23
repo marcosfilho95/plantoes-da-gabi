@@ -1844,29 +1844,16 @@ function App() {
             ) : null}
           </div>
 
-          <div className="flex w-full max-w-[260px] flex-col items-stretch gap-2 justify-self-center sm:max-w-none sm:justify-self-end">
-            <div className="flex items-center gap-2 rounded-xl border border-[#F3D5DC] bg-white px-3 py-2 shadow-sm">
-              <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-700">
-                <User className="size-4" />
-              </div>
-              <div className="min-w-0 text-left">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  Perfil
-                </p>
-                <p className="truncate text-sm font-semibold text-foreground">
-                  {session.email}
-                </p>
-              </div>
-            </div>
-            <Button
+          <div className="flex w-full justify-center sm:w-auto sm:justify-self-end">
+            <button
               type="button"
-              variant="outline"
-              className="h-9 w-full rounded-xl border-rose-200 bg-white px-4 text-sm font-semibold text-rose-700 shadow-sm hover:bg-rose-50"
-              onClick={handleLogout}
+              onClick={() => setProfileOpen(true)}
+              aria-label="Abrir perfil"
+              className="inline-flex h-10 items-center gap-2 rounded-xl border border-[#F3D5DC] bg-white px-4 text-sm font-semibold text-primary shadow-sm transition-colors hover:bg-rose-50"
             >
-              <LogOut className="size-4" />
-              Sair
-            </Button>
+              <User className="size-4" />
+              Perfil
+            </button>
           </div>
         </div>
       </header>
