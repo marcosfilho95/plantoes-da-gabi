@@ -913,6 +913,16 @@ function App() {
   const [profileOpen, setProfileOpen] = useState(false)
   const [tutorialOpen, setTutorialOpen] = useState(false)
   const [profileYear, setProfileYear] = useState(() => new Date().getFullYear())
+  const [titlePref, setTitlePrefState] = useState<TitlePref>(() =>
+    getTitlePref(session?.userId),
+  )
+  useEffect(() => {
+    setTitlePrefState(getTitlePref(session?.userId))
+  }, [session?.userId])
+  const userTitle = resolveTitle(session?.fullName ?? session?.firstName, titlePref)
+  const titledFirstName = userTitle
+    ? `${userTitle} ${session?.firstName ?? ""}`.trim()
+    : session?.firstName ?? ""
 
   useEffect(() => {
     if (!session?.userId) return
