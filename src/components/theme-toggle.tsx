@@ -1,18 +1,23 @@
 import { useEffect, useState } from "react"
+import { Moon, Sun } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-export type ThemeName = "rose" | "blue"
+export type ThemeName = "light" | "dark"
 const THEME_KEY = "plantoes-gabi:theme"
 
 export function getStoredTheme(): ThemeName {
-  if (typeof window === "undefined") return "rose"
+  if (typeof window === "undefined") return "light"
   const v = window.localStorage.getItem(THEME_KEY)
-  return v === "blue" ? "blue" : "rose"
+  // Migrate legacy values (rose/blue) → light
+  return v === "dark" ? "dark" : "light"
 }
 
 export function applyTheme(theme: ThemeName) {
   if (typeof document === "undefined") return
-  document.documentElement.dataset.theme = theme
+  const root = document.documentElement
+  root.dataset.theme = theme
+  root.classList.toggle("dark", theme === "dark")
+  root.style.colorScheme = theme === "dark" ? "dark" : "light"
 }
 
 type DocWithVT = Document & {
@@ -35,13 +40,14 @@ export function changeThemeWithBlob(
     root.style.setProperty("--theme-x", "50%")
     root.style.setProperty("--theme-y", "50%")
   }
-  if (typeof doc.startViewTransition !== "function" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  if (
+    typeof doc.startViewTransition !== "function" ||
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  ) {
     commit(next)
     return
   }
-  doc.startViewTransition(() => {
-    commit(next)
-  })
+  doc.startViewTransition(() => commit(next))
 }
 
 export function useTheme(): [ThemeName, (t: ThemeName) => void] {
@@ -55,24 +61,6 @@ export function useTheme(): [ThemeName, (t: ThemeName) => void] {
   return [theme, setTheme]
 }
 
-const ORBS: Record<
-  ThemeName,
-  { label: string; fill: string; glow: string; ring: string }
-> = {
-  rose: {
-    label: "Rose",
-    fill: "radial-gradient(circle at 32% 30%, #fda4af 0%, #e86a82 55%, #b23253 100%)",
-    glow: "0 0 0 1px rgba(232,106,130,0.18), 0 6px 14px -4px rgba(178,50,83,0.45)",
-    ring: "ring-[#e8a2a2]",
-  },
-  blue: {
-    label: "Azul pastel",
-    fill: "radial-gradient(circle at 32% 30%, #bfdcf2 0%, #6fa6cf 55%, #2f5d86 100%)",
-    glow: "0 0 0 1px rgba(111,166,207,0.18), 0 6px 14px -4px rgba(47,93,134,0.45)",
-    ring: "ring-[#90b4ce]",
-  },
-}
-
 export function ThemeToggle({
   theme,
   onChange,
@@ -84,88 +72,70 @@ export function ThemeToggle({
   className?: string
   size?: "sm" | "md"
 }) {
-  const cell = size === "sm" ? "size-7" : "size-8"
-  const orb = size === "sm" ? "size-4" : "size-[18px]"
+  const isDark = theme === "dark"
+  const next: ThemeName = isDark ? "light" : "dark"
+  const dims = size === "sm" ? "h-8 w-[60px]" : "h-9 w-[68px]"
+  const knob = size === "sm" ? "size-6" : "size-7"
+  const icon = size === "sm" ? "size-3.5" : "size-4"
+  const shift = size === "sm" ? "translate-x-[28px]" : "translate-x-[31px]"
+
   return (
-    <div
-      role="radiogroup"
-      aria-label="Tema de cores"
+    <button
+      type="button"
+      role="switch"
+      aria-checked={isDark}
+      aria-label={isDark ? "Mudar para tema claro" : "Mudar para tema escuro"}
+      title={isDark ? "Tema claro" : "Tema escuro"}
+      onClick={(e) => {
+        const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
+        changeThemeWithBlob(
+          theme,
+          next,
+          { x: r.left + r.width / 2, y: r.top + r.height / 2 },
+          onChange,
+        )
+      }}
       className={cn(
-        "relative inline-flex items-center gap-0.5 rounded-full border border-border/70 bg-white/70 p-1 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.06)] backdrop-blur-sm",
+        "relative inline-flex shrink-0 items-center rounded-full border p-0.5 transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-1 focus-visible:ring-offset-background",
+        dims,
+        isDark
+          ? "border-white/10 bg-[linear-gradient(135deg,#1b2236_0%,#0c1020_100%)]"
+          : "border-border/70 bg-[linear-gradient(135deg,#fff_0%,#fde7ec_100%)]",
         className,
       )}
     >
-      {(Object.keys(ORBS) as ThemeName[]).map((key) => {
-        const active = theme === key
-        const o = ORBS[key]
-        return (
-          <button
-            key={key}
-            type="button"
-            role="radio"
-            aria-checked={active}
-            aria-label={`Tema ${o.label}`}
-            title={o.label}
-            onClick={(e) => {
-              const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
-              changeThemeWithBlob(
-                theme,
-                key,
-                { x: r.left + r.width / 2, y: r.top + r.height / 2 },
-                onChange,
-              )
-            }}
-            className={cn(
-              "group relative inline-flex items-center justify-center rounded-full transition-all duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
-              cell,
-              active
-                ? "bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)]"
-                : "hover:bg-white/60",
-            )}
-          >
-            <span
-              className={cn(
-                "relative block rounded-full transition-all duration-300",
-                orb,
-                active
-                  ? "scale-100 opacity-100"
-                  : "scale-90 opacity-60 group-hover:opacity-90 group-hover:scale-95",
-              )}
-              style={{
-                background: o.fill,
-                boxShadow: active
-                  ? `${o.glow}, inset 0 1px 1px rgba(255,255,255,0.55), inset 0 -2px 3px rgba(0,0,0,0.12)`
-                  : "inset 0 1px 1px rgba(255,255,255,0.4), inset 0 -1px 2px rgba(0,0,0,0.08)",
-              }}
-            >
-              {/* specular highlight */}
-              <span
-                aria-hidden
-                className="pointer-events-none absolute left-[18%] top-[14%] size-1.5 rounded-full bg-white/70 blur-[1px]"
-              />
-              {/* crescent shadow — feels celestial */}
-              <span
-                aria-hidden
-                className="pointer-events-none absolute -right-[2px] -top-[1px] block size-full rounded-full"
-                style={{
-                  background:
-                    "radial-gradient(circle at 75% 35%, transparent 55%, rgba(0,0,0,0.18) 78%)",
-                  mixBlendMode: "multiply",
-                }}
-              />
-            </span>
-            {active && (
-              <span
-                aria-hidden
-                className={cn(
-                  "pointer-events-none absolute inset-0 rounded-full ring-1 ring-offset-1 ring-offset-white",
-                  o.ring,
-                )}
-              />
-            )}
-          </button>
-        )
-      })}
-    </div>
+      {/* Background icons (always visible, fade with theme) */}
+      <Sun
+        className={cn(
+          "absolute left-1.5 size-3.5 transition-opacity duration-300",
+          isDark ? "text-white/30 opacity-60" : "text-amber-500 opacity-0",
+        )}
+        aria-hidden
+      />
+      <Moon
+        className={cn(
+          "absolute right-1.5 size-3.5 transition-opacity duration-300",
+          isDark ? "text-white/0 opacity-0" : "text-slate-400 opacity-70",
+        )}
+        aria-hidden
+      />
+
+      {/* Knob */}
+      <span
+        className={cn(
+          "relative z-10 inline-flex items-center justify-center rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.55)] transition-all duration-500 ease-out",
+          knob,
+          isDark
+            ? cn(shift, "bg-[radial-gradient(circle_at_30%_30%,#f5f3ff_0%,#cbd5e1_60%,#64748b_100%)]")
+            : "translate-x-0 bg-[radial-gradient(circle_at_30%_30%,#fff7ed_0%,#fcd34d_55%,#f59e0b_100%)]",
+        )}
+      >
+        {isDark ? (
+          <Moon className={cn(icon, "text-slate-700")} strokeWidth={2.2} />
+        ) : (
+          <Sun className={cn(icon, "text-amber-700")} strokeWidth={2.4} />
+        )}
+      </span>
+    </button>
   )
 }
