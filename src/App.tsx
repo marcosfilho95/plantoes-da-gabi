@@ -1298,6 +1298,17 @@ function App() {
     }
   }, [session?.userId])
 
+  // Register the service worker for auto-update PWA support.
+  useEffect(() => {
+    void registerServiceWorker({
+      onUpdate: () => {
+        toast.success("Nova versão disponível", {
+          description: "O app foi atualizado em segundo plano.",
+        })
+      },
+    })
+  }, [])
+
 
 
   useEffect(() => {
