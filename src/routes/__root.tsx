@@ -124,7 +124,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=Inter+Tight:wght@400;500;600;700;800&display=swap",
       },
       { rel: "stylesheet", href: appCss },
-      { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32.png" },
       { rel: "icon", type: "image/png", sizes: "192x192", href: "/pwa-192.png" },
       { rel: "icon", type: "image/png", sizes: "512x512", href: "/pwa-512.png" },
