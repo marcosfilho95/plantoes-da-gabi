@@ -2457,7 +2457,221 @@ function App() {
 
       <SiteFooter className="mx-auto w-full max-w-[1180px] px-4 py-8 safe-bottom" />
 
+      <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
+        <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-[640px]">
+          <DialogHeader>
+            <DialogTitle>Perfil</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="flex items-center gap-4 rounded-2xl border border-[#F3D5DC] bg-gradient-soft p-4">
+              <div
+                className="flex size-14 shrink-0 items-center justify-center rounded-2xl text-base font-extrabold text-primary-foreground shadow-brand"
+                style={{ background: "var(--gradient-brand)" }}
+              >
+                {userInitials}
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-lg font-extrabold text-foreground">
+                  Olá, {session.email.split("@")[0]}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Sessão ativa no Plantões da Gabi.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <div className="rounded-xl border border-[#F3D5DC] bg-white px-3 py-2.5">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  E-mail
+                </p>
+                <p className="truncate text-sm font-semibold text-foreground">
+                  {session.email}
+                </p>
+              </div>
+              <div className="rounded-xl border border-[#F3D5DC] bg-white px-3 py-2.5">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Usuário
+                </p>
+                <p className="truncate text-sm font-semibold text-foreground">
+                  Não informado
+                </p>
+              </div>
+              <div className="rounded-xl border border-[#F3D5DC] bg-white px-3 py-2.5">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Plantões
+                </p>
+                <p className="text-sm font-semibold text-foreground">
+                  {formatShiftCount(shifts.length)}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3 rounded-2xl border border-[#F3D5DC] bg-white p-4 shadow-sm">
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    Resumo anual
+                  </p>
+                  <h3 className="text-base font-extrabold text-foreground">
+                    Rendimentos
+                  </h3>
+                </div>
+                <div className="grid gap-1">
+                  <Label
+                    htmlFor="profile-year"
+                    className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground"
+                  >
+                    Ano
+                  </Label>
+                  <Select
+                    value={String(profileYear)}
+                    onValueChange={(value) => setProfileYear(Number(value))}
+                  >
+                    <SelectTrigger id="profile-year" className="h-9 w-28">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableYears.map((year) => (
+                        <SelectItem key={year} value={String(year)}>
+                          {year}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                <div
+                  className="rounded-xl px-3 py-3 text-primary-foreground shadow-brand"
+                  style={{ background: "var(--gradient-brand)" }}
+                >
+                  <p className="text-[10px] font-semibold uppercase tracking-wide opacity-80">
+                    Total anual
+                  </p>
+                  <p className="text-base font-extrabold">
+                    {formatCurrency(annualStats.totalAmount)}
+                  </p>
+                  <p className="text-xs opacity-80">
+                    {formatShiftCount(annualStats.total)}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-amber-900/70">
+                    PF
+                  </p>
+                  <p className="text-base font-extrabold text-amber-900">
+                    {formatCurrency(annualStats.pfAmount)}
+                  </p>
+                  <p className="text-xs text-amber-900/80">
+                    {annualStats.pfPct}% · {formatShiftCount(annualStats.pfCount)}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-900/70">
+                    PJ
+                  </p>
+                  <p className="text-base font-extrabold text-emerald-900">
+                    {formatCurrency(annualStats.pjAmount)}
+                  </p>
+                  <p className="text-xs text-emerald-900/80">
+                    {annualStats.pjPct}% · {formatShiftCount(annualStats.pjCount)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-xs font-semibold text-foreground">
+                    <span>Pessoa Física</span>
+                    <span className="text-muted-foreground">{annualStats.pfPct}%</span>
+                  </div>
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-amber-100">
+                    <div
+                      className="h-full rounded-full bg-amber-500"
+                      style={{ width: `${annualStats.pfPct}%` }}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-xs font-semibold text-foreground">
+                    <span>Pessoa Jurídica</span>
+                    <span className="text-muted-foreground">{annualStats.pjPct}%</span>
+                  </div>
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-emerald-100">
+                    <div
+                      className="h-full rounded-full bg-emerald-600"
+                      style={{ width: `${annualStats.pjPct}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <Separator className="bg-rose-100" />
+
+              <div className="space-y-2">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Exportar planilha do ano
+                </p>
+                <div className="grid grid-cols-3 gap-2">
+                  {(["todos", "PF", "PJ"] as const).map((scope) => {
+                    const subset =
+                      scope === "todos"
+                        ? annualStats.yearShifts
+                        : annualStats.yearShifts.filter(
+                            (shift) => (shift.personType ?? "PF") === scope,
+                          )
+                    const label = scope === "todos" ? "Todos" : scope
+                    return (
+                      <Button
+                        key={scope}
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={subset.length === 0}
+                        onClick={() => exportYearCsv(subset, profileYear, scope)}
+                      >
+                        <Download className="size-4" />
+                        {label}
+                      </Button>
+                    )
+                  })}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  CSV pronto para Excel e Google Sheets.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="flex-col gap-2 sm:flex-row sm:justify-between">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full sm:w-auto"
+              onClick={() => {
+                setProfileOpen(false)
+                handleLogout()
+              }}
+            >
+              <LogOut className="size-4" />
+              Sair da conta
+            </Button>
+            <Button
+              type="button"
+              className="w-full sm:w-auto"
+              onClick={() => setProfileOpen(false)}
+            >
+              Fechar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+
         <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-[420px]">
           <DialogHeader>
             <DialogTitle>{editingId ? "Editar plantão" : "Novo plantão"}</DialogTitle>
