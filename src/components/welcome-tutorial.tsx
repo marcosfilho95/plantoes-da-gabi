@@ -348,7 +348,10 @@ export function WelcomeTutorial({
       {/* Tooltip */}
       <div
         ref={tooltipRef}
-        className="pointer-events-auto fixed w-[min(360px,calc(100vw-1.5rem))] origin-top rounded-3xl border border-border/70 bg-card text-card-foreground shadow-elevated transition-[top,left] duration-300 ease-out"
+        className={cn(
+          "pointer-events-auto fixed w-[min(360px,calc(100vw-1.5rem))] origin-top rounded-3xl border border-border/70 bg-card text-card-foreground shadow-elevated",
+          !isMobile && "transition-[top,left] duration-300 ease-out",
+        )}
         style={{
           top: tooltipPos?.top ?? -9999,
           left: tooltipPos?.left ?? -9999,
