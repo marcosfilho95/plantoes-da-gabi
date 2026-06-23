@@ -1973,6 +1973,114 @@ function App() {
           </TabsContent>
 
           <TabsContent value="plantoes" className="space-y-4">
+            <section aria-label="Filtros">
+              <div className="mb-3 flex h-10 items-center gap-2 px-1 text-base font-semibold text-foreground">
+                <Filter className="size-4 text-muted-foreground" />
+                Filtros
+              </div>
+              <Card className="border-[#F3D5DC] bg-white shadow-sm">
+                <CardContent className="space-y-4 p-4">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-semibold uppercase text-muted-foreground">
+                      Status
+                    </Label>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        { value: "todos", label: "Todos" },
+                        { value: "pendentes", label: "Pendentes" },
+                        { value: "recebidos", label: "Recebidos" },
+                      ].map((option) => (
+                        <FilterChip
+                          key={option.value}
+                          active={paymentFilter === option.value}
+                          onClick={() => setPaymentFilter(option.value as PaymentFilter)}
+                        >
+                          {option.label}
+                        </FilterChip>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-xs font-semibold uppercase text-muted-foreground">
+                      Tipo para ir
+                    </Label>
+                    <div
+                      className="flex flex-wrap gap-2"
+                      role="group"
+                      aria-label="Filtrar por tipo de pessoa"
+                    >
+                      {(
+                        [
+                          { value: "todos", label: "Todos" },
+                          { value: "PF", label: "PF" },
+                          { value: "PJ", label: "PJ" },
+                        ] as const
+                      ).map((option) => (
+                        <FilterChip
+                          key={option.value}
+                          active={personFilter === option.value}
+                          onClick={() => setPersonFilter(option.value)}
+                        >
+                          {option.label}
+                        </FilterChip>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label className="text-xs font-semibold uppercase text-muted-foreground">
+                        Local
+                      </Label>
+                      <Select value={locationFilter} onValueChange={setLocationFilter}>
+                        <SelectTrigger aria-label="Filtrar por local">
+                          <SelectValue placeholder="Local" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="todos">Todos locais</SelectItem>
+                          {availableLocations.map((location) => (
+                            <SelectItem key={location} value={location}>
+                              {location}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs font-semibold uppercase text-muted-foreground">
+                        Turno
+                      </Label>
+                      <Select
+                        value={shiftFilter}
+                        onValueChange={(value) => setShiftFilter(value as ShiftFilter)}
+                      >
+                        <SelectTrigger aria-label="Filtrar por turno">
+                          <SelectValue placeholder="Turno" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="todos">Todos turnos</SelectItem>
+                          {SHIFT_TYPES.map((shiftType) => (
+                            <SelectItem key={shiftType.code} value={shiftType.code}>
+                              {shiftType.code} · {shiftType.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Button
+                type="button"
+                className="mt-3 w-full rounded-xl shadow-soft"
+                onClick={() => openNewShift()}
+              >
+                <Plus className="size-4" />
+                Novo plantão
+              </Button>
+            </section>
             <Card className="overflow-hidden border-[#F3D5DC] bg-white shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#F3D5DC] p-4">
                 <div>
