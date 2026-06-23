@@ -235,6 +235,10 @@ export function buildShiftsSummary(shifts: CsvShift[]): ShiftsSummary {
       "mes",
     ),
     pendente: { total: pendenteTotal, quantidade: pendenteQtd },
+    pendentePorCompetencia: sortByKey(
+      Array.from(pendenteCompMap.entries()).map(([mes, v]) => ({ mes, ...v })),
+      "mes",
+    ),
     porLocal: sortByKey(
       Array.from(localMap.entries()).map(([local, v]) => ({ local, ...v })),
       "local",
