@@ -71,7 +71,7 @@ const STEPS: Step[] = [
     eyebrow: "Agenda",
     title: "Calendário do mês",
     body: "Aqui você visualiza os dias com plantão. Use as setas do topo para trocar de mês.",
-    placement: "bottom",
+    placement: "top",
   },
   {
     tab: "agenda",
