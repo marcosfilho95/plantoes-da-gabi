@@ -1477,9 +1477,6 @@ function App() {
         <div className="relative mx-auto flex min-h-dvh w-full max-w-md flex-col items-center justify-center gap-6 px-5 py-10">
           {/* Form panel */}
           <div className="mx-auto w-full max-w-md">
-            <div className="mb-3 flex justify-end">
-              <ThemeToggle theme={theme} onChange={setTheme} size="sm" />
-            </div>
             <div className="mb-6 flex flex-col items-center text-center">
               <img
                 src="/logo-plantoes-gabi.png"
@@ -1488,7 +1485,10 @@ function App() {
               />
             </div>
 
-            <Card className="overflow-hidden rounded-[1.75rem] border-border/80 bg-card/95 shadow-elevated backdrop-blur-xl">
+            <Card className="relative overflow-hidden rounded-[1.75rem] border-border/80 bg-card/95 shadow-elevated backdrop-blur-xl">
+              <div className="absolute right-4 top-4 z-10">
+                <ThemeToggle theme={theme} onChange={setTheme} size="sm" />
+              </div>
               <CardContent
                 key={authMode}
                 className="auth-panel px-7 pb-7 pt-8 sm:px-9"
