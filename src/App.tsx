@@ -1905,7 +1905,7 @@ function App() {
               className="group inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-semibold text-primary shadow-sm transition-all hover:-translate-y-0.5 hover:bg-secondary hover:shadow-md"
             >
               <User className="size-4" />
-              <span>{session.firstName ? `Olá, ${session.firstName}` : "Perfil"}</span>
+              <span>{session.firstName ? `Olá, ${titledFirstName}` : "Perfil"}</span>
               <ChevronRight className="size-4 text-primary/60 transition-transform group-hover:translate-x-0.5" aria-hidden />
             </button>
             <div className="flex items-center justify-between gap-2">
@@ -1946,6 +1946,7 @@ function App() {
         <WelcomeTutorial
           userId={session.userId}
           firstName={session.firstName}
+          title={userTitle}
           open={tutorialOpen}
           onOpenChange={setTutorialOpen}
           setActiveTab={setActiveTab}
@@ -2601,7 +2602,7 @@ function App() {
               </div>
               <div className="min-w-0">
                 <p className="truncate text-lg font-extrabold text-foreground">
-                  Olá, {session.firstName}
+                  Olá, {titledFirstName || session.firstName}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   Sessão ativa no Plantões da Gabi.
