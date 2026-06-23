@@ -477,6 +477,28 @@ function mergeLocations(...groups: string[][]) {
   return merged
 }
 
+function mergeShifts(...groups: Shift[][]) {
+  const merged = new Map<string, Shift>()
+
+  groups.flat().forEach((shift) => {
+    const existing = merged.get(shift.id)
+
+    if (!existing) {
+      merged.set(shift.id, shift)
+      return
+    }
+
+    const existingUpdated = existing.updatedAt ?? existing.createdAt
+    const shiftUpdated = shift.updatedAt ?? shift.createdAt
+
+    if (shiftUpdated >= existingUpdated) {
+      merged.set(shift.id, shift)
+    }
+  })
+
+  return Array.from(merged.values()).sort(sortShifts)
+}
+
 function readStoredLocations() {
   const raw = window.localStorage.getItem(LOCATIONS_STORAGE_KEY)
 
@@ -1089,6 +1111,7 @@ function App() {
       : "Supabase não configurado. Defina VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.",
   )
   const [authMessage, setAuthMessage] = useState("")
+  const [syncError, setSyncError] = useState("")
   const [isAuthSubmitting, setIsAuthSubmitting] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -1253,13 +1276,17 @@ function App() {
         const accountShifts = sanitizeShifts(remoteData.shifts)
         const accountTemplates = sanitizeShiftTemplates(remoteData.shiftTemplates)
 
-        setLocations(accountLocations)
-        setShifts(accountShifts)
-        setShiftTemplates(
-          accountTemplates.length > 0
-            ? accountTemplates
-            : buildShiftTemplatesFromShifts(accountShifts),
-        )
+        setLocations((current) => mergeLocations(current, accountLocations))
+        setShifts((current) => mergeShifts(current, accountShifts))
+        setShiftTemplates((current) => {
+          const safeTemplates =
+            accountTemplates.length > 0
+              ? accountTemplates
+              : buildShiftTemplatesFromShifts(accountShifts)
+
+          return sanitizeShiftTemplates([...current, ...safeTemplates])
+        })
+        setSyncError("")
         setHasLoadedRemote(true)
         setAuthStatus("authenticated")
       })
@@ -1276,6 +1303,9 @@ function App() {
         }
 
         console.error(error.message)
+        setSyncError(
+          "Não foi possível sincronizar com o Supabase. Seus dados continuam salvos neste navegador, mas confira a configuração do backup.",
+        )
         setAuthStatus("authenticated")
         setHasLoadedRemote(false)
       })
@@ -1296,7 +1326,13 @@ function App() {
         token: session.token,
         body: JSON.stringify({ locations, shifts, shiftTemplates }),
       })
-        .catch((error: Error) => console.error(error.message))
+        .then(() => setSyncError(""))
+        .catch((error: Error) => {
+          console.error(error.message)
+          setSyncError(
+            "Não foi possível salvar o backup no Supabase. Seus dados continuam salvos neste navegador.",
+          )
+        })
     }, 400)
 
     return () => window.clearTimeout(timeout)
@@ -2193,6 +2229,11 @@ function App() {
           setActiveTab={setActiveTab}
         />
 
+        {syncError ? (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900 shadow-sm">
+            {syncError}
+          </div>
+        ) : null}
 
         <Tabs
           value={activeTab}
@@ -3124,9 +3165,9 @@ function App() {
 
             {!editingId && shiftTemplates.length > 0 ? (
               <div className="grid gap-2">
-                <Label>Usar modelo</Label>
+                <Label>Plantões cadastrados</Label>
                 <Select value={selectedTemplateId} onValueChange={applyShiftTemplate}>
-                  <SelectTrigger aria-label="Usar modelo de plantão">
+                  <SelectTrigger aria-label="Plantões cadastrados">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
