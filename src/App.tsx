@@ -1276,6 +1276,7 @@ function App() {
       paid: shift.paid,
       amount: shift.amount ? String(shift.amount).replace(".", ",") : "",
       notes: shift.notes ?? "",
+      personType: shift.personType ?? "PF",
     })
     setNewLocationName("")
     setDialogOpen(true)
@@ -1314,6 +1315,7 @@ function App() {
       paid: form.paid,
       amount: parseAmount(form.amount),
       notes: form.notes.trim(),
+      personType: form.personType,
     }
 
     setLocations((current) => mergeLocations(current, [payload.location]))
