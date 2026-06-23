@@ -54,7 +54,7 @@
   --card-foreground: hsl(346 35% 12%);
   --popover: hsl(0 0% 100%);
   --popover-foreground: hsl(346 35% 12%);
-  --primary: hsl(347 70% 44%);
+  --primary: hsl(345 38% 42%);
   --primary-foreground: hsl(28 60% 98%);
   --secondary: hsl(348 100% 96%);
   --secondary-foreground: hsl(344 54% 24%);
@@ -66,7 +66,7 @@
   --destructive-foreground: hsl(0 0% 100%);
   --border: hsl(345 35% 90%);
   --input: hsl(345 35% 90%);
-  --ring: hsl(347 70% 44%);
+  --ring: hsl(345 38% 42%);
   --gold: hsl(38 55% 55%);
 
   /* Premium effects */
