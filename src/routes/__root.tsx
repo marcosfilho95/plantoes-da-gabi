@@ -81,10 +81,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content: "width=device-width, initial-scale=1.0, viewport-fit=cover",
       },
       { title: "Plantões da Gabi" },
-      {
-        name: "description",
-        content: "Agenda PWA para organizar os plantões da Gabriella.",
-      },
       { name: "theme-color", content: "#fff1f2" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-title", content: "Plantões da Gabi" },
